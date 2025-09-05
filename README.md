@@ -10,6 +10,7 @@
 - [x] zsh config
 - [x] vim config
 - [ ] terminal config
+- [ ] vscode(ium) config
 ### Linux (Arch - Manjaro)
 - [ ] setup script
 - [ ] dependency install
@@ -19,3 +20,6 @@
 - [x] zsh config
 - [x] vim config
 - [ ] terminal config
+- [ ] vscode(ium) config
+- [ ] ufw (firewall) and clamav config
+
