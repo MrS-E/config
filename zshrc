@@ -4,15 +4,46 @@
 export EDITOR=vim
 export VISUAL=vim
 
-# Detect OS (macOS vs Linux)
+##########
+# OS + Hardware Detection
+##########
 case "$(uname -s)" in
-  Darwin) export OS="macos" ;;
-  Linux)  export OS="linux" ;;
-  *)      export OS="unknown" ;;
-esac
+  Darwin)
+    export OS="macos"
 
-# Detect session type (Wayland/X11) on Linux
-: "${XDG_SESSION_TYPE:=}"
+    # Arch: arm64 = Apple Silicon, x86_64 = Intel
+    case "$(uname -m)" in
+      arm64)  export MAC_ARCH="arm64" ;;  # Apple Silicon
+      x86_64) export MAC_ARCH="x86_64" ;; # Intel
+      *)      export MAC_ARCH="unknown" ;;
+    esac
+
+    # RAM in GiB (macOS: hw.memsize reports bytes)
+    export MAC_RAM_GB="$(( $(sysctl -n hw.memsize) / 1024 / 1024 / 1024 ))"
+    ;;
+  Linux)
+    export OS="linux"
+
+    # Detect session type (Wayland/X11)
+    : "${XDG_SESSION_TYPE:=}"
+
+    # Arch
+    case "$(uname -m)" in
+      x86_64) export LINUX_ARCH="x86_64" ;;
+      armv7l) export LINUX_ARCH="armv7l" ;;
+      aarch64) export LINUX_ARCH="arm64" ;;
+      *)      export LINUX_ARCH="unknown" ;;
+    esac
+
+    # RAM in GiB (Linux: /proc/meminfo reports kB)
+    if [[ -r /proc/meminfo ]]; then
+      export LINUX_RAM_GB="$(( $(grep MemTotal /proc/meminfo | awk '{print $2}') / 1024 / 1024 ))"
+    fi
+    ;;
+  *)
+    export OS="unknown"
+    ;;
+esac
 
 ##########
 # History
@@ -241,12 +272,15 @@ fi
 # Plugins
 ##########
 
-# zsh-autocomplete, needs a lot of resources
-# if [[ -f /usr/share/zsh/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]]; then
-#   source /usr/share/zsh/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
-# elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
-#   source "$(brew --prefix)/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
-# fi
+# zsh-autocomplete
+if [[ "$OS" = "macos" ]] && [[ "$MAC_ARCH" = "arm64" ]] && (( MAC_RAM_GB >= 16 )); then
+  # needs a lot of resources, lagged on intel ultra 7 (manjaro) and intel i9 (mac) but ran quit well on mac m3/m4 >16gb
+  if [[ -f /usr/share/zsh/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]]; then
+    source /usr/share/zsh/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+  elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
+    source "$(brew --prefix)/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
+  fi
+fi
 
 # zsh-autosuggestions
 if [[ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
@@ -261,7 +295,6 @@ if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.
 elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
   source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
-
 
 ##########
 # Functions
