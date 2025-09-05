@@ -1,0 +1,34 @@
+[gpg]
+	format = ssh
+[user]
+	signingkey = ./git_code
+	name = Simeon Stix
+	email = simeon.stix@smoca.ch
+[core]
+	autocrlf = input
+	editor = codium --wait --new-window
+[diff]
+	tool = codium
+[difftool]
+      prompt = false
+[difftool "meld"]
+      cmd = meld "$LOCAL" "$REMOTE"
+[difftool "diffmerge"]
+	cmd = diffmerge \"$LOCAL\" \"$REMOTE\"
+[difftool "codium"]
+      cmd = codium "$LOCAL" "$REMOTE" "--diff" "--wait"
+
+[merge]
+	tool = codium
+[mergetool "diffmerge"]
+	cmd = "diffmerge --merge --result=\"$MERGED\" \"$LOCAL\" \"$(if test -f \"$BASE\"; then echo \"$BASE\"; else echo \"$LOCAL\"; fi)\" \"$REMOTE\""
+	trustExitCode = true
+[mergetool]
+	keepBackup = false
+[mergetool "codium"]
+ cmd = codium --wait $MERGE
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
