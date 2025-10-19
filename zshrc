@@ -272,28 +272,19 @@ fi
 # Plugins
 ##########
 
-# zsh-autocomplete
-if [[ "$OS" = "macos" ]] && [[ "$MAC_ARCH" = "arm64" ]] && (( MAC_RAM_GB >= 16 )); then
-  # needs a lot of resources, lagged on intel ultra 7 (manjaro) and intel i9 (mac) but ran quit well on mac m3/m4 >16gb
-  if [[ -f /usr/share/zsh/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]]; then
-    source /usr/share/zsh/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
-  elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
-    source "$(brew --prefix)/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
-  fi
+# Load autosuggestions first
+if [ -f ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+  source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 fi
 
-# zsh-autosuggestions
-if [[ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
-  source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
-  source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+# Load syntax highlighting (must come last!)
+if [ -f ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+  source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
-# zsh-syntax-highlighting
-if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
-  source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-  source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+# Load autocomplete
+if [ -f ~/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]; then
+  source ~/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh
 fi
 
 ##########
@@ -322,7 +313,7 @@ clip() {
     return 1
   fi
 }
-alias pbcopy='clip'
+alias copy='clip'
 
 paste() {
   if [[ "$OS" = "macos" ]] && command -v pbpaste >/dev/null 2>&1; then
@@ -340,4 +331,5 @@ paste() {
     fi
   fi
 }
-alias pbpaste='paste'
+alias paste='paste'
+
