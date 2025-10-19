@@ -1,0 +1,1424 @@
+ls
+shutdown
+vim package_list
+history
+ls
+bat .zhistory
+ufw
+bat .zhistory
+vim package_list
+sudo pacman -S clamav
+sudo freshclam
+freshclam --version
+udo systemctl enable --now clamav-daemon\
+sudo systemctl enable --now clamav-freshclam
+sudo systemctl enable --now clamav-daemon\
+sudo systemctl enable --now clamav-freshclam
+sudo systemctl status clamav-daemon && sudo systemctl status clamav-freshclam
+sudo systemctl enable --now clamav-freshclam
+sudo systemctl status clamav-daemon && sudo systemctl status clamav-freshclam
+sudo systemctl status clamav-freshclam
+sudo pacman -S clamtk
+cd Downloads
+ls
+bash ./cisco-secure-client-linux64-5.1.10.233-core-vpn-webdeploy-k9.sh
+sudo bash ./cisco-secure-client-linux64-5.1.10.233-core-vpn-webdeploy-k9.sh
+sudo pacman -Suu libxml2
+sudo bash ./cisco-secure-client-linux64-5.1.10.233-core-vpn-webdeploy-k9.sh
+cisco-decrypt
+vim cisco-secure-client-linux64-5.1.10.233-core-vpn-webdeploy-k9.sh
+sudo zsh cisco-secure-client-linux64-5.1.10.233-core-vpn-webdeploy-k9.sh
+sudo /opt/cisco/secureclient/bin/vpnui
+ldd /opt/cisco/secureclient/bin/vpnui | grep libxml2\
+
+yay -S  libxml2-legacy
+sudo ldconfig
+sudo ldconfig
+ldd /opt/cisco/secureclient/bin/vpnui | grep libxml2
+vim package_list
+sudo /opt/cisco/secureclient/bin/vpnui
+ps aux | grep vpnagentd
+ps aux | grep vpnagentd
+sstix       7092  0.0  0.0   6612  4200 pts/3    S+   20:24   0:00 grep --color=auto vpnagentd\
+
+[200~sstix       7092  0.0  0.0   6612  4200 pts/3    S+   20:24   0:00 grep --color=auto vpnagentd
+sudo systemctl enable vpnagentd
+sudo systemctl start vpnagentd
+sudo pacman -S manjaro-printer\
+sudo systemctl enable --now cups\
+
+sudo systemctl enable --now cups
+sudo pacman -S system-config-printer
+system-config-printer
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew
+zshsrc
+brew
+zshrc
+zshsrc
+pyenv
+pyenv install anaconda3-2022.05
+pyenv install --list | grep anaconda
+pyenv install anaconda3-2025.06-1
+sudo pacman -Syu r
+yay -S rstudio-desktop-bin\
+
+sudo pacman -S base-devel cmake pandoc
+curl -sL https://github.com/shyiko/jabba/raw/master/install.sh | bash
+zshrc
+zshsrc
+lazy
+jabba
+sudo pacman -Syu filezilla
+sudo pacman -S  labplot
+sudo pacman -S picoscope
+yay -S picoscope
+yay -S picoscope
+sudo pacman -Syu wine winetricks\
+
+ls
+zip loggerpro-win.zip
+zip --help
+unzip loggerpro-win.zip
+ls
+wine loggerpro-win.zip
+wine loggerpro-win.zip
+wine LoggerPro3_16_2.exe
+ls
+chmod +x install-crossover-25.1.0.bin
+./install-crossover-25.1.0.bin
+jabba
+jabba ls-remote
+jabba ls-remote | grep amazon
+jabba ls-remote | grep corretto
+jabba install corretto@21
+export JABBA_INDEX='https://github.com/typelevel/jdk-index/raw/main/index.json'
+jabba ls-remote | grep -E 'corretto@21|corretto@23'
+zshrc
+jabba install corretto@21
+wine uninstaller
+wine LoggerPro3_16_2.exe
+jabba install corretto@21
+zshsrc
+jabba install corretto@21
+sudo pacman -Syu firefox-esr
+pacman -L firefox
+pacman -Ss firefox
+pacman -Ss matlab
+zshsrc
+zshrc
+sudo pacman -S xclip xsel
+cd D
+d Downloads
+cd Downloads
+cd ..
+vim package_list
+xclip
+echo "asdf" |  xclip -selection clipboard
+echo "asdf" |  xclip -selection clipboard
+echo "hello world" | xsel --clipboard --input
+zshrc
+zshsrc
+cat Brewfile|pbcopy
+s 
+echo $XDG_SESSION_TYPE
+zshrc
+zshsrc
+zshsrc
+cat Brewfile | clip
+cat loggerpro-win.zip
+cat loggerpro-win.zip | clip
+zshrc
+co .zshrc
+echo $OS
+uname -s
+rvm
+nvm
+sudo pacman -S nvm
+open .
+dolphin .
+cat .zshrc | pbcopy
+cat .zshrc | clip
+zshsrc
+nvm
+rvm
+zshsrc
+zshsrc
+compinit
+vim package_list
+zshsrc
+zshsrc
+zshsrc
+lazy 
+vim
+sudo pacman -S zsh-completions
+rm -f ~/.zcompdump*
+rm .zcompcache
+rm -rdf .zcompcache
+zshsrc
+pacman -S firefox
+ls
+ll
+rm .zcompdump
+zshsrc
+zshsrc
+fuck
+rvm
+vim
+co .vimrc
+mkdir Proton
+cd Downloads
+co setup.sh
+cd ..
+mkdir -p ~/.vim/pack/themes/start\
+cd ~/.vim/pack/themes/start\
+if [ ! -d "dracula" ]; then\
+  echo "Installing dracular for vim"\
+  git clone https://github.com/dracula/vim.git dracula\
+fi
+cd -
+lauy
+vim
+cp .zshrc zshrc
+dolphin .
+cp .vimrc vimrc
+dolphin .
+pacman -Ru spotify-player
+sudo pacman -Ru spotify-player
+vim package_list
+yay -S spotify
+vim package_list
+zshsrc
+echo $OS
+echo $LINUX_ARCH
+echo $LINUX_RAM_GB
+rm zshrc
+rm vimrc
+cp .zshrc zshrc
+dolphin .
+sudo pacman -S openscad
+openscad
+vim package_list
+shutdown
+;3D
+fdisk
+fdisk list
+fdisk list
+fdisk --help
+fdisk -l
+sudo fdisk -l
+sudo dd if=/home/sstix/Downloads/debian-13.1.0-amd64-netinst.iso of=/dev/sda bs=4M status=progress oflag=sync
+sync
+sudo eject /dev/sda 
+cd Downloads
+sudo cp debian-13.1.0-amd64-netinst.iso /dev/sda && sync
+sudo cp debian-13.1.0-amd64-netinst.iso /dev/sda && sync
+curl -LO https://sourceforge.net/projects/refind/files/0.14.0.2/refind-bin-0.14.0.2.zip\
+
+ls
+unzip refind-bin-0.14.0.2.zip
+ssh cloud@cloud.local
+ping cloud.local
+ssh cloud@192.168.0.19
+vim .sync-exclude.lst
+ps
+ps aux 
+ps aux  
+ps aux | grep jet
+kill -9 1475
+sudo pacman -Suu 
+sudo pacman -Syy rpi-imager 
+ssh-agent
+ssh-agent
+ls
+ll
+cd .ssh
+ls
+dolphin .
+dolphin .
+mkdir -p ~/.config/systemd/user
+cat > ~/.config/systemd/user/ssh-agent.service <<'EOF'\
+[Unit]\
+Description=SSH agent\
+\
+[Service]\
+Type=simple\
+Environment=SSH_AUTH_SOCK=%t/ssh-agent.socket\
+ExecStart=/usr/bin/ssh-agent -D -a $SSH_AUTH_SOCK\
+\
+[Install]\
+WantedBy=default.target\
+EOF
+systemctl --user enable --now ssh-agent.service
+echo 'export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"' >> ~/.zshrc
+ssh-copy-id -i ~/.ssh/id_rsa.pub user@server
+chmod 664 id_rsa.pub
+chmod 600 id_rsa known_hosts config
+chmod 700 ~/.ssh
+ssh-add -l
+eval "$(ssh-agent -s)"
+ssh-add -l
+ssh-add ~/.ssh/id_rsa
+ssh-add ~/.ssh/id_rsa 
+file id_rsa
+head -c 40 ~/.ssh/id_rsa; echo
+vim id_rsa
+file id_rsa
+vm id_rsa.pub
+vim id_rsa.pub
+ssh-add ~/.ssh/id_rsa 
+chmod 600 ~/.ssh/id_rsa
+ssh-add ~/.ssh/id_rsa 
+ssh-agent -s
+ssh-add -vvv ~/.ssh/id_rsa 
+ssh-add -l
+head -n 2 ~/.ssh/id_rsa; tail -n 2 ~/.ssh/id_rsa; wc -c ~/.ssh/id_rsa
+systemctl --user --now disable ssh-agent.service
+rm -f ~/.config/systemd/user/ssh-agent.service
+systemctl --user daemon-reload
+systemctl --user status ssh-agent
+sudo pacman -S --needed kwallet ksshaskpass
+echo $SSH_ASKPASS
+zshsrc
+zshrc
+zshsrc
+systemctl --user status ssh-agent
+ssh-add id_rsa
+zshrc
+sudo pacman -S --needed openssh
+chmod 700 ~/.ssh\
+chmod 600 ~/.ssh/id_* ~/.ssh/known_hosts ~/.ssh/config\
+chmod 644 ~/.ssh/*.pub\
+
+eval "$(ssh-agent -s)"
+ssh-add id_rsa
+head -n 2 ~/.ssh/id_rsa; tail -n 2 ~/.ssh/id_rsa; wc -c ~/.ssh/id_rsa
+vim id_rsa
+co id_rsa
+vim id_rsa
+awk 'NR==1 {print; next} NR==NR {line=$0; next} END {print line}' ~/.ssh/id_rsa\
+
+vim id_rsa
+ssh-add id_rsa
+rm id_rsa
+echo "-----BEGIN OPENSSH PRIVATE KEY----- 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 -----END OPENSSH PRIVATE KEY-----" > id_rsa
+cp id_rsa.flat
+cp id_rsa id_rsa.flat
+[200~# pull the header and footer separately
+hdr="-----BEGIN OPENSSH PRIVATE KEY-----"
+ftr="-----END OPENSSH PRIVATE KEY-----"
+# split the single line into wrapped base64
+sed "s/$hdr//;s/$ftr//" ~/.ssh/id_rsa \\
+  | fold -w 64 \\
+  | (echo "$hdr"; cat; echo "$ftr") > ~/.ssh/id_rsa.fixed
+mv ~/.ssh/id_rsa.fixed ~/.ssh/id_rsa
+chmod 600 ~/.ssh/id_rsa
+ls
+cat id_rsa
+\:wq
+ls
+ssh-add id_rsa
+ssh-add -l
+ls
+rm id_rsa.flat
+ls
+# create a user service\
+mkdir -p ~/.config/systemd/user\
+cat > ~/.config/systemd/user/ssh-agent.service <<'EOF'\
+[Unit]\
+Description=SSH agent\
+\
+[Service]\
+Type=simple\
+Environment=SSH_AUTH_SOCK=%t/ssh-agent.socket\
+ExecStart=/usr/bin/ssh-agent -D -a $SSH_AUTH_SOCK\
+\
+[Install]\
+WantedBy=default.target\
+EOF\
+\
+# enable it and expose the socket for shells\
+systemctl --user enable --now ssh-agent.service\
+echo 'export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"' >> ~/.bashrc\
+# (or add that line to your shellâ€ƒ¹s init file, e.g. ~/.zshrc)\
+
+mkdir -p ~/.config/systemd/user
+cat > ~/.config/systemd/user/ssh-agent.service <<'EOF'\
+[Unit]\
+Description=SSH agent\
+\
+[Service]\
+Type=simple\
+Environment=SSH_AUTH_SOCK=%t/ssh-agent.socket\
+ExecStart=/usr/bin/ssh-agent -D -a $SSH_AUTH_SOCK\
+\
+[Install]\
+WantedBy=default.target\
+EOF
+systemctl --user enable --now ssh-agent.service
+echo 'export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"' >> ~/.zshrc
+ssh-copy-id -i ~/.ssh/id_rsa.pub user@server
+ssh-add -l
+ssh-copy-id -i ~/.ssh/id_ed25519.pub user@server
+systemctl --user enable --now ssh-agent.service
+systemctl --user status ssh-agent
+ssh-agent -l
+ssh-add id_rsa
+ssh-add ls
+ssh-add -l
+cd ..
+git clone ssh://git@gitlab.smoca.ch:2223/smoca/rtm-lock-nrf5340.git
+vim .ssh/config
+git clone ssh://git@gitlab.smoca.ch:2223/smoca/rtm-lock-nrf5340.git
+ls
+ls
+ll
+vim zshrc
+diff .zshrc zshrc
+vim zshrc
+rm zshrc
+ls
+ll
+rm -rdf Proton
+flatpak uninstall com.hunterwittenborn.Celeste
+ssh logcat@aplocklogcat.local
+ssh logcat@aplocklogcat.local
+ping aplocklogcat.local
+ping cloud.local
+ls
+mkdir Projects
+cd Projects
+git clone git@github.com:emersion/hydroxide.git
+history -c
+history c
+ssh-keygen -t ed25519 
+ssh-keygen -t ed25519 
+ssh-keygen -t ed25519 
+cat ~/.ssh/id_zhaw | pbcopy
+cat ~/.ssh/id_zhaw.pub| pbcopy
+cd Projects
+ls
+ssh-add ~/.ssh/id_zhaw
+git clone git@github.zhaw.ch:stixsim1/02_Praktikum-1_Buch.git
+ls
+cd 02_Praktikum-1_Buch
+ls
+vim README.md
+vim README.TXT
+vim package.bluej
+ls
+vim Buch.java
+cd ~
+ls
+ll
+ll | grep git
+vim .gitconfig
+ls
+ll
+cd Downloads
+bash lock_config.sh
+vim lock_config.sh
+chmod 700 lock_config.sh
+./lock_config.sh
+zsh lock_config.sh
+vim lock_config.sh
+bash lock_config.sh
+vim lock_config.sh
+bash lock_config.sh
+zsh lock_config.sh
+vim lock_config.sh
+zsh lock_config.sh
+vim lock_config.sh
+zsh lock_config.sh
+pbcopy < lock_config.sh
+vim lock
+zsh lock 
+rm lock lock_config.sh
+cd ../Projects
+cd 02_Praktikum-1_Buch
+ls
+vim Buch.java
+java Buck.java
+java Buch.java
+vim Buch.java
+java Buch.java
+vim Buch.java
+java Buch.java
+vim package.bluej
+vim Buch.java
+java Buch.java
+vim Buch.java
+vim Buch.java
+git add Buch.java
+git commit -m "fix"
+cd Projects
+ls
+cd 02_Praktikum-1_Buch
+git diff
+git status
+git diff Buch.java
+lazy
+cd ~
+vim .gitconfig
+cd Projects/02_Praktikum-1_Buch
+git add Buch.java
+git commit -m "fix"
+cd ..
+cd 02_Praktikum-1_Buch
+touch Bankkonto.java
+vim Bankkonto.java
+sudo pacman -S libpackagekitqt6
+yay -S libpackagekitqt6
+yay -S libpackagekit
+git add Bankkonto.java
+git commit -m "aufgabe 3"
+cd..
+cd ..
+git clone ssh://git@gitlab.smoca.ch:2223/smoca/llb-swiss-investment.git
+ls
+cd llb-swiss-investment
+ls
+cd ios/dsenkus-lbsios-6148b2bc1f4d/LBSwissApp/Utils
+ls
+vim LBSColors.swift
+vim ~/.gitconfig
+lazy
+vim LBSColors.swift
+vim ~/.gitconfig
+cd â€ƒ½
+cd 
+cd Downloads
+vim zshrc
+rm zshrc
+ls
+sudo pacman -S packagekit-qt6
+man sway
+sudo pacman -S sway 
+sudo pacman -R sway
+sudo pacman -S i3-wallpapers m i3-default-artwork 
+sudo pacman -S i3-wm i3-default-artwork 
+logout
+qwebengine_c
+dolphin /home/sstix/Documents/ZHAW/Pasted image 20250919103935.png
+dolphin /home/sstix/Documents/ZHAW
+fzf 
+fzf key
+fzf 
+sudo pacman -S nextcloud-client 
+sudo pacman -S joplin
+yay -S joplin
+wget -O - https://raw.githubusercontent.com/laurent22/joplin/dev/Joplin_install_and_update.sh | bash
+ls
+cd Projects
+git clone git@github.zhaw.ch:PM1-IT99/tictactoe.git
+ssh-add -l
+ssh-add -l
+git clone https://github.zhaw.ch/PM1-IT99/tictactoe.git
+git clone https://github.zhaw.ch/Repository/
+mkdir -p firmware/brcm
+cp ~/Downloads/firmware-brcm80211_20250410-2_all.deb firmware-brcm80211_20250410-2_all.deb
+ls
+sudo pacman -S dpkg-deb
+sudo pacman -Syyuu
+cd Downloads
+chmod +x nrfconnect-5.2.0-x86_64.AppImage
+./nrfconnect-5.2.0-x86_64.AppImage
+sudo pacman -S appimagelauncher
+yay -S appimage
+sudo pacman -S gearlever 
+gearlever
+sudo pacman -S git cmake ninja gperf python python-pip python-wheel \\
+    dfu-util dtc device-tree-compiler gcc make\
+
+yay -S nrf
+yay -S nrf-connect
+yay -S nrf-connect-sdk-installer
+ssh-add -l
+systemctl --user status ssh-agent
+ssh-add -l
+echo "$SSH_AUTH_SOCK"
+systemctl --user status ssh-agent
+shistory ssh
+ssh-add id_rsa
+cd ~/.ssh
+ls
+ssh-add id_rsa
+ls
+ssh-add id_zhaw
+nrf-connect-sdk-installer 
+nrf-connect-sdk-installer --help
+nrf-connect-sdk-installer --install-dir ~/nrf
+mkdir nrf
+nrf-connect-sdk-installer --install-dir ~/nrf
+nrf-connect-sdk-installer --install-dir ~/nrf
+rm -rd  nrf/* 
+l
+mkdir nrf
+nrf-connect-sdk-installer --install-dir ~/nrf
+cd Projects
+ls
+git clone ssh://git@gitlab.smoca.ch:2223/smoca/rtm-lock-nrf5340.git
+cd rtm-lock-nrf5340/
+cd Downloads 
+ls
+vim SmartID_log_dba1.txt
+cd Projects
+git clone ssh://git@gitlab.smoca.ch:2223/smoca/rtm-lock-2020-android.git
+cd rtm-lock-2020-android
+cat SmartID_log_dba1.txts | grep -E "RTMKey|Cryptp|Finger|Face"
+cat SmartID_log_dba1.txt | grep -E "RTMKey|Cryptp|Finger|Face"
+cat SmartID_log_dba1.txt | grep -E "RTMKey|Cryptp|Finger|Face" > SmartID_log_new.log
+vim SmartID_log_new.log
+rm SmartID_log_new.log
+cat SmartID_log_dba1.txt | grep -E "RTMKey|Cryptp|Finger|Face|Biometric" > smartid_log.log
+vim smartid_log
+vim smartid_log.log
+unzip Code.zip
+ls
+unzip --help
+unzip Code.zip -d Code
+vim smartid_log.log
+rm smartid_log.log
+cat SmartID_log_dba1.txt | grep -E "RTMKey|Crypto|Finger|Face|Biometric" > smartid_log.log
+vim smartid_log.log
+dmesg | grep tty\
+
+sudo -i
+lsblk
+cd Downloads
+ls
+ls | grep debian
+lsblk
+sudo qemu-system-i386 \\
+    -enable-kvm \\
+    -m 512 \\
+    -hda /dev/sdc \\
+    -cdrom debian-12.1.0-i386-netinst.iso \\
+    -boot d\
+
+screen /dev/ttyUSB0 115200
+screen /dev/ttyUSB0 115200
+sudo qemu-system-i386 \\
+    -enable-kvm \\
+    -m 512 \\
+    -hda /dev/sdc \\
+    -cdrom debian-12.1.0-i386-netinst.iso \\
+    -boot d\
+
+screen /dev/ttyUSB0 115200
+screen /dev/ttyUSB0 115200
+screen /dev/ttyUSB0 38400
+screen /dev/ttyUSB0 38400
+screen /dev/ttyUSB0 38400
+sudo qemu-system-i386 \\
+    -enable-kvm \\
+    -m 512 \\
+    -hda /dev/sdc \\
+    -cdrom debian-12.1.0-i386-netinst.iso \\
+    -boot d\
+
+sudo qemu-system-i386 \\
+    -enable-kvm \\
+    -m 512 \\
+    -hda /dev/sdc \    -cdrom debian-12.1.0-i386-netinst.iso \\
+    -boot d\
+
+sudo qemu-system-i386 \\
+    -enable-kvm \\
+    -m 512 \\
+    -hda /dev/sdc \\
+    -boot d\
+
+lsblk
+sudo qemu-system-i386 \\
+    -enable-kvm \\
+    -m 512 \\
+    -hda /dev/sdd \\
+    -boot d\
+
+lsblk
+lsblk
+lsblk
+sudo qemu-system-i386 \\
+    -enable-kvm \\
+    -m 512 \\
+    -hda /dev/sdc \\
+    -boot d\
+
+sudo qemu-system-i386 \\
+    -enable-kvm \\
+    -m 512 \\
+    -hda /dev/sdc \\
+    -boot d\
+
+lsblk
+sudo fdisk /dev/sdc
+sudo fdisk /dev/sdc --wipe
+sudo fdisk --wipe /dev/sdc
+sudo fdisk --wipe /dev/sdc
+sudo fdisk --wipe 
+sudo fdisk /dev/sdc
+sudo fdisk /dev/sdc
+sudo fdisk /dev/sdc
+sudo mkfs.ext4 -L rootfs -O ^has_journal /dev/sdc1
+sudo mount /dev/sdc1 /mnt/cf
+mkdir -p /mnt/cf
+sudo mkdir -p /mnt/cf
+sudo mount /dev/sdc1 /mnt/cf
+sudo pacman -S debootstrap
+sudo debootstrap --arch=i386 stable /mnt/cf http://deb.debian.org/debian\
+
+sudo mount --bind /dev /mnt/cf/dev\
+sudo mount --bind /sys /mnt/cf/sys\
+sudo mount --bind /proc /mnt/cf/proc\
+sudo chroot /mnt/cf\
+
+lsblk
+mount --all
+umount 
+umount -l /dev/sdc
+screen /dev/ttyUSB0 38400
+screen /dev/ttyUSB0 38400
+screen /dev/ttyUSB1 38400
+screen /dev/ttyUSB1 38400
+screen /dev/ttyUSB1 38400
+screen /dev/ttyUSB1 38400
+ls -l /dev/ttyUSB1
+sudo usermod -a -G uucp $USER
+screen /dev/ttyUSB1 38400
+screen /dev/ttyUSB1 38400
+sudo mount --bind /dev /mnt/cf/dev\
+sudo mount --bind /sys /mnt/cf/sys\
+sudo mount --bind /proc /mnt/cf/proc\
+sudo chroot /mnt/cf\
+
+lsblk
+sudo mount /dev/sdc1 /mnt/cf\
+
+lsblk
+sudo mount --bind /dev /mnt/cf/dev\
+sudo mount --bind /sys /mnt/cf/sys\
+sudo mount --bind /proc /mnt/cf/proc\
+sudo chroot /mnt/cf\
+
+sudo mount --bind /dev/pts /mnt/cf/dev/pts
+su 
+su 
+cd ..
+cd -
+vim setup_router.sh
+lsblk
+chmod +x setup_router.sh
+lsblk
+DISK=/dev/sdd ./setup_router.sh
+DISK=/dev/sdd sudo ./setup_router.sh
+DISK=/dev/sdd sudo ./setup_router.sh
+DISK=/dev/sdd sudo ./setup_router.sh
+reboot
+cd Downloads
+lsblk
+lsblk
+lsblk
+DISK=/dev/sdc sudo ./setup_router.sh
+DISK=/dev/sdc && sudo ./setup_router.sh
+vim setup_router.sh
+export DISK=/dev/sdc && sudo ./setup_router.sh
+vim setup_router.sh
+vim setup_router.sh
+sudo ./setup_router.sh
+sudo ./setup_router.sh
+vim setup_router.sh
+reboot
+fdisk -l
+su
+lsblk
+sudo pacman -Syyuu
+ssh-add -l
+systemctl status ssh-agent
+systemctl --user status ssh-agent
+vim $SSH_AUTH_SOCK
+sudo vim $SSH_AUTH_SOCK
+vim .config/systemd/user/ssh-agent.service
+ls /run/user
+ls /run/user/1000/
+vim .ssh/config
+sudo pacman -Syu --needed kwallet ksshaskpass kwalletmanager
+zshrc
+ssh-add -l
+zshrc
+zshrc
+vim .config/systemd/user/ssh-agent.service
+systemctl --user restart ssh-agent.service
+systemctl --user daemon-reload
+systemctl --user restart ssh-agent.service
+vim .config/autostart/ssh-add.desktop
+ls .ssh
+vim .config/autostart/ssh-add.desktop
+ssh-add -q .ssh/id_zhaw
+sudo systemctl reboot
+ssh-add -q .ssh/id_zhaw
+ssh-add -l
+vim .config/kwalletrc 
+ssh-add -q
+ssh-add -q .ssh/id_zhaw
+ssh-add -q .ssh/id_rsa
+ssh-add -l
+systemctl reboot
+ssh-add -l
+cd Projects
+ls
+ssh-add
+ssh-add -l
+ssh-add ~/.ssh/id_zhaw
+git clone git@github.zhaw.ch:PM1-IT25taWIN-muon-mach-urak/team10-prinzessinen-projekt1-tic-tac-toe.git
+cd team10-prinzessinen-projekt1-tic-tac-toe
+ls
+git fetch
+lazy
+co .
+lazy
+ls
+bat package_list
+shistory nrf
+history | fzf
+history 0 | fzf
+history 0 | fzf
+ssh-add
+ssh-add -l
+zshrc
+which nrfjprog
+history 0 | bat
+sudo -i
+cd Downloads
+ls
+ls
+ls | grep nrf
+cd nrf-command-line-tools-10.24.2_linux-amd64
+ls
+vim README.txt
+co .
+git log
+vim sum.c
+sudo pacman -R picoscope
+cd ..
+git clone https://github.com/lightfinesthour/flashcards.git
+ls
+cd flashcards
+ls
+python --version
+pip install reportlab
+python -m venv .venv
+source .venv/bin/activate
+which pip
+pip install reportlab
+python flashcards.py
+python flashcards.py "/home/sstix/Downloads/Unbenannte Tabelle - Tabellenblatt1.csv"
+vim flashcards.py
+co flashcards.py
+python flashcards.py "/home/sstix/Downloads/Unbenannte Tabelle - Tabellenblatt1.csv"
+ls
+ls
+cd Projects/team10-prinzessinen-projekt1-tic-tac-toe
+ls
+cd ../flashcards
+source .venv/bin/activate
+python flashcards.py "/home/sstix/Downloads/Unbenannte Tabelle - Tabellenblatt1.csv"
+open .
+dolphin /home/sstix/Documents/ZHAW
+dolphin .
+python flashcards.py "/home/sstix/Downloads/Unbenannte Tabelle - Tabellenblatt1.csv"
+dolphin .
+cd ..
+mkdir leetcode
+cd leetcode
+vim medianOfTwoSortedArrays.java
+ls
+java medianOfTwoSortedArrays.java
+vim medianOfTwoSortedArrays.java
+java medianOfTwoSortedArrays.java
+vim medianOfTwoSortedArrays.java
+vim medianOfTwoSortedArrays.java
+java medianOfTwoSortedArrays.java
+vim medianOfTwoSortedArrays.java
+java medianOfTwoSortedArrays.java
+java medianOfTwoSortedArrays.java
+vim medianOfTwoSortedArrays.java
+java medianOfTwoSortedArrays.java
+java medianOfTwoSortedArrays.java
+vim medianOfTwoSortedArrays.java
+java medianOfTwoSortedArrays.java
+vim medianOfTwoSortedArrays.java
+vim medianOfTwoSortedArrays.java
+java medianOfTwoSortedArrays.java
+s cd ..
+cd ..
+ls
+cd team10-prinzessinen-projekt1-tic-tac-toe
+co .
+lazy
+vim README.md
+lazy
+cd Projects/team10-prinzessinen-projekt1-tic-tac-toe
+lazy
+ls
+cd ..
+cd leetcode
+ls
+vim medianOfTwoSortedArrays.java
+co me
+co medianOfTwoSortedArrays.java
+cd ../team10-prinzessinen-projekt1-tic-tac-toe
+co .
+lazy
+cd ~/Downloads
+mv source_1.txt source_2.txt source_4.txt source_5.txt source_6.txt ~/Projects/inco_entropy/
+ls
+ls src
+java src/EntropyArray.java source_1.txt
+java src/EntropyArray.java source_2.txt
+wc source_1.txt
+wc source_2.txt
+chmod +x entropy.sh
+./entropy.sh source_1.txt
+java src/EntropyArray.java source_2.txt
+clear
+java src/EntropyArray.java source_2.txt
+./entropy.sh source_2.txt
+java src/EntropyArray.java source_2.txt
+./entropy.sh source_2.txt
+./entropy.sh source_1.txt
+java src/EntropyArray.java source_2.txt
+./entropy.sh source_1.txt
+./entropy.sh source_2.txt
+java src/EntropyArray.java source_1.txt
+./entropy.sh source_1.txt
+./entropy.sh source_3.txt
+./entropy.sh source_4.txt
+java src/EntropyArray.java source_4.txt
+java src/EntropyArray.java source_5.txt
+./entropy.sh source_5.txt
+java src/EntropyArray.java source_6.txt
+java src/EntropyArray.java source_1.txt
+java src/EntropyArray.java source_1.txt
+lz4 source_1.txt
+./entropy.sh source_2.txt
+java src/EntropyArray.java source_2.txt
+less source_1.txt
+less source_2.txt
+less source_4.txt
+mv ~/Downloads/source_3.txt .
+lz4 source_3.txt
+lz4 source_4.txt
+java src/EntropyArray.java source_3.txt
+java src/EntropyArray.java source_4.txt
+bat source_4.txt
+bat source_3.txt
+bat source_3.txt
+bat source_4.txt
+bat source_3.txt
+java src/EntropyArray.java source_5.txt
+java src/EntropyArray.java source_6.txt
+java src/EntropyArray.java source_6.txt
+java src/EntropyArray.java source_6.txt
+lz4 source_1.txt
+zip source_1.txt
+zip source_1.txt
+zip source_1.txt.zip source_1.txt
+ll source_1.txt
+ll source_1.txt.zip
+lz4 source_2.txt
+lz4 source_4.txt
+lz4 source_3.txt
+java src/EntropyArray.java source_5.txt
+java src/EntropyArray.java source_6.txt
+sudo pacman -Syu nvim
+nvim
+cd ..
+ls
+ll
+sudo pacman -Syu nveoim
+sudo pacman -Syu neovim
+cd .config
+ls
+ll|grep nvim
+mkdir nvim
+cd nvim
+git clone https://github.com/Morphylus/nvim-config.git
+ls
+mv -r nvim-config/* .
+mv nvim-config/* .
+ls
+rm -d nvim-config
+man mv
+ls
+ll
+ls nvim-config
+ls
+cd ..
+mv * ../
+cd nvim
+ll
+cd .
+cd ~
+ls
+cd .config
+ls
+ll
+cd ..
+ls
+rm -rdf nvim
+cd .config
+mkdir nvim
+cd nvim
+ls
+git clone https://github.com/Morphylus/nvim-config.git
+cd nvim-config
+mv * ../
+ll
+cd ..
+l
+cd lua
+ls
+mv funsi main
+ls
+cd main
+ls
+cd ..
+cd ..
+l
+vim init.lua
+nvim
+nvim
+cd lua/main
+ls
+ls
+vim init.lua
+vim settings.lua
+vim keymaps.lua
+vim lazy_init.lua
+vim init.lua
+nvim
+ls
+nvim
+vim settings.lua
+nvim
+vim settings.lua
+nvim
+vim ini
+vim init.lua
+vim lazy_init.lua
+sudo pacman -S sway
+logout
+nvim
+cd .config/nvim/
+ls
+ll
+rm nvim-config
+rm -d nvim-config
+ll nvim-config
+rm -rdf nvim-config
+cd lua/main
+ls
+vim keymaps.lua
+cd plugins
+ls
+cat telescope.lua
+nvim
+ls
+ll
+cd ..
+ll
+find . -name "plugins\
+"
+find . -name "plugins"
+ll
+vim init.lua
+vim lazy_init.lua
+nvim
+nvim init.lua
+cd ~
+cd pro
+cd Projects/team10-prinzessinen-projekt1-tic-tac-toe
+kazy
+lazy
+nvim .
+touch Board.java
+nvim .
+cd ~/.config/nvim/
+ls
+ssh-add -l
+cd -
+lazy
+lazy
+cd -
+ls
+cd lua/main/plugins
+ls
+vim lsp.lua
+vim java.lua
+cat lsp.lua | pbcopy
+cd ..
+ls
+cd ..
+tree
+cd ..
+tree
+cd lua/main/plugins
+vim java.lua
+cat mason-pin.lua
+cd -
+nvim .
+cd .
+cd ~/Projects/team10-prinzessinen-projekt1-tic-tac-toe
+nvim .
+nvim
+sudo pacman -S tree-sitter
+sudo pacman -S --needed jdk17-openjdk base-devel git unzip nodejs npm\
+
+nvim
+nvim
+nvim .
+lazy
+sudo pacman -Syyyu
+cd Projects
+nvim team10-prinzessinen-projekt1-tic-tac-toe
+lazy
+lazy team10-prinzessinen-projekt1-tic-tac-toe
+cd team10-prinzessinen-projekt1-tic-tac-toe
+lazy
+nvim .
+lazy
+ls
+tree
+cd tictactoe
+ls
+mv ch.prinzessinen.tictactoe.iml ch.prinzessinnen.tictactoe.iml
+vim ch.prinzessinnen.tictactoe.iml
+cd ..
+rm -rdf tictactoe
+rm -rdf tictactoe
+rm -rdf tictactoe
+rm -rdf tictactoe
+s lazy
+lazy
+./gradlew check
+./gradlew -v
+./gradlew clean check
+mkdir -p .github/workflows/ci.yml
+rmdir .github/workflows/ci.yml
+touch .github/workflows/ci.yml
+vim .github/workflows/ci.yml
+lazy
+vim .github/workflows/ci.yml
+lazy
+vim .github/workflows/ci.yml
+mkdir -p .github/actions/java-setup
+touch .github/actions/java-setup/action.yml
+vim .github/actions/java-setup/action.yml
+vim .github/workflows/ci.yml
+co .github
+lazy
+cd ..
+mkdir router
+cd router
+mv ~/Downloads/pfSense-CE-2.3.5-RELEASE-4g-i386-nanobsd.img.gz ./pfSense-CE-2.3.5-RELEASE-4g-i386-nanobsd.img.gz
+gunzip pfSense-CE-2.3.5-RELEASE-4g-i386-nanobsd.img.gz
+fdisk -l
+sudo fdisk -l
+sudo dd if=pfSense-CE-2.3.5-RELEASE-4g-i386-nanobsd.img of=/dev/sdc bs=1M status=progress
+sudo fdisk -l
+sudo dd if=pfSense-CE-2.3.5-RELEASE-4g-i386-nanobsd.img of=/dev/sdc bs=1M status=progress
+sync
+ls /dev/ttyUSB0
+ls /dev/ttyUSB*
+screen /dev/ttyUSB0 9600
+screen /dev/ttyUSB0 115200
+screen /dev/ttyUSB0 115200
+ls /dev/ttyUSB*
+screen /dev/ttyUSB0 115200
+screen /dev/ttyUSB0 115200
+dmesg | grep ttyUSB
+sudo dmesg | grep ttyUSB
+ls -l /dev/ttyUSB*
+sudo screen /dev/ttyUSB0 115200
+sudo screen /dev/ttyUSB0 115200
+sudo screen /dev/ttyUSB0 115200
+sudo pacman -S picocom
+picocom -b 115200 /dev/ttyUSB0
+picocom -b 115200 /dev/ttyUSB0
+picocom -b 115200 /dev/ttyUSB0
+picocom -b 115200 /dev/ttyUSB0
+picocom -b 115200 /dev/ttyUSB0
+picocom -b 115200 /dev/ttyUSB0
+picocom -b 115200 /dev/ttyUSB0
+picocom -b 115200 /dev/ttyUSB0
+picocom -b 115200 /dev/ttyUSB0
+picocom -b 115200 /dev/ttyUSB0
+sudo picocom -b 115200 /dev/ttyUSB0
+sudo picocom -b 115200 /dev/ttyUSB0
+sudo pacman -S minicom
+sudo minicom -b 115200 -D /dev/ttyUSB0
+sudo screen /dev/ttyUSB0 115200\
+
+sudo screen /dev/ttyUSB0 115200\
+
+sudo screen /dev/ttyUSB0 115200\
+
+sudo screen /dev/ttyUSB0 115200\
+
+sudo screen /dev/ttyUSB0 115200\
+
+ip a
+ip a
+sudo pacman -S thonny
+yay -S thonny
+ls -l /dev/ttyUSB*
+ls -l /dev/tty*
+ls -l /dev/tty*
+screen /dev/ttyACM0
+screen /dev/ttyACM0 115200
+screen /dev/ttyACM0 115200
+screen /dev/ttyACM0 115200
+screen /dev/ttyACM0 115200
+screen /dev/ttyACM1 115200
+screen /dev/ttyACM1 115200
+screen /dev/ttyACM1 115200
+screen /dev/ttyACM1 115200
+screen /dev/ttyACM2 115200
+screen /dev/ttyACM3 115200
+screen /dev/ttyACM4 115200
+cd Projects/team10-prinzessinen-projekt1-tic-tac-toe
+lazy
+open .
+dolphin .
+./gradlew tasks
+lazy
+lazy
+./gradlew run
+lazy
+ssh-add -l
+ssh-add -l
+shistory ssh-add
+ssh-add -q .ssh/id_zhaw
+systemctl status ssh-agent
+reboot
+: 1760682535:0;ssh-add -l
+: 1760682562:0;history 0 
+: 1760682574:0;history 0 | bat
+: 1760682601:0;history 0 | bat
+: 1760682665:0;mkdir -p ~/.config/systemd/user\
+
+: 1760682724:0;cat > ~/.config/systemd/user/ssh-agent.service <<'EOF'\n[Unit]\nDescription=SSH agent\n\n[Service\nType=simple\nEnvironment=SSH_AUTH_SOCK=%t/ssh-agent.socket\nExecStart=/usr/bin/ssh-agent -D -a $SSH_AUTH_SOCK\n\n[Install]\nWantedBy=default.target\nEO
+: 1760682758:0;cat > ~/.config/systemd/user/ssh-agent.service <<'EOF'\n[Unit]\nDescription=SSH agent\n\n[Service\nType=simple\nEnvironment=SSH_AUTH_SOCK=%t/ssh-agent.socket\nExecStart=/usr/bin/ssh-agent -D -a $SSH_AUTH_SOCK\n\n[Install]\nWantedBy=default.target\nEOF\
+
+: 1760682839:0;mkdir -p ~/.config/systemd/user\
+cat > ~/.config/systemd/user/ssh-agent.service <<'EOF'\
+[Unit]\
+Description=SSH agent\
+\
+\
+[Service]\
+Type=simple\
+Environment=SSH_AUTH_SOCK=%t/ssh-agent.socket\nExecStart=/usr/bin/ssh-agent -D -a $SSH_AUTH_SOCK\
+\
+\
+[Install]\
+WantedBy=default.target\
+EOF
+: 1760682846:0;       systemctl --user enable --now ssh-agent.service\
+
+: 1760682862:0;systemctl --user status ssh-agent.service
+: 1760682889:0;vim .config/systemd/user/ssh-agent.service
+: 1760682902:0;systemctl --user status ssh-agent.service
+: 1760682908:0;       systemctl --user enable --now ssh-agent.service\
+
+: 1760682913:0;ssh-add -q .ssh/id_zhaw
+: 1760682946:0;ssh-add -l
+: 1760682952:0;cd Projects/team10-prinzessinen-projekt1-tic-tac-toe
+: 1760682953:0;lazy
+: 1760683065:0;lazy
+: 1760683387:0;lazy
+: 1760683412:0;cd tictactoe
+: 1760683417:0;./gradlew run
+: 1760683449:0;jabba install openjdk@21
+: 1760683463:0;jabba install oracle@21
+: 1760683496:0;jabba use oracle@21
+: 1760683507:0;echo $JAVA_HOME
+: 1760683512:0;./gradlew run
+: 1760683563:0;lazy
+: 1760683575:0;cd ..
+: 1760683578:0;nvim .
+: 1760683942:0;lazy
+: 1760684090:0;lazy
+: 1760684103:0;cd tictactoe
+: 1760684106:0;echo $JAVA_HOME
+: 1760684109:0;./gradlew run
+: 1760684114:0;./gradlew test
+: 1760684331:0;lazy
+: 1760684335:0;nvim .
+: 1760684395:0;lazy
+: 1760684410:0;nvim .
+: 1760686820:0;cd ..
+: 1760686832:0;mv -r tictactoe .
+: 1760686840:0;mv --help
+: 1760686983:0;mv tictactoe ..
+: 1760686984:0;ls
+: 1760686995:0;layz
+: 1760686998:0;lazy
+: 1760687027:0;cat .gitignore | pbcopy
+: 1760687033:0;mv tictactoe .
+: 1760687051:0;cd ..
+: 1760687062:0;mv team10-prinzessinen-projekt1-tic-tac-toe/tictactoe team10-prinzessinen-projekt1-tic-tac-toe
+: 1760687085:0;mv team10-prinzessinen-projekt1-tic-tac-toe/tictactoe/* team10-prinzessinen-projekt1-tic-tac-toe
+: 1760687092:0;cd team10-prinzessinen-projekt1-tic-tac-toe
+: 1760687093:0;ls
+: 1760687097:0;ll
+: 1760687105:0;vim .gitignore
+: 1760687134:0;git diff tictactoe/.gitignore
+: 1760687142:0;dolphin .
+: 1760687164:0;cat tictactoe.gitignore | pbcopy
+: 1760687169:0;cat tictactoe/.gitignore | pbcopy
+: 1760687177:0;vim .gitignore
+: 1760687216:0;vim .gitignore
+: 1760687307:0;rm -rdf tictactoe
+: 1760687385:0;rm -rdf tictactoe
+: 1760687423:0;vim .gitignore
+: 1760687451:0;lazy
+: 1760687503:0;lazy
+: 1760687534:0;vim .gitignore
+: 1760687547:0;lazy
+: 1760687581:0;echo $JAVA_HOME
+: 1760687585:0;./gradlew test
+: 1760687590:0;./gradlew run
+: 1760687603:0;lazy
+: 1760687955:0;cd ..
+: 1760687956:0;ls
+: 1760687967:0;cd rtm-lock-2020-android
+: 1760687995:0;ls
+: 1760688000:0;cd rtm-lock-android
+: 1760688005:0;ll
+: 1760688009:0;cd app
+: 1760688009:0;ll
+: 1760688022:0;cd src/main/java/ch/rtm/lock/
+: 1760688028:0;vim MainActivity.kt
+: 1760688064:0;vim MainActivity.kt
+: 1760699316:0;cd Projects/team10-prinzessinen-projekt1-tic-tac-toe
+: 1760699319:0;ls
+: 1760699323:0;lazy
+: 1760699557:0;./gradlew check
+: 1760699571:0;jabba use oracle@21
+: 1760699573:0;./gradlew check
+: 1760699593:0;./gradlew spotlessApply
+: 1760700120:0;touch Jenkinsfile
+: 1760700344:0;sudo pacman -S podman
+: 1760700355:0;podman start machine
+: 1760700364:0;podman machine init
+: 1760700375:0;podman machine start
+: 1760700379:0;podman machine init
+: 1760700440:0;chmod +x scripts/run-jenkins-podman.sh
+: 1760700461:0;podman machine start
+: 1760700516:0;command -v gvproxy || sudo find /usr -name gvproxy 2>/dev/null
+: 1760700530:0;yay -S gvproxy
+: 1760700571:0;sudo pacman -Syu podman
+: 1760700622:0;podman machine start
+: 1760700629:0;yay -S gvproxy-bin
+: 1760700649:0;podman machine start
+: 1760700687:0;podman machine rm -f podman-machine-default || true\
+podman machine init --now\
+
+: 1760700732:0;sudo pacman -Syu podman qemu-desktop edk2-ovmf
+: 1760700773:0;sudo install -d /usr/libexec/podman\
+sudo curl -L -o /usr/libexec/podman/gvproxy \\
+  https://github.com/containers/gvisor-tap-vsock/releases/latest/download/gvproxy-linux-amd64\
+sudo chmod +x /usr/libexec/podman/gvproxy
+: 1760700780:0;mkdir -p ~/.config/containers
+: 1760700787:0;cat > ~/.config/containers/containers.conf <<'EOF'\
+[engine]\
+helper_binaries_dir=["/usr/libexec/podman","/usr/lib/podman","/usr/local/libexec/podman","/usr/local/lib/podman"]\
+EOF
+: 1760700792:0;podman machine rm -f podman-machine-default || true\
+podman machine init --now
+: 1760700821:0;sudo pacman -S virtiofsd
+: 1760700836:0;sudo pacman -S virtiofsd
+: 1760700841:0;podman machine rm -f podman-machine-default || true\
+podman machine init --now
+: 1760700871:0;which virtiofsd
+: 1760701363:0;chmod +x scripts/run-jenkins-locally.sh
+: 1760701371:0;./scripts/run-jenkins-locally.sh
+: 1760701431:0;./scripts/run-jenkins-locally.sh
+: 1760701498:0;./scripts/run-jenkins-locally.sh
+: 1760701593:0;./scripts/run-jenkins-locally.sh
+: 1760701660:0;./scripts/run-jenkins-locally.sh
+: 1760701794:0;./scripts/run-jenkins-locally.sh
+: 1760701990:0;./scripts/run-jenkins-locally.sh
+: 1760702064:0;./scripts/run-jenkins-locally.sh
+: 1760702091:0;jabba use oracle@21
+: 1760702094:0;./scripts/run-jenkins-locally.sh
+: 1760702285:0;./scripts/run-jenkins-locally.sh
+: 1760706277:0;ssh cloud@cloud.local
+: 1760706290:0;ssh cloud@cloud.local
+: 1760706294:0;ssh cloud@192.168.0.19
+: 1760730161:0;ssh cloud@cloud
+: 1760730286:0;ssh cloud@cloud.local
+: 1760730447:0;sudo pacman -S zmap
+: 1760730542:0;ip a
+: 1760730550:0;sudo zmap -p 0 10.10.0.0/24 -o alive.txt
+: 1760730597:0;sudo zmap -p 22 10.10.0.0/24 -o ssh_hosts.txt\
+
+: 1760730657:0;sudo zmap -B 10M -p 22 10.10.0.0/24 --blocklist-file=/dev/null -o ssh_hosts.txt\
+
+: 1760730709:0;sudo pacman -S nmap
+: 1760730792:0;ll
+: 1760730799:0;cd ..
+: 1760730842:0;sudo nmap -sn 10.10.0.0/24 -oG - | awk '/Up$/{print $2}' > live_hosts.txt
+: 1760730924:0;cat live_hosts.txt
+: 1760731067:0;cat live_hosts.txt
+: 1760731079:0;cat live_hosts.txt
+: 1760731097:0;ssh cloud@10.10.0.39
+: 1760731202:0;ping cloud.local
+: 1760731270:0;sudo pacman -S avahi 
+: 1760731299:0;sudo systemctl enable --now avahi-daemon.s
+: 1760731303:0;sudo systemctl enable --now avahi-daemon
+: 1760731314:0;ping cloud.local
+: 1760732353:0;ssh cloud@10.10.0.40
+: 1760733421:0;shistory nmap
+: 1760733437:0;rm live_hosts.txt
+: 1760733448:0;sudo nmap -sn 10.10.0.0/24 -oG - | awk '/Up$/{print $2}' > live_hosts.txt
+: 1760788885:0;ping 1.1.1.1
+: 1760788897:0;ping 1.1.1.1
+: 1760789548:0;ssh-add -l
+: 1760789571:0;sudo pacman -Syyu
+: 1760789781:0;ping 1.1.1.1
+: 1760802305:0;ssh cloud@10.10.0.40
+: 1760803672:0;sudo fdisk -l
+: 1760803693:0;sudo fdisk /dev/sda
+: 1760868278:0;fdisk -l
+: 1760868285:0;sudo fdisk -l
+: 1760868304:0;sudo fdisk -l
+: 1760868311:0;sudo fdisk -l
+: 1760868344:0;mkdir /mnt/nextcloud
+: 1760868350:0;sudo mkdir /mnt/nextcloud
+: 1760868361:0;man mount
+: 1760868402:0;mount /dev/sda1 /mnt/nextcloud
+: 1760868411:0;sudo mount /dev/sda1 /mnt/nextcloud
+: 1760868421:0;cd /mnt/nextcloud
+: 1760868427:0;sudo cd /mnt/nextcloud
+: 1760868436:0;sudo -i
+: 1760874725:0;sudo pacman -S partitionmanager
+: 1760875557:0;flatpak install fedora-media-writer
+: 1760875669:0;flatpak
+: 1760875672:0;flatpak --help
+: 1760875734:0;cd Downloads
+: 1760875752:0;flatpak install org.fedoraproject.MediaWriter.flatpakref
+: 1760876573:0;pacman -Qqe\
+
+: 1760876589:0;cd ..
+: 1760876593:0;ll
+: 1760876612:0;ll | grep package
+: 1760876712:0;cp ~/package_list /run/media/sstix/NO\ NAME/package_list
+: 1760879258:0;pacman -Qqe > package_list2
+: 1760879269:0;cp ~/package_list2 /run/media/sstix/NO\ NAME/package_list2
+: 1760879275:0;ll
+: 1760879353:0;mkdir /run/media/sstix/NO\ NAME/config
+: 1760879463:0;cp ~/.zshrc /run/media/sstix/NO\ NAME/config/.zshrc
+: 1760879483:0;cp ~/.zsh_history /run/media/sstix/NO\ NAME/config/.zsh_history

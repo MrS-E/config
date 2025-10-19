@@ -341,3 +341,10 @@ paste() {
   fi
 }
 alias pbpaste='paste'
+
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR"/ssh-agent.socket
+
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="/home/sstix/Projects/team10-prinzessinen-projekt1-tic-tac-toe/.jenkins-local/home/workspace/tac-toe_simeon_feature_pipelines/.sdkman"
+[[ -s "/home/sstix/Projects/team10-prinzessinen-projekt1-tic-tac-toe/.jenkins-local/home/workspace/tac-toe_simeon_feature_pipelines/.sdkman/bin/sdkman-init.sh" ]] && source "/home/sstix/Projects/team10-prinzessinen-projekt1-tic-tac-toe/.jenkins-local/home/workspace/tac-toe_simeon_feature_pipelines/.sdkman/bin/sdkman-init.sh"
