@@ -3,6 +3,7 @@
 ## TODO
 ### Mac
 - [x] setup script
+- [ ] neovim in setup
 - [x] dependency install
 - [x] dependency list
 - [x] ssh config
@@ -11,6 +12,7 @@
 - [x] vim config
 - [ ] terminal config
 - [ ] vscode(ium) config
+- [ ] neovim
 ### Linux (Arch - Manjaro)
 - [ ] setup script
 - [ ] dependency install
@@ -21,5 +23,6 @@
 - [x] vim config
 - [ ] terminal config
 - [ ] vscode(ium) config
-- [ ] ufw (firewall) and clamav config
+- [ ] ufw (firewall) and clamav config / firewalld
+- [ ] neovim
 
