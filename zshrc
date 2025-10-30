@@ -88,19 +88,19 @@ alias subu='git submodule update'
 alias swi='git switch'
 alias swic='git switch -c'
 alias gittree='git log --graph --decorate --oneline'
-alias lazy=lazygit
+alias lazy='lazygit'
 
 # Rails 
-alias rg='rails generate'
-alias rg:mo='rg model'
-alias rg:mi='rg migration'
-alias rg:v='rg view'
-alias rg:c='rg controller'
-alias rdb:c='rails db:create'
-alias rdb:d='rails db:drop'
-alias rdb:s='rails db:seed'
-alias rdb:m='rails db:migrate'
-alias rdb:cms='rails db:create db:migrate db:seed'
+# alias rg='rails generate'
+# alias rg:mo='rg model'
+# alias rg:mi='rg migration'
+# alias rg:v='rg view'
+# alias rg:c='rg controller'
+# alias rdb:c='rails db:create'
+# alias rdb:d='rails db:drop'
+# alias rdb:s='rails db:seed'
+# alias rdb:m='rails db:migrate'
+# alias rdb:cms='rails db:create db:migrate db:seed'
 
 # History
 alias shistory="history 0 | grep"
@@ -237,9 +237,12 @@ fi
 
 # JABBA
 export JABBA_INDEX='https://github.com/typelevel/jdk-index/raw/main/index.json'
-[ -s "/home/sstix/.jabba/jabba.sh" ] && source "/home/sstix/.jabba/jabba.sh"
+export JABBA_HOME="$HOME/.jabba"
+[ -s "$JABBA_HOME/jabba.sh" ] && source "$JABBA_HOME/jabba.sh"
 
 # PYENV
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
 if command -v pyenv >/dev/null 2>&1; then
   eval "$(pyenv init -)"        # shells
   eval "$(pyenv init --path)"   # login shells
@@ -250,9 +253,11 @@ if [[ "$OS" = "macos" ]]; then
   export PATH="$PATH:/usr/local/bin"
 fi
 
-# RVM
-export PATH="$PATH:$HOME/.rvm/bin"
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+# RBEnv (same as rvm)
+export PATH="$HOME/.rbenv/bin:$PATH"
+if command -v rbenv >/dev/null 2>&1; then
+  eval "$(rbenv init - zsh)"
+fi
 
 # Zephyr-SDK
 export ZEPHYR_SDK_INSTALL_DIR="$HOME/zephyr-sdk-0.17.1"
@@ -272,28 +277,19 @@ fi
 # Plugins
 ##########
 
-# zsh-autocomplete
-if [[ "$OS" = "macos" ]] && [[ "$MAC_ARCH" = "arm64" ]] && (( MAC_RAM_GB >= 16 )); then
-  # needs a lot of resources, lagged on intel ultra 7 (manjaro) and intel i9 (mac) but ran quit well on mac m3/m4 >16gb
-  if [[ -f /usr/share/zsh/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]]; then
-    source /usr/share/zsh/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
-  elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
-    source "$(brew --prefix)/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
-  fi
+# Load autosuggestions first
+if [ -f ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+  source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 fi
 
-# zsh-autosuggestions
-if [[ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
-  source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
-  source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+# Load syntax highlighting (must come last!)
+if [ -f ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+  source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
-# zsh-syntax-highlighting
-if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
-  source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-  source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+# Load autocomplete
+if [ -f ~/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]; then
+  source ~/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh
 fi
 
 ##########
@@ -322,9 +318,9 @@ clip() {
     return 1
   fi
 }
-alias pbcopy='clip'
+alias copy='clip'
 
-paste() {
+clippaste() {
   if [[ "$OS" = "macos" ]] && command -v pbpaste >/dev/null 2>&1; then
     pbpaste
   elif [[ "$OS" = "linux" ]]; then
@@ -340,4 +336,5 @@ paste() {
     fi
   fi
 }
-alias pbpaste='paste'
+alias paste='clippaste'
+
