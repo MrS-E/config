@@ -88,7 +88,8 @@ alias subu='git submodule update'
 alias swi='git switch'
 alias swic='git switch -c'
 alias gittree='git log --graph --decorate --oneline'
-alias lazy=lazygit
+#TODO
+alias lazy='toolbox run --container cli-dev lazygit'
 
 # Rails 
 alias rg='rails generate'
@@ -315,7 +316,7 @@ clip() {
 }
 alias copy='clip'
 
-paste() {
+clippaste() {
   if [[ "$OS" = "macos" ]] && command -v pbpaste >/dev/null 2>&1; then
     pbpaste
   elif [[ "$OS" = "linux" ]]; then
@@ -331,5 +332,5 @@ paste() {
     fi
   fi
 }
-alias paste='paste'
+alias paste='clippaste'
 
