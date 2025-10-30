@@ -1,0 +1,121 @@
+# Pacman:
+vim
+yay
+llvm
+android-tools
+afl++
+bat
+android-tools
+cmake
+ccache
+cmake-extras
+cppcheck
+fzf
+git-lfs
+jdk-openjdk
+ktlint
+lazygit
+ffmpeg
+gcc
+make
+nvm
+ninja
+plantuml
+podman
+podman-compose
+pyenv
+scrcpy
+socat
+tailscale
+texlive-basic
+texlive-langenglish
+texlive-langgerman
+texlive-bibtexextra
+texlive-xetex
+texlive-luatex
+texlive-latex
+texlive-latexrecommended
+texlive-fontsrecommended
+texlive-doc
+crun
+thefuck
+tree
+wget
+w3m
+ranger
+ollama
+yarn
+drawio-desktop
+gimp
+firefox
+spotify-player
+openscad
+obsidian
+wireshark-qt
+zsh
+zsh-syntax-highlighting
+zsh-autosuggestions
+zsh-autocomplete
+thunderbird
+protonmail-bridge
+proton-vpn-gtk-app
+clamav
+manjaro-printer
+| sudo systemctl enable --now cups
+system-config-printer
+r
+base-devel
+cmake
+pandoc
+filezilla
+labplot
+wine
+winetricks
+xclip
+xsel
+
+
+
+# AUR
+backslash
+base-devel
+ltex-ls-plus-bin
+shc
+vscodium
+zotero
+logseq-desktop
+postman-bin
+ufw
+ufw-extra
+gufw
+ 108   | sudo pacman -Syu nftables iptables-nft\
+ 109   │ sudo pacman -Rns iptables-legacy
+ 110   │ sudo systemctl enable --now nftables
+ 111   │ sudo ufw enable~
+ 112   │ reboot
+ 113   │ sudo ufw --force reset
+ 114   │ sudo ufw enable
+rstudio-desktop-bin
+picoscope
+spotify
+
+
+
+# External
+https://www.jetbrains.com/toolbox-app/download/download-thanks.html?platform=linux
+github.com/hwittenborn/celeste (flatpack)
+https://servicedesk.zhaw.ch/tas/public/ssp/content/search?q=KI%201747 (cisco secure client)
+| yay -S libxml2-legacy    # or: yay -S libxml2-2
+| sudo ldconfig
+| sudo systemctl enable vpnagentd
+| sudo systemctl start vpnagentd
+homebrew
+curl -sL https://github.com/shyiko/jabba/raw/master/install.sh | bash
+wget -O - https://raw.githubusercontent.com/laurent22/joplin/dev/Joplin_install_and_update.sh | bash
+
+# pyenv
+anaconda3-2025.06-1
+
+
+
+
