@@ -60,6 +60,12 @@ sudo rpmkeys --import https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw
 printf "[gitlab.com_paulcarroty_vscodium_repo]\nname=download.vscodium.com\nbaseurl=https://download.vscodium.com/rpms/\nenabled=1\ngpgcheck=1\nrepo_gpgcheck=1\ngpgkey=https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg\nmetadata_expire=1h\n" | sudo tee -a /etc/yum.repos.d/vscodium.repo
 sudo dnf -y install codium
 
+# JetBrains Toolbox
+mkdir -p ~/.config/jetbrains
+wget -P ~/.config/jetbrains "https://download.jetbrains.com/toolbox/jetbrains-toolbox-3.0.1.59888.tar.gz"
+tar -xzf ~/.config/jetbrains/jetbrains-toolbox-3.0.1.59888.tar.gz -C ~/.config/jetbrains/
+nohup ~/.config/jetbrains/jetbrains-toolbox-3.0.1.59888/bin/jetbrains-toolbox >/dev/null 2>&1 & 
+
 # Proton Mail Bridge
 wget https://proton.me/download/bridge/protonmail-bridge-3.13.0-1.x86_64.rpm
 sudo dnf -y install ./protonmail-bridge-3.13.0-1.x86_64.rpm
@@ -100,7 +106,7 @@ sudo dnf -y install \
   nodejs yarnpkg \
   java-21-openjdk java-21-openjdk-devel maven \
   python3-pip python3-virtualenv \
-  git-lfs
+  git-lfs podman
 sudo dnf copr enable atim/lazygit
 sudo dnf install -y lazygit
 
