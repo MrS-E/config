@@ -60,12 +60,8 @@ return { {
             vim.opt.signcolumn = 'yes'
         end,
         config = function()
-            local lsp_defaults = require('lspconfig').util.default_config
-
-            -- Add cmp_nvim_lsp capabilities settings to lspconfig
-            -- This should be executed before you configure any language server
-            lsp_defaults.capabilities = vim.tbl_deep_extend('force', lsp_defaults.capabilities,
-                require('cmp_nvim_lsp').default_capabilities())
+            -- Capabilities for all servers (used below per-server)
+            local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
             -- Define the autoformat function locally
             local buffer_autoformat = function(bufnr)
@@ -132,26 +128,37 @@ return { {
                 end
             })
 
-            require('lspconfig').eslint.setup({
+            vim.lsp.config('eslint', {
+                capabilities = capabilities,
                 settings = {
                     eslint = {
                         enable = true,
                         packageManager = "yarn",
                         configFiles = ".eslint.config.mjs",
-                        validate = "on"
-                    }
-                }
+                        validate = "on",
+                    },
+                },
             })
+            vim.lsp.enable({ 'eslint' })
 
             require('mason').setup()
 
             require('mason-lspconfig').setup({
-                ensure_installed = { "eslint", "clangd" },
-                handlers = { -- this first function is the "default handler"
-                    -- it applies to every language server without a "custom handler"
+            ensure_installed = { "eslint", "clangd" },
+                handlers = {
                     function(server_name)
-                        require('lspconfig')[server_name].setup({})
-                    end }
+                        local opts = { capabilities = capabilities }
+
+                        -- per-server tweaks (examples)
+                        if server_name == "clangd" then
+                            opts.cmd = { "clangd", "--background-index" }
+                        end
+
+                        vim.lsp.config(server_name, opts)
+                        vim.lsp.enable({ server_name })
+                    end,
+                },
             })
+
         end
     } }
