@@ -1,0 +1,24 @@
+{
+    "files.autoSave": "afterDelay",
+    "markdown-preview-enhanced.markdownFileExtensions": [
+
+        ".md",
+        ".markdown",
+        ".mdown",
+        ".mkdn",
+        ".mkd",
+        ".rmd",
+        ".qmd",
+        ".mdx"
+    ],
+    "markdown-preview-enhanced.plantumlJarPath": "/opt/homebrew/Cellar/plantuml/1.2025.4/libexec/plantuml.jar",
+    "idf.hasWalkthroughBeenShown": true,
+    "idf.pythonInstallPath": "/Users/simeon.stix/.pyenv/shims/python",
+    "idf.espIdfPath": "/Users/simeon.stix/esp/esp-idf",
+    "idf.toolsPath": "/Users/simeon.stix/.espressif",
+    "idf.gitPath": "git",
+    "redhat.telemetry.enabled": true,
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    }
+}
