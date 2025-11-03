@@ -5,14 +5,15 @@ endif
 set undodir=~/.vim/undo
 set undofile
 
-" use dracula as colorscheme
-packadd! dracula
-colorscheme dracula
-" set transparent dracula background
-let g:dracula_colorterm = 0
-" disable italic to prevent weird word highlights if italic is not supported by the terminal 
-let g:dracula_italic = 0
-syntax enable
+" Use Cyberpunk Scarlet Protocol Adjusted colors
+set termguicolors        " enable true color
+syntax enable            " keep syntax highlighting
+
+" load color scheme
+colorscheme cyberpunk_scarlet_protocol_adjusted
+
+" make background transparent if Ghostty handles it
+hi Normal guibg=NONE ctermbg=NONE
 
 " enable line numeration
 set nu
