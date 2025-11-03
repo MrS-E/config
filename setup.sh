@@ -90,8 +90,3 @@ else
 fi
 
 echo "✅ Setup complete."
-# additional tools:
-# app store
-# https://developer.apple.com/download/all/?q=additional%20tools
-# https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-Desktop/Download#infotabs
-# https://lp.digilent.com/complete-waveforms-download/
