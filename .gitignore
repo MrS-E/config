@@ -1,4 +1,5 @@
 ssh/**
 vim/undo/**
+vim/.netrwhist
 !vim/undo/.keep
 .DS_STORE
