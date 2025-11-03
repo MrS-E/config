@@ -5,8 +5,6 @@ tap "nikitabobko/tap"
 brew "openssl@3"
 # Library for command-line editing
 brew "readline"
-# Interpreted, interactive, object-oriented programming language
-brew "python@3.13"
 # Swiss-army knife for Android testing and development
 brew "adb-enhanced"
 # Next-gen compiler infrastructure
@@ -75,6 +73,8 @@ brew "pkgconf"
 brew "icu4c@76"
 # Cross-platform Java Version Manager
 brew "jabba"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.13"
 # Sane PBXProj files
 brew "kin"
 # Anti-bikeshedding Kotlin linter with built-in formatter
@@ -185,8 +185,6 @@ cask "diffmerge"
 cask "figma"
 # Web browser
 cask "firefox"
-# Free and open-source image editor
-cask "gimp"
 # Web browser
 cask "google-chrome"
 # Terminal emulator as alternative to Apple's Terminal app
@@ -205,8 +203,6 @@ cask "macdroid"
 cask "mactex"
 # Open source implementation of Microsoft's .NET Framework
 cask "mono-mdk-for-visual-studio"
-# Unofficial Google Nearby Share app
-# cask "neardrop"
 # Command-line tools for Nordic nRF Semiconductors
 cask "nordic-nrf-command-line-tools"
 # Knowledge base that works on top of a local folder of plain text Markdown files
@@ -239,8 +235,6 @@ cask "temurin"
 cask "texifier"
 # Virtual machines UI using QEMU
 cask "utm"
-# Connect to Windows
-cask "windows-app"
 # Network protocol analyzer
 cask "wireshark-app"
 # Collect, organise, cite, and share research sources

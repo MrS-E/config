@@ -232,3 +232,9 @@ logcat_analyse() {
   grep -E "^[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}[[:space:]]+${pid}\>|^[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}[[:space:]]+[0-9]+[[:space:]]+${pid}\>" "$file"
 }
 
+update_and_clean(){
+ brew update && brew upgrade && brew cleanup -s
+}
+
+
+
