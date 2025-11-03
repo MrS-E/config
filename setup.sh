@@ -5,6 +5,7 @@ set -e
 CONFIG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BREWFILE="$CONFIG_DIR/Brewfile"
 SSH_DIR="$CONFIG_DIR/ssh"
+NVIM_DIR="$CONFIG_DIR/nvim"
 
 echo "Starting setup..."
 
@@ -34,6 +35,9 @@ for file in "${FILES[@]}"; do
   echo "Creating symlink for $file"
   ln -s "$SRC" "$DEST"
 done
+
+#3. Symlink nvim config
+ln -sfn "$NVIM_DIR" "$HOME/.config/nvim"
 
 # 3. Symlink SSH directory
 if [ -d "$SSH_DIR" ]; then
