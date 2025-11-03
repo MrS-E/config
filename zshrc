@@ -161,9 +161,6 @@ zstyle ':completion:*' menu select
 # generated using $(brew --prefix)/opt/fzf/install needs brew install fzf
 [ -f "$CONFIG_DIR/fzf.zsh" ] && source "$CONFIG_DIR/fzf.zsh"
 
-# ITerm2
-test -e "$CONFIG_DIR/iterm2_shell_integration.zsh" && source "$CONFIG_DIR/iterm2_shell_integration.zsh"
-
 ##########
 # Patter Matching
 ##########
