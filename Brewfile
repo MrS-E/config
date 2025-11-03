@@ -45,10 +45,10 @@ brew "direnv"
 brew "dotnet"
 # Play, record, convert, and stream audio and video
 brew "ffmpeg"
-# GNU compiler collection
-brew "gcc"
 # Command-line fuzzy finder written in Go
 brew "fzf"
+# GNU compiler collection
+brew "gcc"
 # Git extension for versioning large files
 brew "git-lfs"
 # X.509 and CMS library
@@ -67,8 +67,6 @@ brew "libtool"
 brew "graphviz"
 # GNU grep, egrep and fgrep
 brew "grep"
-# Package compiler and linker metadata toolkit
-brew "pkgconf"
 # C/C++ and Java libraries for Unicode and globalization
 brew "icu4c@76"
 # Cross-platform Java Version Manager
@@ -105,20 +103,16 @@ brew "neovim"
 brew "ninja"
 # Open-source, cross-platform JavaScript runtime environment
 brew "node"
-# Open-source, cross-platform JavaScript runtime environment
-brew "node@20"
 # Libraries for security-enabled client and server applications
 brew "nss"
 # Manage multiple Node.js versions
 brew "nvm"
 # Create, run, and share large language models (LLMs)
 brew "ollama"
-# Development kit for the Java programming language
-brew "openjdk@17"
-# Development kit for the Java programming language
-brew "openjdk@21"
 # Cryptography and SSL/TLS Toolkit
 brew "openssl@1.1"
+# Package compiler and linker metadata toolkit
+brew "pkgconf"
 # Draw UML diagrams
 brew "plantuml"
 # Your Gateway to Embedded Software Development Excellence
@@ -129,8 +123,6 @@ brew "podman"
 brew "podman-compose"
 # Python version management
 brew "pyenv"
-# File browser
-brew "ranger"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
 # Display and control your Android device
@@ -141,24 +133,14 @@ brew "sevenzip"
 brew "shc"
 # SOcket CAT: netcat on steroids
 brew "socat"
-# Tool to enforce Swift style and conventions
-brew "swiftlint"
 # Easiest, most secure way to use WireGuard and 2FA
 brew "tailscale"
 # User interface to the TELNET protocol
 brew "telnet"
-# Display images in a terminal using block graphic characters
-brew "terminalimageviewer"
-# Free software distribution for the TeX typesetting system
-brew "texlive"
 # Programmatically correct mistyped console commands
 brew "thefuck"
 # Display directories as trees (with optional color/HTML output)
 brew "tree"
-# Image processing library
-brew "vips"
-# Pager/text based browser
-brew "w3m"
 # Internet file retriever
 brew "wget"
 # JavaScript package manager
@@ -177,8 +159,6 @@ cask "android-platform-tools"
 cask "arduino-ide"
 # Web security testing toolkit
 cask "burp-suite"
-# Browser for SQLite databases
-cask "db-browser-for-sqlite"
 # Visually compare and merge files
 cask "diffmerge"
 # Collaborative team software
@@ -191,8 +171,6 @@ cask "google-chrome"
 cask "iterm2"
 # JetBrains tools manager
 cask "jetbrains-toolbox"
-# Note taking and to-do application with synchronisation capabilities
-cask "joplin"
 # Software for Logitech devices
 cask "logi-options+"
 # Privacy-first, open-source platform for knowledge sharing and management
@@ -229,8 +207,8 @@ cask "segger-jlink"
 cask "slack"
 # Music streaming service
 cask "spotify"
-# JDK from the Eclipse Foundation (Adoptium)
-cask "temurin"
+# Text editor for code, markup and prose
+cask "sublime-text"
 # LaTeX editor
 cask "texifier"
 # Virtual machines UI using QEMU
