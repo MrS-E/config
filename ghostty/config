@@ -1,0 +1,61 @@
+# ---------- Appearance ----------
+theme = "Cyberpunk Scarlet Protocol"
+font-family = "Menlo"
+font-size = 13
+cursor-style = block
+cursor-style-blink = true
+copy-on-select = true
+
+# ---------- Background / visuals ----------
+background-opacity = 0.98
+alpha-blending = native
+
+# ---------- Scrollback / scrolling ----------
+scrollback-limit = 20000000
+mouse-scroll-multiplier = 4
+unfocused-split-opacity = 0.85
+
+# ---------- Close behavior ----------
+confirm-close-surface = true
+
+# ---------- Apple-classic keybindings ----------
+# Tabs
+keybind = cmd+t=new_tab
+keybind = cmd+w=close_surface
+
+# Prev/Next tab: on Swiss keyboards “[” and “]” are usually Option+5/6
+keybind = cmd+[=previous_tab
+keybind = cmd+]=next_tab
+# direct Swiss-friendly alternatives:
+keybind = cmd+alt+5=previous_tab
+keybind = cmd+alt+6=next_tab
+
+# Splits
+keybind = cmd+d=new_split:down
+# “\” is Option+Shift+7 on Swiss; bind BOTH
+keybind = cmd+\=new_split:right
+keybind = cmd+shift+7=new_split:right
+
+# Focus between splits (Cmd+Alt+Arrows)
+keybind = cmd+alt+left=goto_split:left
+keybind = cmd+alt+right=goto_split:right
+keybind = cmd+alt+up=goto_split:up
+keybind = cmd+alt+down=goto_split:down
+
+# Fast movement in shells
+# Option+Arrows: word-wise move (ESC b/f)
+keybind = alt+left=esc:b
+keybind = alt+right=esc:f
+# Cmd+Left/Right: start/end of line (Ctrl-A/E)
+keybind = cmd+left=text:\x01
+keybind = cmd+right=text:\x05
+# Cmd+Up/Down: send PageUp/PageDown CSI (works in less/vim/nvim/tmux)
+keybind = cmd+up=csi:5~
+keybind = cmd+down=csi:6~
+
+# Clipboard / app controls
+keybind = cmd+c=copy_to_clipboard
+keybind = cmd+v=paste_from_clipboard
+keybind = cmd+k=clear_screen
+keybind = cmd+enter=toggle_fullscreen
+keybind = cmd+,=open_config

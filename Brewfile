@@ -165,10 +165,10 @@ cask "diffmerge"
 cask "figma"
 # Web browser
 cask "firefox"
+# Terminal emulator that uses platform-native UI and GPU acceleration
+cask "ghostty"
 # Web browser
 cask "google-chrome"
-# Terminal emulator as alternative to Apple's Terminal app
-cask "iterm2"
 # JetBrains tools manager
 cask "jetbrains-toolbox"
 # Software for Logitech devices
