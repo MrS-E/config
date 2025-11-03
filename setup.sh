@@ -7,6 +7,7 @@ BREWFILE="$CONFIG_DIR/Brewfile"
 SSH_DIR="$CONFIG_DIR/ssh"
 NVIM_DIR="$CONFIG_DIR/nvim"
 GHOSTTY_DIR="$CONFIG_DIR/ghostty"
+VIM_DIR="$CONFIG_DIR/vim"
 
 echo "Starting setup..."
 
@@ -42,6 +43,8 @@ ln -sfn "$NVIM_DIR" "$HOME/.config/nvim"
 
 #4. Ghostty config
 ln -sfn "$GHOSTTY_DIR" "$HOME/.config/ghostty"
+
+ln -sfn "$VIM_DIR" "$HOME/.vim"
 
 # 3. Symlink SSH directory
 if [ -d "$SSH_DIR" ]; then

@@ -1,2 +1,4 @@
 ssh/**
+vim/undo/**
+!vim/undo/.keep
 .DS_STORE
