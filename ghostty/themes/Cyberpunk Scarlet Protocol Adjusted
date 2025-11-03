@@ -1,3 +1,6 @@
+# Cyberpunk Scarlet Protocol Adjusted
+# Diff-balanced version with red/green contrast
+
 palette = 0=#101116
 palette = 1=#ff0051
 palette = 2=#01dc84
@@ -14,9 +17,11 @@ palette = 12=#6871ff
 palette = 13=#bd35ec
 palette = 14=#60fdff
 palette = 15=#ffffff
+
 background = #101116
 foreground = #e41951
 cursor-color = #76ff9f
 cursor-text = #ffffff
 selection-background = #c1deff
 selection-foreground = #000000
+
