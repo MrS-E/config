@@ -3,7 +3,8 @@
 ##########
 export EDITOR=vim
 export VISUAL=vim
-CONFIG_DIR="$(cd "$(dirname "${(%):-%x}")" && pwd)"
+ZSHRC_PATH="$(realpath "${(%):-%x}")"
+CONFIG_DIR="$(dirname "$ZSHRC_PATH")"
 
 ##########
 # History
@@ -115,12 +116,11 @@ adb() {
 #alias proxy='socat TCP-LISTEN:5555,fork TCP:192.168.3.97:5555'
 
 # Files
-alias projects='[ -d "$HOME/Projects" ] && cd "$HOME/Projects" || { [ -d "$HOME/Work" ] && cd "$HOME/Work" || echo "unknown directory"; }'
-alias hosts='vim $HOME/.ssh/known_hosts'
 alias vimrc='vim $HOME/.vimrc'
 alias zshrc='vim $HOME/.zshrc'
 alias zshsrc='source $HOME/.zshrc'
 alias sshrc='vim $HOME/.ssh/config'
+alias hosts='vim $HOME/.ssh/known_hosts'
 alias o="open"
 
 ##########
@@ -233,5 +233,6 @@ update_and_clean(){
  brew update && brew upgrade && brew cleanup -s
 }
 
-
+#projects
+source "$CONFIG_DIR/scripts/project.sh"
 
