@@ -75,7 +75,8 @@ alias co='codium'
 alias code='codium'
 
 # Docker
-alias compose_up='docker-compose up && docker-compose rm -fsv'
+# alias compose_up='docker-compose up && docker-compose rm -fsv'
+# alias docker_mounts="docker inspect $(docker ps -q) | jq '.[] | {container: .Name, mounts: .Mounts}'"
 
 # ESP-IDF
 alias get_idf='. $HOME/esp/esp-idf/export.sh'
