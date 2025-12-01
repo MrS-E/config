@@ -5,13 +5,6 @@ endif
 set undodir=~/.vim/undo
 set undofile
 
-" use dracula as colorscheme
-packadd! dracula
-colorscheme dracula
-" set transparent dracula background
-let g:dracula_colorterm = 0
-" disable italic to prevent weird word highlights if italic is not supported by the terminal 
-let g:dracula_italic = 0
 syntax enable
 
 " enable line numeration
