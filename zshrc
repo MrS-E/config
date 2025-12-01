@@ -3,6 +3,7 @@
 ##########
 export EDITOR=vim
 export VISUAL=vim
+export TERMINAL=cosmic-term
 
 ##########
 # OS + Hardware Detection
@@ -45,11 +46,13 @@ case "$(uname -s)" in
     ;;
 esac
 
-##########
+DIR="$(dirname "$(readlink -f "$0")")"
+
+#########
 # History
 ##########
 
-HISTFILE=~/.zsh_history
+HISTFILE="$HOME/.zsh_history"
 HISTSIZE=1000000
 SAVEHIST=1000000
 setopt SHARE_HISTORY
@@ -73,7 +76,7 @@ alias rgrep='grep -rin'
 # SSH
 alias sshproxy='ssh -D 8080 -C -N'
 
-# Git 
+# Git
 alias branch='git branch'
 alias clone='git clone'
 alias glog='git log --graph --abbrev-commit --decorate --all --oneline'
@@ -268,6 +271,9 @@ if [[ "$OS" = "macos" ]] && command -v brew >/dev/null 2>&1; then
   [[ -d "$GREP_GNUBIN" ]] && export PATH="$PATH:$GREP_GNUBIN"
 fi
 
+# generated with tailscale completion zsh
+source $DIR/tailscale.sh
+
 #TheFuck
 if command -v thefuck >/dev/null 2>&1; then
   eval "$(thefuck --alias)"
@@ -278,18 +284,18 @@ fi
 ##########
 
 # Load autosuggestions first
-if [ -f ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
-  source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+if [ -f $HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+  source $HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 fi
 
 # Load syntax highlighting (must come last!)
-if [ -f ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
-  source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+if [ -f $HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+  source $HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
 # Load autocomplete
-if [ -f ~/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]; then
-  source ~/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+if [ -f $HOME/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]; then
+  source $HOME/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh
 fi
 
 ##########
