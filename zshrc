@@ -183,7 +183,7 @@ zstyle ':completion:*' menu select
 
 # ITerm2
 if [[ "$OS" = "macos" ]]; then
-  [[ -e "iterm2_shell_integration.zsh" ]] && source "iterm2_shell_integration.zsh"
+  [[ -e "$DIR/iterm2_shell_integration.zsh" ]] && source "$DIR/iterm2_shell_integration.zsh"
 fi
 
 ##########
