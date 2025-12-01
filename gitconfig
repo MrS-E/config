@@ -3,20 +3,20 @@
 [user]
 	signingkey = ./git_code
 	name = Simeon Stix
-	email = simeon.stix@smoca.ch
+	email = stixsim1@students.zhaw.ch
 [core]
 	autocrlf = input
 	editor = codium --wait --new-window
 [diff]
 	tool = codium
 [difftool]
-      prompt = false
+	prompt = false
 [difftool "meld"]
-      cmd = meld "$LOCAL" "$REMOTE"
+	cmd = meld "$LOCAL" "$REMOTE"
 [difftool "diffmerge"]
 	cmd = diffmerge \"$LOCAL\" \"$REMOTE\"
 [difftool "codium"]
-      cmd = codium "$LOCAL" "$REMOTE" "--diff" "--wait"
+	cmd = codium "$LOCAL" "$REMOTE" "--diff" "--wait"
 
 [merge]
 	tool = codium
