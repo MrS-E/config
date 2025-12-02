@@ -138,19 +138,41 @@ autoload -Uz compinit
 zmodload zsh/complist
 compinit
 
-# if [[ -d /usr/share/bash-completion/completions ]]; then
-#   autoload -U +X bashcompinit && bashcompinit
-#   for cfile in /usr/share/bash-completion/completions/*(.N); do
-#     cmd="${cfile:t}"
-#     # only if the command exists
-#     (( $+commands[$cmd] )) || continue
-#     # skip scripts that require bash-only features
-#     if grep -qE '\b(compopt|_init_completion|declare -A|shopt)\b' "$cfile"; then
-#       continue
-#     fi
-#     source "$cfile"
-#   done
-# fi
+#  bash completions into zsh
+if [[ -d /usr/share/bash-completion/completions ]]; then
+  autoload -Uz bashcompinit
+  bashcompinit
+  # Only enable bash completions for these commands:
+  local -a bashcomp_cmds
+  bashcomp_cmds=(
+    git
+    curl
+    wget
+    ssh
+    rsync
+    kubectl
+    docker
+    docker-compose
+    pip
+    pip3
+  )
+
+  for cfile in /usr/share/bash-completion/completions/*(.N); do
+    cmd=${cfile:t}
+    # Only if it's in our allowlist
+    if (( ${bashcomp_cmds[(Ie)$cmd]} == 0 )); then
+      continue
+    fi
+    # Only if the command actually exists
+    command -v "$cmd" >/dev/null 2>&1 || continue
+    # Skip scripts that rely on bash-only features that tend to break in zsh
+    if grep -qE '\b(compopt|_init_completion|declare -A|shopt|_comp_have_command|check_type)\b' "$cfile"; then
+      continue
+    fi
+    source "$cfile"
+  done
+fi
+
 
 # Arch system zsh site-functions (usually present by default)
 [[ -d /usr/share/zsh/site-functions ]] && FPATH="/usr/share/zsh/site-functions:$FPATH"
@@ -223,29 +245,36 @@ if ! command -v brew >/dev/null 2>&1; then
 fi
 
 # NVM
-export NVM_DIR="$HOME/.nvm"
 if [[ -s /usr/share/nvm/init-nvm.sh ]]; then
   # Arch/pacman package
+  export NVM_DIR="$HOME/.nvm"
   source /usr/share/nvm/init-nvm.sh
   [[ -s /usr/share/nvm/bash_completion ]] && source /usr/share/nvm/bash_completion
 elif command -v brew >/dev/null 2>&1 && [[ -d "$(brew --prefix 2>/dev/null)/opt/nvm" ]]; then
   # Homebrew
-  [[ -s "$(brew --prefix)/opt/nvm/nvm.sh" ]] && source "$(brew --prefix)/opt/nvm/nvm.sh"
-  [[ -s "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm" ]] && source "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm"
-elif [[ -s "$NVM_DIR/nvm.sh" ]]; then
+  export NVM_DIR="$(brew --prefix)/opt/nvm"
+  [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
+  [[ -s "$NVM_DIR/etc/bash_completion.d/nvm" ]] && source "$NVM_DIR/etc/bash_completion.d/nvm"
+elif [[ -s "$HOME/.nvm/nvm.sh" ]]; then
   # Manual install
+  export NVM_DIR="$HOME/.nvm"
   source "$NVM_DIR/nvm.sh"
   [[ -s "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"
 fi
 
+
 # JABBA
-export JABBA_INDEX='https://github.com/typelevel/jdk-index/raw/main/index.json'
-export JABBA_HOME="$HOME/.jabba"
-[ -s "$JABBA_HOME/jabba.sh" ] && source "$JABBA_HOME/jabba.sh"
+if [[ -s "$HOME/.jabba/jabba.sh" ]]; then
+  export JABBA_INDEX="https://github.com/typelevel/jdk-index/raw/main/index.json"
+  export JABBA_HOME="$HOME/.jabba"
+  source "$JABBA_HOME/jabba.sh"
+fi
 
 # PYENV
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
+if [[ -d "$HOME/.pyenv/bin" ]]; then
+  export PATH="$HOME/.pyenv/bin:$PATH"
+fi
+
 if command -v pyenv >/dev/null 2>&1; then
   eval "$(pyenv init -)"        # shells
   eval "$(pyenv init --path)"   # login shells
@@ -257,7 +286,10 @@ if [[ "$OS" = "macos" ]]; then
 fi
 
 # RBEnv (same as rvm)
-export PATH="$HOME/.rbenv/bin:$PATH"
+if [[ -d "$HOME/.rbenv/bin" ]]; then
+  export PATH="$HOME/.rbenv/bin:$PATH"
+fi
+
 if command -v rbenv >/dev/null 2>&1; then
   eval "$(rbenv init - zsh)"
 fi
@@ -271,8 +303,10 @@ if [[ "$OS" = "macos" ]] && command -v brew >/dev/null 2>&1; then
   [[ -d "$GREP_GNUBIN" ]] && export PATH="$PATH:$GREP_GNUBIN"
 fi
 
-# generated with tailscale completion zsh
-source $DIR/tailscale.sh
+# Tailscale
+if command -v tailscale >/dev/null 2>&1; then
+  source <(tailscale completion zsh)
+fi
 
 #TheFuck
 if command -v thefuck >/dev/null 2>&1; then
