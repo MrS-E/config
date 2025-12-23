@@ -54,7 +54,7 @@ echo "==> Installing default programs"
 sudo dnf -y install \
     seahorse filezilla wireshark\
     openscad eog
-    
+
 # VSCodium
 sudo rpmkeys --import https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg
 printf "[gitlab.com_paulcarroty_vscodium_repo]\nname=download.vscodium.com\nbaseurl=https://download.vscodium.com/rpms/\nenabled=1\ngpgcheck=1\nrepo_gpgcheck=1\ngpgkey=https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg\nmetadata_expire=1h\n" | sudo tee -a /etc/yum.repos.d/vscodium.repo
@@ -125,7 +125,7 @@ curl -sL https://github.com/shyiko/jabba/raw/master/install.sh | bash
 
 if ! grep -q 'JABBA_HOME' ~/.zshrc 2>/dev/null; then
   cat >> ~/.zshrc <<'EOF'
-  
+
 # Jabba (Java version manager)
 export JABBA_HOME="$HOME/.jabba"
 [ -s "$JABBA_HOME/jabba.sh" ] && source "$JABBA_HOME/jabba.sh"
@@ -196,6 +196,7 @@ fi
 echo "==> installing additional software"
 sudo dnf install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
 sudo dnf config-manager setopt fedora-cisco-openh264.enabled=1
+
 #Steam
 sudo dnf -y install steam
 
@@ -203,6 +204,9 @@ sudo dnf -y install steam
 sudo dnf -y install tailscale
 sudo systemctl enable --now tailscaled
 sudo tailscale set --operator=$USER
+
+#Nextcloud
+sudo dnf -y install nextcloud
 
 echo
 echo "✅ All set for Fedora!"

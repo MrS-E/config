@@ -10,4 +10,5 @@ ln -sfn $DIR/config/gitconfig $HOME/.gitconfig
 ln -sfn $DIR/config/nvim $HOME/.config/nvim
 ln -sfn $DIR/config/nvim $HOME/.config/nvim
 ln -sfn $DIR/config/lazygit $HOME/.config/lazygit
+ln -sfn $DIR/config/Nextcloud $HOME/.config/Nextcloud
 
