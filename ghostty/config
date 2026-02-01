@@ -15,8 +15,10 @@ scrollback-limit = 20000000
 mouse-scroll-multiplier = 4
 unfocused-split-opacity = 0.85
 
-# ---------- Close behavior ----------
+# ---------- Behavior ----------
 confirm-close-surface = true
+shell-integration-features = no-cursor,ssh-env
+term = xterm-256color
 
 # ---------- Apple-classic keybindings ----------
 # Tabs
