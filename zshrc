@@ -37,6 +37,7 @@ alias fzfile='rg --no-heading --line-number "" | fzf' # ripgrep and fuzyfind nee
 
 # SSH
 alias sshproxy='ssh -D 8080 -C -N'
+alias sshdisconnect='rm /tmp/ssh*'
 
 # Git 
 alias branch='git branch'
@@ -78,43 +79,12 @@ alias code='codium'
 # alias compose_up='docker-compose up && docker-compose rm -fsv'
 # alias docker_mounts="docker inspect $(docker ps -q) | jq '.[] | {container: .Name, mounts: .Mounts}'"
 
-# ESP-IDF
-alias get_idf='. $HOME/esp/esp-idf/export.sh'
-
 # 7Zip (Brew)
 alias 7zip="7zz"
 alias 7z="7zz"
 
-# ADB
-adb() {
-    case "$1" in
-        packcat)
-            shift
-            if [ -z "$1" ]; then
-                echo "Usage: adb packcat <package.name> [logcat args]"
-                return 1
-            fi
-            pkg="$1"
-            shift
-            pid=$(command adb shell pidof "$pkg")
-            if [ -z "$pid" ]; then
-                echo "Process for package '$pkg' not found."
-                return 1
-            fi
-            command adb logcat --pid="$pid" "$@"
-            ;;
-        screen)
-            shift
-            scrcpy --video-codec=h265 -m1024 --max-fps=60 --no-audio -K "$@"
-            ;;
-        *)
-            command adb "$@"
-            ;;
-    esac
-}
-
 # Proxy
-#alias proxy='socat TCP-LISTEN:5555,fork TCP:192.168.3.97:5555'
+# alias proxy='socat TCP-LISTEN:5555,fork TCP:192.168.3.97:5555'
 
 # Files
 alias vimrc='vim $HOME/.vimrc'
@@ -129,7 +99,7 @@ alias o="open"
 ##########
 bindkey "^[[A" history-beginning-search-backward
 bindkey "^[[B" history-beginning-search-forward
-bindkey -v #-e for emacs style keybindings; -v for vim like keybindings
+# bindkey -v # - e for emacs style keybindings; -v for vim like keybindings
 
 function zle-keymap-select {
   if [[ $KEYMAP == vicmd ]]; then
@@ -148,7 +118,7 @@ bindkey '^xe' edit-command-line
 ##########
 # Style
 ##########
-#zsh completion
+# zsh completion
 autoload -Uz compinit
 compinit
 
@@ -165,7 +135,7 @@ zstyle ':completion:*' menu select
 ##########
 # Patter Matching
 ##########
-#setopt extended_glob
+# setopt extended_glob
 
 ##########
 # Promt
@@ -217,23 +187,152 @@ export PATH="$PATH: $(brew --prefix)/opt/grep/libexec/gnubin"
 #TheFuck
 eval $(thefuck --alias)
 
-export IDF_PATH="$HOME/esp/esp_idf"
-
-#Plugins
+##########
+# ZSH-Plugins
+##########
 source  $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source  $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 #source $(brew --prefix)/share/zsh-history-substring-search/zsh-history-substring-search.zsh
 
-logcat_analyse() {
-  pid="$1"
-  file="$2"
-  grep -E "^[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}[[:space:]]+${pid}\>|^[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}[[:space:]]+[0-9]+[[:space:]]+${pid}\>" "$file"
+##########
+# Scripts
+##########
+
+# ADB/logcat
+adb() {
+    case "$1" in
+        loganal)
+          shift
+          if [ -z "$1" && -z "$2"]; then
+              echo "Usage: adb loganal <pid> <path>"
+              return 1
+          fi
+          pid="$1"
+          file="$2"
+          grep -E "^[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}[[:space:]]+${pid}\>|^[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}[[:space:]]+[0-9]+[[:space:]]+${pid}\>" "$file"
+          ;;
+        packcat)
+          shift
+          if [ -z "$1" ]; then
+              echo "Usage: adb packcat <package.name> [logcat args]"
+              return 1
+          fi
+          pkg="$1"
+          shift
+          pid=$(command adb shell pidof "$pkg")
+          if [ -z "$pid" ]; then
+              echo "Process for package '$pkg' not found."
+              return 1
+          fi
+          command adb logcat --pid="$pid" "$@"
+          ;;
+        screen)
+          shift
+          scrcpy --video-codec=h265 -m1024 --max-fps=60 --no-audio -K "$@"
+          ;;
+        *)
+          command adb "$@"
+          ;;
+    esac
 }
 
-update_and_clean(){
- brew update && brew upgrade && brew cleanup -s
+# Homebrew
+brew(){
+  case "$1" in
+    fullupgrade)
+      brew update && brew upgrade && brew cleanup -s
+      ;;
+    file)
+      shift
+      local brewfile="${1:-Brewfile}"
+      local backup="${brewfile}.old"
+      if [[ -f "$brewfile" ]]; then
+        if [[ -f "$backup" ]]; then
+          mv "$brewfile" "${backup}.$(date +%Y%m%d%H%M%S)"
+        else
+          mv "$brewfile" "$backup"
+        fi
+      fi
+      brew bundle dump --file="$brewfile" --describe --force
+      ;;
+    *)
+      command brew "$@"
+      ;;
+  esac
 }
 
-#projects
+# Projects
 source "$CONFIG_DIR/scripts/project.sh"
 
+# ESP-IDF
+idf(){
+  case "$1" in
+  get)
+    . $HOME/esp/esp-idf/export.sh
+    ;;
+  use)
+    shift
+    if [ -z "$1" ]; then
+        echo "Usage: idf use <version>"
+        echo "Example: idf use v5.4.2"
+        return 1
+    fi
+
+    VERSION="$1"
+    ESP_ROOT="$HOME/esp"
+    IDF_DIR="$ESP_ROOT/esp-idf-$VERSION"
+
+    mkdir -p "$ESP_ROOT"
+
+    echo "Using ESP-IDF version $VERSION"
+    if [ ! -d "$IDF_DIR" ]; then
+        echo "Cloning ESP-IDF $VERSION into $IDF_DIR"
+        git clone --recursive https://github.com/espressif/esp-idf.git "$IDF_DIR"
+    fi
+    cd "$IDF_DIR"
+
+    echo "Fetching updates"
+    git fetch --all --tags
+
+    echo "Checking out $VERSION"
+    git checkout "$VERSION"
+
+    echo "Cleaning previous submodules"
+    git submodule deinit -f --all || true
+    git reset --hard
+    git clean -fdx
+
+    echo "Updating submodules"
+    git submodule update --init --recursive
+
+    echo "Installing tools + Python env"
+    ./install.sh
+
+    echo "Activating ESP-IDF environment"
+    . ./export.sh
+
+    echo "ESP-IDF ready: $(idf.py --version)"
+    ;;
+  *)
+    if command -v idf.py >/dev/null 2>&1; then
+      idf.py "$@"
+      return $?
+    fi
+
+    local export_sh="$HOME/esp/esp-idf/export.sh"
+    if [[ -f "$export_sh" ]]; then
+      . "$export_sh"
+    else
+      echo "idf: idf.py not found and export script missing: $export_sh" >&2
+      return 127
+    fi
+
+    if command -v idf.py >/dev/null 2>&1; then
+      idf.py "$@"
+    else
+      echo "idf: idf.py still not found after sourcing $export_sh" >&2
+      return 127
+    fi
+    ;;
+  esac
+}
