@@ -12,7 +12,6 @@ bleastprogram.cpp-compiler
 cheshirekow.cmake-format
 christian-kohler.npm-intellisense
 christian-kohler.path-intellisense
-circuitdojo.zephyr-tools
 cschlosser.doxdocgen
 davidanson.vscode-markdownlint
 dbaeumer.vscode-eslint
@@ -82,7 +81,6 @@ pinage404.bash-extension-pack
 pokey.parse-tree
 postman.postman-for-vscode
 prisma.prisma-insider
-probe-rs.probe-rs-debugger
 project-accelerate.shared-state-store
 qwtel.sqlite-viewer
 rail5.bashpp
@@ -95,7 +93,6 @@ rpinski.shebang-snippets
 shd101wyy.markdown-preview-enhanced
 shopify.ruby-lsp
 sndst00m.vscode-native-svg-preview
-sqlfluff.vscode-sqlfluff
 sr-team.clang-tidy-sr-team-fork
 sr-team.vscode-clangd-cmake
 sr-team.vscode-cpp-file-renamer
