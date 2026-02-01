@@ -20,5 +20,6 @@
     "redhat.telemetry.enabled": true,
     "[json]": {
         "editor.defaultFormatter": "vscode.json-language-features"
-    }
+    },
+    "extensions.autoUpdate": false
 }

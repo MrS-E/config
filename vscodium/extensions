@@ -4,6 +4,8 @@ alefragnani.bookmarks
 alexcvzz.vscode-sqlite
 angular.ng-template
 anilkumarum.compile-ts
+anweber.httpbook
+anweber.vscode-httpyac
 bbenoist.doxygen
 bierner.emojisense
 bleastprogram.cpp-compiler
@@ -14,6 +16,7 @@ circuitdojo.zephyr-tools
 cschlosser.doxdocgen
 davidanson.vscode-markdownlint
 dbaeumer.vscode-eslint
+ddorch.codium-devcontainer
 devsense.composer-php-vscode
 devsense.intelli-php-vscode
 devsense.phptools-vscode
@@ -34,6 +37,7 @@ franneck94.vscode-c-cpp-config
 franneck94.vscode-c-cpp-dev-extension-pack
 franneck94.vscode-typescript-extension-pack
 fwcd.kotlin
+gicentre.markdown-preview-enhanced-with-litvis
 gruntfuggly.todo-tree
 guyutongxue.cpp-reference
 gydunhn.javascript-essentials
@@ -65,6 +69,7 @@ ms-azuretools.vscode-containers
 ms-azuretools.vscode-docker
 ms-python.debugpy
 ms-python.python
+ms-python.vscode-python-envs
 ms-vscode.cmake-tools
 ms-vscode.hexeditor
 ms-vscode.vscode-typescript-next
@@ -77,6 +82,7 @@ pinage404.bash-extension-pack
 pokey.parse-tree
 postman.postman-for-vscode
 prisma.prisma-insider
+probe-rs.probe-rs-debugger
 project-accelerate.shared-state-store
 qwtel.sqlite-viewer
 rail5.bashpp
