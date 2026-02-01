@@ -73,7 +73,6 @@ alias shistory="history 0 | grep"
 
 # Codium
 alias co='codium'
-alias code='codium'
 
 # Docker
 # alias compose_up='docker-compose up && docker-compose rm -fsv'
@@ -333,6 +332,103 @@ idf(){
       echo "idf: idf.py still not found after sourcing $export_sh" >&2
       return 127
     fi
+    ;;
+  esac
+}
+
+code(){
+  case "$1" in
+  export)
+    shift 
+    if [ -z "$1" ]; then
+      echo "Usage: code export <path>"
+      return 1
+    fi
+
+    local dst_dir="$1"
+    local user_dir="$HOME/Library/Application Support/VSCodium/User"
+    local src_settings="$user_dir/settings.json"
+    local dst_settings="$dst_dir/settings.json"
+    local dst_exts="$dst_dir/extensions"
+
+    local codium_bin=""
+    if command -v codium >/dev/null 2>&1; then
+      codium_bin="codium"
+    elif [[ -x "/Applications/VSCodium.app/Contents/Resources/app/bin/codium" ]]; then
+      codium_bin="/Applications/VSCodium.app/Contents/Resources/app/bin/codium"
+    elif [[ -x "$HOME/Applications/VSCodium.app/Contents/Resources/app/bin/codium" ]]; then
+      codium_bin="$HOME/Applications/VSCodium.app/Contents/Resources/app/bin/codium"
+    else
+      echo "vscodium_export: couldn't find 'codium' CLI. Install it or ensure VSCodium.app exists in /Applications." >&2
+      return 127
+    fi
+
+    mkdir -p "$dst_dir"
+
+    if [[ -f "$src_settings" ]]; then
+      cp -f "$src_settings" "$dst_settings"
+      echo "Exported settings -> $dst_settings"
+    else
+      echo "vscodium_export: no settings.json found at: $src_settings (skipping settings export)" >&2
+    fi
+
+    "$codium_bin" --list-extensions | LC_ALL=C sort > "$dst_exts"
+    echo "Exported extensions -> $dst_exts"
+    ;;
+  import)
+    shift
+    if [ -z "$1" ]; then
+      echo "Usage: code import <path>"
+      return 1
+    fi
+
+    local src_dir="$1"
+    local src_settings="$src_dir/settings.json"
+    local src_exts="$src_dir/extensions"
+
+    local user_dir="$HOME/Library/Application Support/VSCodium/User"
+    local dst_settings="$user_dir/settings.json"
+
+    local codium_bin=""
+    if command -v codium >/dev/null 2>&1; then
+      codium_bin="codium"
+    elif [[ -x "/Applications/VSCodium.app/Contents/Resources/app/bin/codium" ]]; then
+      codium_bin="/Applications/VSCodium.app/Contents/Resources/app/bin/codium"
+    elif [[ -x "$HOME/Applications/VSCodium.app/Contents/Resources/app/bin/codium" ]]; then
+      codium_bin="$HOME/Applications/VSCodium.app/Contents/Resources/app/bin/codium"
+    else
+      echo "vscodium_import: couldn't find 'codium' CLI. Install it or ensure VSCodium.app exists in /Applications." >&2
+      return 127
+    fi
+
+    if [[ ! -f "$src_settings" ]]; then
+      echo "vscodium_import: missing $src_settings" >&2
+      return 2
+    fi
+    mkdir -p "$user_dir"
+    cp -f "$src_settings" "$dst_settings"
+    echo "Imported settings -> $dst_settings"
+
+    if [[ ! -f "$src_exts" ]]; then
+      echo "vscodium_import: missing $src_exts (skipping extensions install)" >&2
+      return 0
+    fi
+
+    echo "Installing extensions from -> $src_exts"
+    local line ext
+    while IFS= read -r line || [[ -n "$line" ]]; do
+      ext="${line%%#*}"
+      ext="$(echo "$ext" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+      [[ -z "$ext" ]] && continue
+
+      echo "  + $ext"
+      "$codium_bin" --install-extension "$ext" --force >/dev/null
+    done < "$src_exts"
+
+    echo "Done."
+    ;;
+  *)
+    command codium "$@"
     ;;
   esac
 }
