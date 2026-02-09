@@ -264,10 +264,69 @@ brew(){
 source "$CONFIG_DIR/scripts/project.sh"
 
 # ESP-IDF
+export IDF_PATH="$HOME/esp/esp-idf"
 idf(){
   case "$1" in
   get)
-    . $HOME/esp/esp-idf/export.sh
+    shift
+    . $IDF_PATH/export.sh
+
+    if command -v idf.py >/dev/null 2>&1 && [ -n "${1-}" ]; then
+      idf.py "$@"
+      return $?
+    fi
+    ;;
+  trace)
+    shift
+    if [ -z "$1" ] || [ -z "$2" ]; then
+      echo "Error: Missing arguments."
+      echo "Usage: idf trace path/to/project.elf \"0x400...:0x3ff... 0x400...\""
+      exit 1
+    fi
+
+    ELF_FILE="$1"
+    BACKTRACE="$2"
+
+    if [ ! -f "$ELF_FILE" ]; then
+        echo "Error: ELF file '$ELF_FILE' not found."
+        exit 1
+    fi
+
+    ADDR2LINE="xtensa-esp32-elf-addr2line"
+
+    if ! command -v "$ADDR2LINE" &> /dev/null; then
+        echo "Info: $ADDR2LINE not found. Attempting to load ESP-IDF environment..."
+
+        if [ -f "$IDF_PATH/export.sh" ]; then
+            . "$IDF_PATH/export.sh" > /dev/null 2>&1
+        else
+            echo "Error: $ADDR2LINE is not in PATH and $IDF_PATH/export.sh was not found."
+            echo "Please ensure ESP-IDF is installed and set correctly."
+            exit 1
+        fi
+    fi
+
+    if ! command -v "$ADDR2LINE" &> /dev/null; then
+        echo "Error: $ADDR2LINE is still not available after trying to source ESP-IDF."
+        exit 1
+    fi
+
+    echo "Decoding Backtrace using: $(basename "$ELF_FILE")"
+    echo "------------------------------------------------"
+
+    for entry in $BACKTRACE; do
+        # Extract the PC address (before the colon)
+        addr=$(echo "$entry" | cut -d':' -f1)
+        
+        # -p: pretty-print
+        # -f: show function names
+        # -i: show inlines
+        # -a: show addresses
+        # -C: demangle C++ names
+        $ADDR2LINE -pfiaC -e "$ELF_FILE" "$addr"
+    done
+
+    echo "------------------------------------------------"
     ;;
   use)
     shift
@@ -318,9 +377,9 @@ idf(){
       return $?
     fi
 
-    local export_sh="$HOME/esp/esp-idf/export.sh"
+    local export_sh="$IDF_PATH/export.sh"
     if [[ -f "$export_sh" ]]; then
-      . "$export_sh"
+      . "$export_sh" > /dev/null 2>&1
     else
       echo "idf: idf.py not found and export script missing: $export_sh" >&2
       return 127
