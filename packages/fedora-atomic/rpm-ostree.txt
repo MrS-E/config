@@ -1,0 +1,32 @@
+# Shell / CLI
+zsh
+vim
+neovim
+fzf
+ripgrep
+yq
+tealdeer
+clamav
+clamav-update
+bat
+socat
+xclip
+xsel
+
+# Core tools
+git
+curl
+wget
+unzip
+tar
+
+# Host desktop / utilities
+wireshark
+openscad
+eog
+seahorse
+filezilla
+oculante
+android-tools
+scrcpy
+lazygit
