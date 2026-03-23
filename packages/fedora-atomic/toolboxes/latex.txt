@@ -1,0 +1,16 @@
+texlive
+texlive-collection-basic
+texlive-collection-latex
+texlive-collection-latexrecommended
+texlive-collection-fontsrecommended
+texlive-xetex
+texlive-luatex
+texlive-bibtex-bin
+texlive-babel-english
+texlive-babel-german
+hyphen-english
+hyphen-german
+java-21-openjdk
+wget
+tar
+pandoc

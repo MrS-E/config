@@ -1,0 +1,11 @@
+gcc
+gcc-c++
+llvm
+clang
+cmake
+make
+ninja-build
+ccache
+cppcheck
+gdb
+valgrind

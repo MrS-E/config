@@ -20,15 +20,21 @@
 
 [merge]
 	tool = codium
+[mergetool]
+	keepBackup = false
 [mergetool "diffmerge"]
 	cmd = "diffmerge --merge --result=\"$MERGED\" \"$LOCAL\" \"$(if test -f \"$BASE\"; then echo \"$BASE\"; else echo \"$LOCAL\"; fi)\" \"$REMOTE\""
 	trustExitCode = true
-[mergetool]
-	keepBackup = false
 [mergetool "codium"]
- cmd = codium --wait $MERGE
+	cmd = codium --wait $MERGE
+	trustExitCode = true
+[mergetool "nvim"]
+    cmd = nvim -d "$LOCAL" "$BASE" "$REMOTE" "$MERGED" -c 'wincmd J | wincmd =' -c 'echo "Use :wqa to finish merge"'
+    trustExitCode = false
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+[pull]
+	rebase = false

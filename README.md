@@ -1,8 +1,26 @@
 # config
 
 ## TODO
+
 ### Mac
-- [x] setup script
+
+- [x] setup script (untested)
+- [x] neovim in setup
+- [x] dependency install
+- [x] dependency list
+- [x] ssh config
+- [x] git config
+- [x] zsh config
+- [x] vim config
+- [x] terminal config (ghostty)
+- [x] vscode(ium) config
+- [x] neovim
+
+### Linux
+
+#### Fedora
+
+- [x] setup script (untested)
 - [x] dependency install
 - [x] dependency list
 - [x] ssh config
@@ -10,16 +28,21 @@
 - [x] zsh config
 - [x] vim config
 - [ ] terminal config
-- [ ] vscode(ium) config
-### Linux (Arch - Manjaro)
-- [ ] setup script
-- [ ] dependency install
-- [ ] dependency list
-- [ ] ssh config
-- [ ] git config
+- [x] vscode(ium) config
+- [ ] ufw (firewall) and clamav config / firewalld
+- [x] neovim config
+
+#### Fedora Atomic
+
+- [x] setup script (untested)
+- [x] dependency install
+- [x] dependency list
+- [x] ssh config
+- [x] git config
 - [x] zsh config
 - [x] vim config
 - [ ] terminal config
-- [ ] vscode(ium) config
-- [ ] ufw (firewall) and clamav config
+- [x] vscode(ium) config
+- [ ] ufw (firewall) and clamav config / firewalld
+- [x] neovim config
 
