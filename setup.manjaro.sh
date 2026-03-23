@@ -131,15 +131,33 @@ setup_clamav() {
   fi
 }
 
-run_external() {
-  local script="$PKG_DIR/external.sh"
+run_external_scripts() {
+  local dir="$PKG_DIR/external"
 
-  if [[ -x "$script" ]]; then
-    log "Running external setup..."
-    "$script"
-  else
-    log "No external.sh found or not executable"
-  fi
+  [[ -d "$dir" ]] || {
+    log "No external directory found."
+    return 0
+  }
+
+  shopt -s nullglob
+  local scripts=("$dir"/*.sh)
+  shopt -u nullglob
+
+  [[ ${#scripts[@]} -gt 0 ]] || {
+    log "No external scripts to run."
+    return 0
+  }
+
+  log "Running external setup scripts..."
+  local script
+  for script in "${scripts[@]}"; do
+    if [[ -x "$script" ]]; then
+      log "-> $(basename "$script")"
+      "$script"
+    else
+      log "skip: not executable: $script"
+    fi
+  done
 }
 
 main() {
@@ -151,7 +169,7 @@ main() {
   setup_printer
   setup_firewall
   setup_clamav
-  run_external
+  run_external_scripts
   log ""
   log "Manjaro setup complete."
 }
