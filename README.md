@@ -4,7 +4,7 @@
 
 ### Mac
 
-- [x] setup script
+- [x] setup script (untested)
 - [x] neovim in setup
 - [x] dependency install
 - [x] dependency list
@@ -16,9 +16,11 @@
 - [x] vscode(ium) config
 - [x] neovim
 
-### Linux (Fedora)
+### Linux
 
-- [x] setup script
+#### Fedora
+
+- [x] setup script (untested)
 - [x] dependency install
 - [x] dependency list
 - [x] ssh config
@@ -28,4 +30,19 @@
 - [ ] terminal config
 - [x] vscode(ium) config
 - [ ] ufw (firewall) and clamav config / firewalld
-- [x] neovim
+- [x] neovim config
+
+#### Fedora Atomic
+
+- [x] setup script (untested)
+- [x] dependency install
+- [x] dependency list
+- [x] ssh config
+- [x] git config
+- [x] zsh config
+- [x] vim config
+- [ ] terminal config
+- [x] vscode(ium) config
+- [ ] ufw (firewall) and clamav config / firewalld
+- [x] neovim config
+
