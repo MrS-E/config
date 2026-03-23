@@ -309,9 +309,9 @@ if command -v tailscale >/dev/null 2>&1; then
 fi
 
 #TheFuck
-if command -v thefuck >/dev/null 2>&1; then
-  eval "$(thefuck --alias)"
-fi
+#if command -v thefuck >/dev/null 2>&1; then
+#  eval "$(thefuck --alias)"
+#fi
 
 ##########
 # Plugins
