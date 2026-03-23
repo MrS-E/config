@@ -417,30 +417,31 @@ adb() {
 }
 
 # Homebrew
-brew() {
-  case "$1" in
-    fullupgrade)
-      command brew update && command brew upgrade && command brew cleanup -s
-      ;;
-    file)
-      shift
-      local brewfile="${1:-Brewfile}"
-      local backup="${brewfile}.old"
-      if [[ -f "$brewfile" ]]; then
-        if [[ -f "$backup" ]]; then
-          mv "$brewfile" "${backup}.$(date +%Y%m%d%H%M%S)"
-        else
-          mv "$brewfile" "$backup"
+if (( $+commands[brew] )); then
+  brew() {
+    case "$1" in
+      fullupgrade)
+        command brew update && command brew upgrade && command brew cleanup -s
+        ;;
+      file)
+        shift
+        local brewfile="${1:-Brewfile}"
+        local backup="${brewfile}.old"
+        if [[ -f "$brewfile" ]]; then
+          if [[ -f "$backup" ]]; then
+            mv "$brewfile" "${backup}.$(date +%Y%m%d%H%M%S)"
+          else
+            mv "$brewfile" "$backup"
+          fi
         fi
-      fi
-      command brew bundle dump --file="$brewfile" --describe --force
-      ;;
-    *)
-      command brew "$@"
-      ;;
-  esac
-}
-
+        command brew bundle dump --file="$brewfile" --describe --force
+        ;;
+      *)
+        command brew "$@"
+        ;;
+    esac
+  }
+fi 
 # Projects
 [[ -f "$CONFIG_DIR/scripts/project.sh" ]] && source "$CONFIG_DIR/scripts/project.sh"
 
