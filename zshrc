@@ -149,7 +149,6 @@ alias subu='git submodule update'
 alias swi='git switch'
 alias swic='git switch -c'
 alias gittree='git log --graph --decorate --oneline'
-
 alias lazy='lazygit'
 
 # Rails 
