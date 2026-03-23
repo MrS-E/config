@@ -19,7 +19,12 @@
     "idf.gitPath": "git",
     "redhat.telemetry.enabled": true,
     "[json]": {
-        "editor.defaultFormatter": "vscode.json-language-features"
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-    "extensions.autoUpdate": false
+    "extensions.autoUpdate": false,
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false,
+    "kotlin.languageServer.enabled": false,
+    "kotlin.debugAdapter.enabled": false
 }
