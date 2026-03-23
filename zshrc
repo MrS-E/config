@@ -149,7 +149,20 @@ alias subu='git submodule update'
 alias swi='git switch'
 alias swic='git switch -c'
 alias gittree='git log --graph --decorate --oneline'
+
 alias lazy='lazygit'
+
+# Rails 
+alias rg='rails generate'
+alias rg:mo='rg model'
+alias rg:mi='rg migration'
+alias rg:v='rg view'
+alias rg:c='rg controller'
+alias rdb:c='rails db:create'
+alias rdb:d='rails db:drop'
+alias rdb:s='rails db:seed'
+alias rdb:m='rails db:migrate'
+alias rdb:cms='rails db:create db:migrate db:seed'
 
 # History
 alias shistory='history 0 | grep'
