@@ -241,9 +241,6 @@ bindkey '^xe' edit-command-line
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 zstyle ':completion:*' menu select
 
-# FZF shell integration from local config dir
-[[ -f "$CONFIG_DIR/fzf.zsh" ]] && source "$CONFIG_DIR/fzf.zsh"
-
 # ITerm2 integration on macOS
 if [[ "$OS" = "macos" ]]; then
   [[ -e "$DIR/iterm2_shell_integration.zsh" ]] && source "$DIR/iterm2_shell_integration.zsh"
@@ -268,6 +265,21 @@ function render_prompt {
 if ! command -v brew >/dev/null 2>&1; then
   [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
   [[ -x /usr/local/bin/brew ]] && eval "$(/usr/local/bin/brew shellenv)"
+fi
+
+##########
+# FZF
+##########
+
+if (( $+commands[brew] )); then
+  BREW_PREFIX="$(brew --prefix 2>/dev/null)"
+  if [[ -n "$BREW_PREFIX" && -d "$BREW_PREFIX/opt/fzf/bin" && ":$PATH:" != *":$BREW_PREFIX/opt/fzf/bin:"* ]]; then
+    export PATH="$BREW_PREFIX/opt/fzf/bin:$PATH"
+  fi
+fi
+
+if (( $+commands[fzf] )); then
+  source <(fzf --zsh)
 fi
 
 ##########
