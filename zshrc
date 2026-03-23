@@ -584,13 +584,25 @@ code() {
       local user_dir=""
       local src_settings=""
       local dst_settings="$dst_dir/settings.json"
+      local dst_base="$dst_dir/settings.base.json"
+      local dst_overlay=""
       local dst_exts="$dst_dir/extensions"
 
-      if [[ "$OS" = "macos" ]]; then
-        user_dir="$HOME/Library/Application Support/VSCodium/User"
-      else
-        user_dir="${XDG_CONFIG_HOME:-$HOME/.config}/VSCodium/User"
-      fi
+      case "$OS" in
+        macos)
+          user_dir="$HOME/Library/Application Support/VSCodium/User"
+          dst_overlay="$dst_dir/settings.macos.json"
+          ;;
+        linux)
+          user_dir="${XDG_CONFIG_HOME:-$HOME/.config}/VSCodium/User"
+          dst_overlay="$dst_dir/settings.linux.json"
+          ;;
+        *)
+          echo "code export: unsupported OS '$OS'" >&2
+          return 1
+          ;;
+      esac
+
       src_settings="$user_dir/settings.json"
 
       local codium_bin=""
@@ -609,7 +621,37 @@ code() {
 
       if [[ -f "$src_settings" ]]; then
         cp -f "$src_settings" "$dst_settings"
-        echo "Exported settings -> $dst_settings"
+        echo "Exported full settings -> $dst_settings"
+
+        if command -v jq >/dev/null 2>&1; then
+          # Keys that should live in per-machine overlays
+          local path_filter='
+            del(
+              ."markdown-preview-enhanced.plantumlJarPath",
+              ."idf.pythonInstallPath",
+              ."idf.espIdfPath",
+              ."idf.toolsPath"
+            )
+          '
+
+          local overlay_filter='
+            {
+              "markdown-preview-enhanced.plantumlJarPath": ."markdown-preview-enhanced.plantumlJarPath",
+              "idf.pythonInstallPath": ."idf.pythonInstallPath",
+              "idf.espIdfPath": ."idf.espIdfPath",
+              "idf.toolsPath": ."idf.toolsPath"
+            }
+            | with_entries(select(.value != null))
+          '
+
+          jq "$path_filter" "$src_settings" > "$dst_base" &&
+            echo "Exported shared settings -> $dst_base"
+
+          jq "$overlay_filter" "$src_settings" > "$dst_overlay" &&
+            echo "Exported OS overlay -> $dst_overlay"
+        else
+          echo "code export: jq not found; wrote only full settings backup -> $dst_settings" >&2
+        fi
       else
         echo "code export: no settings.json found at: $src_settings (skipping settings export)" >&2
       fi
@@ -626,16 +668,28 @@ code() {
 
       local src_dir="$1"
       local src_settings="$src_dir/settings.json"
+      local src_base="$src_dir/settings.base.json"
+      local src_overlay=""
       local src_exts="$src_dir/extensions"
       local user_dir=""
       local dst_settings=""
       local codium_bin=""
 
-      if [[ "$OS" = "macos" ]]; then
-        user_dir="$HOME/Library/Application Support/VSCodium/User"
-      else
-        user_dir="${XDG_CONFIG_HOME:-$HOME/.config}/VSCodium/User"
-      fi
+      case "$OS" in
+        macos)
+          user_dir="$HOME/Library/Application Support/VSCodium/User"
+          src_overlay="$src_dir/settings.macos.json"
+          ;;
+        linux)
+          user_dir="${XDG_CONFIG_HOME:-$HOME/.config}/VSCodium/User"
+          src_overlay="$src_dir/settings.linux.json"
+          ;;
+        *)
+          echo "code import: unsupported OS '$OS'" >&2
+          return 1
+          ;;
+      esac
+
       dst_settings="$user_dir/settings.json"
 
       if command -v codium >/dev/null 2>&1; then
@@ -649,14 +703,30 @@ code() {
         return 127
       fi
 
-      if [[ ! -f "$src_settings" ]]; then
-        echo "code import: missing $src_settings" >&2
+      mkdir -p "$user_dir"
+
+      if [[ -f "$src_base" ]]; then
+        if ! command -v jq >/dev/null 2>&1; then
+          echo "code import: jq is required to merge settings.base.json with OS overlays." >&2
+          return 2
+        fi
+
+        if [[ -f "$src_overlay" ]]; then
+          jq -s '.[0] * .[1]' "$src_base" "$src_overlay" > "$dst_settings" || return 1
+          echo "Imported merged settings -> $dst_settings"
+          echo "  base:    $src_base"
+          echo "  overlay: $src_overlay"
+        else
+          cp -f "$src_base" "$dst_settings"
+          echo "Imported base settings only -> $dst_settings"
+        fi
+      elif [[ -f "$src_settings" ]]; then
+        cp -f "$src_settings" "$dst_settings"
+        echo "Imported full settings -> $dst_settings"
+      else
+        echo "code import: missing $src_base and $src_settings" >&2
         return 2
       fi
-
-      mkdir -p "$user_dir"
-      cp -f "$src_settings" "$dst_settings"
-      echo "Imported settings -> $dst_settings"
 
       if [[ ! -f "$src_exts" ]]; then
         echo "code import: missing $src_exts (skipping extensions install)" >&2
