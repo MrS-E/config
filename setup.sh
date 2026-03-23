@@ -81,6 +81,12 @@ run_platform_setup() {
           }
           "$REPO_DIR/setup.fedora.sh"
         fi
+      elif [[ -f /etc/manjaro-release ]]; then
+        [[ -x "$REPO_DIR/setup.manjaro.sh" ]] || {
+          log "warn: setup.manjaro.sh not found or not executable"
+          return 0
+        }
+        "$REPO_DIR/setup.manjaro.sh"
       else
         log "warn: unsupported Linux distribution"
       fi

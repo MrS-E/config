@@ -31,13 +31,11 @@ return {
                 view = {
                     entries = { name = 'custom', selection_order = 'top_down' },
                 },
-
                 sources = {
                     { name = 'nvim_lsp' },
                     { name = 'buffer' },
                     { name = 'path' },
                 },
-
                 mapping = cmp.mapping.preset.insert({
                     ['<C-Space>'] = cmp.mapping.complete(),
                     ['<C-u>'] = cmp.mapping.scroll_docs(-4),
@@ -64,7 +62,6 @@ return {
                         end
                     end, { 'i', 's' }),
                 }),
-
                 snippet = {
                     expand = function(args)
                         vim.snippet.expand(args.body)
@@ -106,7 +103,6 @@ return {
             local lspconfig = require('lspconfig')
             local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
-            -- Autoformat helper
             local buffer_autoformat = function(bufnr)
                 local group = 'lsp_autoformat'
                 vim.api.nvim_create_augroup(group, { clear = false })
@@ -128,7 +124,6 @@ return {
                 })
             end
 
-            -- Per-buffer LSP setup
             vim.api.nvim_create_autocmd('LspAttach', {
                 desc = 'LSP actions',
                 callback = function(event)
@@ -151,7 +146,7 @@ return {
                         'n',
                         'gD',
                         '<cmd>vsplit | wincmd L | lua vim.lsp.buf.declaration()<cr>',
-                        { noremap = true, silent = true, desc = 'Go to declaration in split window' }
+                        { noremap = true, silent = true, buffer = event.buf, desc = 'Go to declaration in split window' }
                     )
                     vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts('Go to implementation'))
                     vim.keymap.set('n', 'go', vim.lsp.buf.type_definition, opts('Go to type definition'))

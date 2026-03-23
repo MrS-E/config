@@ -28,6 +28,7 @@ vim.opt.incsearch = true
 vim.opt.termguicolors = true
 vim.o.background = "dark"
 vim.cmd.colorscheme("cyberpunk_scarlet_protocol_adjusted")
+-- vim.cmd("colorscheme catppuccin-macchiato")
 
 -- Keep space above and below when scrolling
 vim.opt.scrolloff = 8
@@ -37,4 +38,3 @@ vim.opt.isfname:append("@-@")
 vim.opt.updatetime = 50
 
 vim.opt.colorcolumn = "80"
-
