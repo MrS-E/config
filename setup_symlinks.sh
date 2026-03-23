@@ -4,6 +4,7 @@ DIR="$(dirname "$(readlink -f "$0")")"
 
 ln -sfn $DIR/config/zshrc $HOME/.zshrc
 ln -sfn $DIR/config/vimrc $HOME/.vimrc
+ln -sfn $DIR/config/vim $HOME/.vim
 ln -sfn $DIR/config/ssh $HOME/.ssh
 ln -sfn $DIR/.gitconfig $HOME/.gitconfig
 ln -sfn $DIR/config/gitconfig $HOME/.gitconfig
