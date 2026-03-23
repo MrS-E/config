@@ -7,3 +7,5 @@ vim/.netrwhist
 .DS_STORE
 Nextcloud
 Nextcloud/**/*
+!Nextcloud/nextcloud.cfg
+!Nextcloud/sync-exclude.lst
