@@ -1,15 +1,20 @@
 #!/bin/bash
+set -euo pipefail
 
-DIR="$(dirname "$(readlink -f "$0")")"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-ln -sfn $DIR/config/zshrc $HOME/.zshrc
-ln -sfn $DIR/config/vimrc $HOME/.vimrc
-ln -sfn $DIR/config/vim $HOME/.vim
-ln -sfn $DIR/config/ssh $HOME/.ssh
-ln -sfn $DIR/.gitconfig $HOME/.gitconfig
-ln -sfn $DIR/config/gitconfig $HOME/.gitconfig
-ln -sfn $DIR/config/nvim $HOME/.config/nvim
-ln -sfn $DIR/config/nvim $HOME/.config/nvim
-ln -sfn $DIR/config/lazygit $HOME/.config/lazygit
-ln -sfn $DIR/config/Nextcloud $HOME/.config/Nextcloud
+mkdir -p "$HOME/.config"
+mkdir -p "$HOME/.ssh"
+
+ln -sfn "$DIR/zshrc" "$HOME/.zshrc"
+ln -sfn "$DIR/vimrc" "$HOME/.vimrc"
+ln -sfn "$DIR/vim" "$HOME/.vim"
+ln -sfn "$DIR/gitconfig" "$HOME/.gitconfig"
+ln -sfn "$DIR/nvim" "$HOME/.config/nvim"
+ln -sfn "$DIR/lazygit" "$HOME/.config/lazygit"
+ln -sfn "$DIR/ghostty" "$HOME/.config/ghostty"
+ln -sfn "$DIR/Nextcloud" "$HOME/.config/Nextcloud"
+
+# ln -sfn "$DIR/ssh" "$HOME/.ssh"
+ln -sfn "$DIR/ssh/config" "$HOME/.ssh/config"
 
