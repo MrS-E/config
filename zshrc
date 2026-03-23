@@ -314,10 +314,9 @@ idf(){
     echo "Decoding Backtrace using: $(basename "$ELF_FILE")"
     echo "------------------------------------------------"
 
-    for entry in $BACKTRACE; do
+    for entry in $(echo $BACKTRACE); do
         # Extract the PC address (before the colon)
         addr=$(echo "$entry" | cut -d':' -f1)
-        
         # -p: pretty-print
         # -f: show function names
         # -i: show inlines
