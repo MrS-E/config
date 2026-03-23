@@ -1,0 +1,17 @@
+backslash
+ltex-ls-plus-bin
+shc
+vscodium
+zotero
+logseq-desktop
+postman-bin
+ufw
+ufw-extras
+gufw
+rstudio-desktop-bin
+picoscope
+spotify
+spotify-player
+zsh-syntax-highlighting
+zsh-autosuggestions
+zsh-autocomplete
