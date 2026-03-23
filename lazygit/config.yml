@@ -1,0 +1,9 @@
+# https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md
+
+keybinding:
+  universal:
+    nextTab: "<tab>"
+    prevTab: "<backtab>"
+    nextBlock-alt2: ""
+    prevBlock-alt2: ""
+    togglePanel: ""

@@ -1,34 +1,57 @@
-return { {
-    'williamboman/mason.nvim',
-    lazy = false,
-    opts = {}
-}, -- Autocompletion
+return {
+    {
+        'williamboman/mason.nvim',
+        lazy = false,
+        opts = {},
+    },
+
+    -- Autocompletion
     {
         'hrsh7th/nvim-cmp',
         event = 'InsertEnter',
+        dependencies = {
+            'hrsh7th/cmp-nvim-lsp',
+            'hrsh7th/cmp-buffer',
+            'hrsh7th/cmp-path',
+            'hrsh7th/cmp-cmdline',
+        },
         config = function()
             local cmp = require('cmp')
 
+            vim.o.completeopt = 'menu,menuone,noselect'
+
             cmp.setup({
-                sources = { {
-                    name = 'nvim_lsp'
-                } },
+                window = {
+                    completion = cmp.config.window.bordered({
+                        max_height = 15,
+                        scrollbar = true,
+                    }),
+                    documentation = cmp.config.window.bordered(),
+                },
+                view = {
+                    entries = { name = 'custom', selection_order = 'top_down' },
+                },
+
+                sources = {
+                    { name = 'nvim_lsp' },
+                    { name = 'buffer' },
+                    { name = 'path' },
+                },
+
                 mapping = cmp.mapping.preset.insert({
                     ['<C-Space>'] = cmp.mapping.complete(),
                     ['<C-u>'] = cmp.mapping.scroll_docs(-4),
                     ['<C-d>'] = cmp.mapping.scroll_docs(4),
 
-                    -- Use enter to confirm completion
                     ['<CR>'] = cmp.mapping.confirm({
-                        select = false
+                        select = false,
                     }),
 
-                    -- Navigate completions with <C-j> and <C-k>
-                    ["<C-j>"] = cmp.mapping.select_next_item({
-                        behavior = cmp.SelectBehavior.Insert
+                    ['<C-j>'] = cmp.mapping.select_next_item({
+                        behavior = cmp.SelectBehavior.Insert,
                     }),
-                    ["<C-k>"] = cmp.mapping.select_prev_item({
-                        behavior = cmp.SelectBehavior.Insert
+                    ['<C-k>'] = cmp.mapping.select_prev_item({
+                        behavior = cmp.SelectBehavior.Insert,
                     }),
 
                     ['<Tab>'] = cmp.mapping(function(fallback)
@@ -41,37 +64,55 @@ return { {
                         end
                     end, { 'i', 's' }),
                 }),
+
                 snippet = {
                     expand = function(args)
                         vim.snippet.expand(args.body)
-                    end
-                }
+                    end,
+                },
             })
-        end
-    }, -- LSP
+
+            cmp.setup.cmdline(':', {
+                mapping = cmp.mapping.preset.cmdline(),
+                sources = {
+                    { name = 'path' },
+                    { name = 'cmdline' },
+                },
+            })
+
+            cmp.setup.cmdline({ '/', '?' }, {
+                mapping = cmp.mapping.preset.cmdline(),
+                sources = {
+                    { name = 'buffer' },
+                },
+            })
+        end,
+    },
+
+    -- LSP
     {
         'neovim/nvim-lspconfig',
         cmd = { 'LspInfo', 'LspInstall', 'LspStart' },
         event = { 'BufReadPre', 'BufNewFile' },
-        dependencies = { { 'hrsh7th/cmp-nvim-lsp' }, { 'williamboman/mason.nvim' }, { 'williamboman/mason-lspconfig.nvim' } },
+        dependencies = {
+            { 'hrsh7th/cmp-nvim-lsp' },
+            { 'williamboman/mason.nvim' },
+            { 'williamboman/mason-lspconfig.nvim' },
+        },
         init = function()
-            -- Reserve a space in the gutter
-            -- This will avoid an annoying layout shift in the screen
             vim.opt.signcolumn = 'yes'
         end,
         config = function()
-            -- Capabilities for all servers (used below per-server)
+            local lspconfig = require('lspconfig')
             local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
-            -- Define the autoformat function locally
+            -- Autoformat helper
             local buffer_autoformat = function(bufnr)
                 local group = 'lsp_autoformat'
-                vim.api.nvim_create_augroup(group, {
-                    clear = false
-                })
+                vim.api.nvim_create_augroup(group, { clear = false })
                 vim.api.nvim_clear_autocmds({
                     group = group,
-                    buffer = bufnr
+                    buffer = bufnr,
                 })
 
                 vim.api.nvim_create_autocmd('BufWritePre', {
@@ -79,21 +120,18 @@ return { {
                     group = group,
                     desc = 'LSP format on save',
                     callback = function()
-                        -- note: do not enable async formatting
                         vim.lsp.buf.format({
                             async = false,
-                            timeout_ms = 10000
+                            timeout_ms = 10000,
                         })
-                    end
+                    end,
                 })
             end
 
-            -- LspAttach is where you enable features that only work
-            -- if there is a language server active in the file
+            -- Per-buffer LSP setup
             vim.api.nvim_create_autocmd('LspAttach', {
                 desc = 'LSP actions',
                 callback = function(event)
-                    -- Autoformat on save
                     local id = vim.tbl_get(event, 'data', 'client_id')
                     local client = id and vim.lsp.get_client_by_id(id)
                     if client == nil then
@@ -104,61 +142,56 @@ return { {
                         buffer_autoformat(event.buf)
                     end
 
-                    -- vim.keymap.set('n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>',
-                    --     { buffer = event.buf, desc = "Hover over selection" })
-                    vim.keymap.set('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>',
-                        { buffer = event.buf, desc = "Go to definition" })
-                    -- Go to definition in split window: Split window, move to left and open definition
-                    vim.keymap.set('n', 'gD', '<cmd>vsplit | wincmd L | lua vim.lsp.buf.declaration()<cr>',
-                        { noremap = true, silent = true, desc = "Go to definition in split window" })
-                    vim.keymap.set('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<cr>',
-                        { buffer = event.buf, desc = "Go to implementation" })
-                    vim.keymap.set('n', 'go', '<cmd>lua vim.lsp.buf.type_definition()<cr>',
-                        { buffer = event.buf, desc = "Go to type definition" })
-                    vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<cr>',
-                        { buffer = event.buf, desc = "Show references" })
-                    vim.keymap.set('n', 'gs', '<cmd>lua vim.lsp.buf.signature_help()<cr>',
-                        { buffer = event.buf, desc = "Show signature help" })
-                    vim.keymap.set('n', 'gR', '<cmd>lua vim.lsp.buf.rename()<cr>',
-                        { buffer = event.buf, desc = "Rename" })
-                    vim.keymap.set({ 'n', 'x' }, 'f', '<cmd>lua vim.lsp.buf.format({async = true})<cr>',
-                        { buffer = event.buf, desc = "Format selection" })
-                    vim.keymap.set('n', '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>',
-                        { buffer = event.buf, desc = "Code action" })
-                end
-            })
+                    local opts = function(desc)
+                        return { buffer = event.buf, desc = desc }
+                    end
 
-            vim.lsp.config('eslint', {
-                capabilities = capabilities,
-                settings = {
-                    eslint = {
-                        enable = true,
-                        packageManager = "yarn",
-                        configFiles = ".eslint.config.mjs",
-                        validate = "on",
-                    },
-                },
+                    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts('Go to definition'))
+                    vim.keymap.set(
+                        'n',
+                        'gD',
+                        '<cmd>vsplit | wincmd L | lua vim.lsp.buf.declaration()<cr>',
+                        { noremap = true, silent = true, desc = 'Go to declaration in split window' }
+                    )
+                    vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts('Go to implementation'))
+                    vim.keymap.set('n', 'go', vim.lsp.buf.type_definition, opts('Go to type definition'))
+                    vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts('Show references'))
+                    vim.keymap.set('n', 'gs', vim.lsp.buf.signature_help, opts('Show signature help'))
+                    vim.keymap.set('n', 'gR', vim.lsp.buf.rename, opts('Rename'))
+                    vim.keymap.set({ 'n', 'x' }, 'f', function()
+                        vim.lsp.buf.format({ async = true })
+                    end, opts('Format selection'))
+                    vim.keymap.set('n', '<F4>', vim.lsp.buf.code_action, opts('Code action'))
+                end,
             })
-            vim.lsp.enable({ 'eslint' })
 
             require('mason').setup()
 
             require('mason-lspconfig').setup({
-            ensure_installed = { "eslint", "clangd" },
+                ensure_installed = { 'eslint', 'clangd' },
                 handlers = {
                     function(server_name)
-                        local opts = { capabilities = capabilities }
+                        local opts = {
+                            capabilities = capabilities,
+                        }
 
-                        -- per-server tweaks (examples)
-                        if server_name == "clangd" then
-                            opts.cmd = { "clangd", "--background-index" }
+                        if server_name == 'clangd' then
+                            opts.cmd = { 'clangd', '--background-index' }
+                        elseif server_name == 'eslint' then
+                            opts.settings = {
+                                eslint = {
+                                    enable = true,
+                                    packageManager = 'yarn',
+                                    configFile = '.eslint.config.mjs',
+                                    validate = 'on',
+                                },
+                            }
                         end
 
-                        vim.lsp.config(server_name, opts)
-                        vim.lsp.enable({ server_name })
+                        lspconfig[server_name].setup(opts)
                     end,
                 },
             })
-
-        end
-    } }
+        end,
+    },
+}

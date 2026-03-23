@@ -5,14 +5,14 @@ endif
 set undodir=~/.vim/undo
 set undofile
 
-" Use Cyberpunk Scarlet Protocol Adjusted colors
+" use Cyberpunk Scarlet Protocol Adjusted colors
 set termguicolors        " enable true color
 syntax enable            " keep syntax highlighting
 
 " load color scheme
 colorscheme cyberpunk_scarlet_protocol_adjusted
 
-" make background transparent if Ghostty handles it
+" make background transparent if ghostty handles it
 hi Normal guibg=NONE ctermbg=NONE
 
 " enable line numeration

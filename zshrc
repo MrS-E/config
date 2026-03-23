@@ -3,28 +3,123 @@
 ##########
 export EDITOR=vim
 export VISUAL=vim
-ZSHRC_PATH="$(realpath "${(%):-%x}")"
-CONFIG_DIR="$(dirname "$ZSHRC_PATH")"
+
+# Path of this config file / directory (works when sourced by zsh)
+ZSHRC_PATH="${${(%):-%N}:A}"
+CONFIG_DIR="${ZSHRC_PATH:h}"
+DIR="$CONFIG_DIR"
 
 ##########
+# OS + Hardware Detection
+##########
+case "$(uname -s)" in
+  Darwin)
+    export OS="macos"
+
+    case "$(uname -m)" in
+      arm64)  export MAC_ARCH="arm64" ;;
+      x86_64) export MAC_ARCH="x86_64" ;;
+      *)      export MAC_ARCH="unknown" ;;
+    esac
+
+    export MAC_RAM_GB="$(( $(sysctl -n hw.memsize) / 1024 / 1024 / 1024 ))"
+    ;;
+  Linux)
+    export OS="linux"
+
+    : "${XDG_SESSION_TYPE:=}"
+
+    case "$(uname -m)" in
+      x86_64) export LINUX_ARCH="x86_64" ;;
+      armv7l) export LINUX_ARCH="armv7l" ;;
+      aarch64) export LINUX_ARCH="arm64" ;;
+      *)      export LINUX_ARCH="unknown" ;;
+    esac
+
+    if [[ -r /proc/meminfo ]]; then
+      export LINUX_RAM_GB="$(( $(awk '/MemTotal/ {print $2}' /proc/meminfo) / 1024 / 1024 ))"
+    fi
+    ;;
+  *)
+    export OS="unknown"
+    ;;
+esac
+
+#########
 # History
 ##########
-
-HISTFILE=~/.zsh_history
-HISTSIZE=100000000
-SAVEHIST=100000000
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=1000000
+SAVEHIST=1000000
 setopt SHARE_HISTORY
 
 ##########
 # Alias
 ##########
 # Navigation
-alias ll="ls -al"
+alias ll='ls -al'
 alias l='ls -lah'
 alias la='ls -lah'
 alias ..='cd ..'
 alias ...='cd ../..'
-alias pwdcpy="pwd | pbcopy"
+
+# Clipboard / platform helpers
+clip() {
+  if [[ "$OS" = "macos" ]] && command -v pbcopy >/dev/null 2>&1; then
+    pbcopy
+  elif [[ "$OS" = "linux" ]]; then
+    if [[ "$XDG_SESSION_TYPE" = "wayland" ]] && command -v wl-copy >/dev/null 2>&1; then
+      wl-copy
+    elif command -v xclip >/dev/null 2>&1; then
+      xclip -selection clipboard
+    elif command -v xsel >/dev/null 2>&1; then
+      xsel --clipboard --input
+    else
+      echo "clip(): no clipboard tool found (install wl-clipboard, xclip, or xsel)" >&2
+      return 1
+    fi
+  else
+    echo "Unsupported OS for clip()" >&2
+    return 1
+  fi
+}
+alias copy='clip'
+alias pwdcpy='pwd | clip'
+
+clippaste() {
+  if [[ "$OS" = "macos" ]] && command -v pbpaste >/dev/null 2>&1; then
+    pbpaste
+  elif [[ "$OS" = "linux" ]]; then
+    if [[ "$XDG_SESSION_TYPE" = "wayland" ]] && command -v wl-paste >/dev/null 2>&1; then
+      wl-paste
+    elif command -v xclip >/dev/null 2>&1; then
+      xclip -selection clipboard -o
+    elif command -v xsel >/dev/null 2>&1; then
+      xsel --clipboard --output
+    elif command -v wl-paste >/dev/null 2>&1; then
+      wl-paste
+    else
+      echo "clippaste(): no clipboard tool found" >&2
+      return 1
+    fi
+  else
+    echo "Unsupported OS for clippaste()" >&2
+    return 1
+  fi
+}
+alias paste='clippaste'
+
+# Open current file/url in platform default opener
+o() {
+  if [[ "$OS" = "macos" ]] && command -v open >/dev/null 2>&1; then
+    open "$@"
+  elif [[ "$OS" = "linux" ]] && command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "$@"
+  else
+    echo "No platform opener available" >&2
+    return 1
+  fi
+}
 
 # Grep
 alias egrep='egrep --color=auto'
@@ -32,14 +127,14 @@ alias fgrep='fgrep --color=auto'
 alias grep='grep --color=auto'
 alias rgrep='grep -rin'
 
-#FZF
-alias fzfile='rg --no-heading --line-number "" | fzf' # ripgrep and fuzyfind needed
+# FZF
+alias fzfile='rg --no-heading --line-number "" | fzf'
 
 # SSH
 alias sshproxy='ssh -D 8080 -C -N'
-alias sshdisconnect='rm /tmp/ssh*'
+alias sshdisconnect='rm -f /tmp/ssh*'
 
-# Git 
+# Git
 alias branch='git branch'
 alias clone='git clone'
 alias glog='git log --graph --abbrev-commit --decorate --all --oneline'
@@ -53,37 +148,18 @@ alias subi='git submodule init'
 alias subu='git submodule update'
 alias swi='git switch'
 alias swic='git switch -c'
-alias gittree="git log --graph --decorate --oneline"
-alias lazy=lazygit
-
-# Rails 
-# alias rg='rails generate'
-# alias rg:mo='rg model'
-# alias rg:mi='rg migration'
-# alias rg:v='rg view'
-# alias rg:c='rg controller'
-# alias rdb:c='rails db:create'
-# alias rdb:d='rails db:drop'
-# alias rdb:s='rails db:seed'
-# alias rdb:m='rails db:migrate'
-# alias rdb:cms='rails db:create db:migrate db:seed'
+alias gittree='git log --graph --decorate --oneline'
+alias lazy='lazygit'
 
 # History
-alias shistory="history 0 | grep"
+alias shistory='history 0 | grep'
 
 # Codium
 alias co='codium'
 
-# Docker
-# alias compose_up='docker-compose up && docker-compose rm -fsv'
-# alias docker_mounts="docker inspect $(docker ps -q) | jq '.[] | {container: .Name, mounts: .Mounts}'"
-
-# 7Zip (Brew)
-alias 7zip="7zz"
-alias 7z="7zz"
-
-# Proxy
-# alias proxy='socat TCP-LISTEN:5555,fork TCP:192.168.3.97:5555'
+# 7Zip
+alias 7zip='7zz'
+alias 7z='7zz'
 
 # Files
 alias vimrc='vim $HOME/.vimrc'
@@ -91,14 +167,60 @@ alias zshrc='vim $HOME/.zshrc'
 alias zshsrc='source $HOME/.zshrc'
 alias sshrc='vim $HOME/.ssh/config'
 alias hosts='vim $HOME/.ssh/known_hosts'
-alias o="open"
+
+##########
+# Completion
+##########
+autoload -Uz compinit
+zmodload zsh/complist
+compinit
+
+# bash completions into zsh
+if [[ -d /usr/share/bash-completion/completions ]]; then
+  autoload -Uz bashcompinit
+  bashcompinit
+
+  local -a bashcomp_cmds
+  bashcomp_cmds=(
+    git
+    curl
+    wget
+    ssh
+    rsync
+    kubectl
+    docker
+    docker-compose
+    podman
+    podman-compose
+    pip
+    pip3
+  )
+
+  for cfile in /usr/share/bash-completion/completions/*(.N); do
+    cmd=${cfile:t}
+    if (( ${bashcomp_cmds[(Ie)$cmd]} == 0 )); then
+      continue
+    fi
+    command -v "$cmd" >/dev/null 2>&1 || continue
+    if grep -qE '\b(compopt|_init_completion|declare -A|shopt|_comp_have_command|check_type)\b' "$cfile"; then
+      continue
+    fi
+    source "$cfile"
+  done
+fi
+
+[[ -d /usr/share/zsh/site-functions ]] && FPATH="/usr/share/zsh/site-functions:$FPATH"
+
+if command -v brew >/dev/null 2>&1; then
+  FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
+fi
 
 ##########
 # Keybinds
 ##########
 bindkey "^[[A" history-beginning-search-backward
 bindkey "^[[B" history-beginning-search-forward
-# bindkey -v # - e for emacs style keybindings; -v for vim like keybindings
+# bindkey -v
 
 function zle-keymap-select {
   if [[ $KEYMAP == vicmd ]]; then
@@ -109,7 +231,6 @@ function zle-keymap-select {
 }
 zle -N zle-keymap-select
 
-# inline command edit
 autoload edit-command-line
 zle -N edit-command-line
 bindkey '^xe' edit-command-line
@@ -117,81 +238,140 @@ bindkey '^xe' edit-command-line
 ##########
 # Style
 ##########
-# zsh completion
-autoload -Uz compinit
-compinit
-
-# case-insensitive matching
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
-
-# use completion menu
 zstyle ':completion:*' menu select
 
-# fuzzy completion
-# generated using $(brew --prefix)/opt/fzf/install needs brew install fzf
-[ -f "$CONFIG_DIR/fzf.zsh" ] && source "$CONFIG_DIR/fzf.zsh"
+# FZF shell integration from local config dir
+[[ -f "$CONFIG_DIR/fzf.zsh" ]] && source "$CONFIG_DIR/fzf.zsh"
+
+# ITerm2 integration on macOS
+if [[ "$OS" = "macos" ]]; then
+  [[ -e "$DIR/iterm2_shell_integration.zsh" ]] && source "$DIR/iterm2_shell_integration.zsh"
+fi
 
 ##########
-# Patter Matching
-##########
-# setopt extended_glob
-
-##########
-# Promt
+# Prompt
 ##########
 precmd_functions=(render_prompt)
 
 function render_prompt {
-  # Start with an empty prompt
-  PROMPT="" 
-  # If there's exactly one background job, show a bold %
+  PROMPT=""
   PROMPT+="%(1j.%B%%%b .)"
-  # Show current directory, using ~ for home
   PROMPT+="%~ "
-  # If last command succeeded, prompt is green; if failed, red. Show bold $
   PROMPT+="%(?.%F{green}.%F{red})%B$%b%f "
-  # On the right, show red exit code in brackets if last command failed
   RPROMPT="%(?..%F{red}[%?]%f)"
 }
 
 ##########
 # Homebrew
 ##########
-if ! command -v brew &> /dev/null; then
-  eval "$(/opt/homebrew/bin/brew shellenv)" # for Apple Silicon
-  eval "$(/usr/local/bin/brew shellenv)"    # for Intel
+if ! command -v brew >/dev/null 2>&1; then
+  [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+  [[ -x /usr/local/bin/brew ]] && eval "$(/usr/local/bin/brew shellenv)"
 fi
 
-# NVM
-export NVM_DIR="$HOME/.nvm"
-  [ -s "$(brew --prefix)/opt/nvm/nvm.sh" ] && \. "$(brew --prefix)/opt/nvm/nvm.sh"  # This loads nvm
-  [ -s "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm" ] && \. "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+##########
+# Jetbrains Toolbox
+##########
 
-# PYENV
-eval "$(pyenv init --path)"
-
-# Added by Toolbox App
 export PATH="$PATH:/usr/local/bin"
 
-# RVM
-export PATH="$PATH:$HOME/.rvm/bin"
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+##########
+# NVM
+##########
+if [[ -s /usr/share/nvm/init-nvm.sh ]]; then
+  export NVM_DIR="$HOME/.nvm"
+  source /usr/share/nvm/init-nvm.sh
+  [[ -s /usr/share/nvm/bash_completion ]] && source /usr/share/nvm/bash_completion
+elif command -v brew >/dev/null 2>&1 && [[ -d "$(brew --prefix 2>/dev/null)/opt/nvm" ]]; then
+  export NVM_DIR="$HOME/.nvm"
+  [[ -s "$(brew --prefix)/opt/nvm/nvm.sh" ]] && source "$(brew --prefix)/opt/nvm/nvm.sh"
+  [[ -s "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm" ]] && source "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm"
+elif [[ -s "$HOME/.nvm/nvm.sh" ]]; then
+  export NVM_DIR="$HOME/.nvm"
+  source "$NVM_DIR/nvm.sh"
+  [[ -s "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"
+fi
 
+##########
+# JABBA
+##########
+if [[ -s "$HOME/.jabba/jabba.sh" ]]; then
+  export JABBA_INDEX="https://github.com/typelevel/jdk-index/raw/main/index.json"
+  export JABBA_HOME="$HOME/.jabba"
+  source "$JABBA_HOME/jabba.sh"
+fi
+
+##########
+# PYENV
+##########
+if [[ -d "$HOME/.pyenv/bin" ]]; then
+  export PATH="$HOME/.pyenv/bin:$PATH"
+fi
+
+if command -v pyenv >/dev/null 2>&1; then
+  eval "$(pyenv init -)"
+  eval "$(pyenv init --path)"
+fi
+
+##########
+# RBENV
+##########
+if [[ -d "$HOME/.rbenv/bin" ]]; then
+  export PATH="$HOME/.rbenv/bin:$PATH"
+fi
+
+if command -v rbenv >/dev/null 2>&1; then
+  eval "$(rbenv init - zsh)"
+fi
+
+##########
 # Zephyr-SDK
-export ZEPHYR_SDK_INSTALL_DIR="$HOME/zephyr-sdk-0.17.1"
-
-# GNU grep
-export PATH="$PATH: $(brew --prefix)/opt/grep/libexec/gnubin"
-
-#TheFuck
-eval $(thefuck --alias)
+##########
+# export ZEPHYR_SDK_INSTALL_DIR="$HOME/zephyr-sdk-0.17.1"
 
 ##########
-# ZSH-Plugins
+# GNU grep (Homebrew)
 ##########
-source  $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source  $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-#source $(brew --prefix)/share/zsh-history-substring-search/zsh-history-substring-search.zsh
+if command -v brew >/dev/null 2>&1; then
+  export PATH="$(brew --prefix)/opt/grep/libexec/gnubin:$PATH"
+fi
+
+##########
+# Tailscale
+##########
+if command -v tailscale >/dev/null 2>&1; then
+  source <(tailscale completion zsh)
+fi
+
+##########
+# TheFuck
+##########
+if command -v thefuck >/dev/null 2>&1; then
+  eval "$(thefuck --alias)"
+fi
+
+##########
+# ZSH Plugins
+##########
+
+# Prefer local clones if present
+if [[ -f "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+  source "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh"
+elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+  source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+fi
+
+if [[ -f "$HOME/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
+  source "$HOME/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
+fi
+
+# Syntax highlighting should be last
+if [[ -f "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+  source "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+  source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+fi
 
 ##########
 # Scripts
@@ -199,47 +379,48 @@ source  $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # ADB/logcat
 adb() {
-    case "$1" in
-        loganal)
-          shift
-          if [ -z "$1" && -z "$2"]; then
-              echo "Usage: adb loganal <pid> <path>"
-              return 1
-          fi
-          pid="$1"
-          file="$2"
-          grep -E "^[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}[[:space:]]+${pid}\>|^[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}[[:space:]]+[0-9]+[[:space:]]+${pid}\>" "$file"
-          ;;
-        packcat)
-          shift
-          if [ -z "$1" ]; then
-              echo "Usage: adb packcat <package.name> [logcat args]"
-              return 1
-          fi
-          pkg="$1"
-          shift
-          pid=$(command adb shell pidof "$pkg")
-          if [ -z "$pid" ]; then
-              echo "Process for package '$pkg' not found."
-              return 1
-          fi
-          command adb logcat --pid="$pid" "$@"
-          ;;
-        screen)
-          shift
-          scrcpy --video-codec=h265 -m1024 --max-fps=60 --no-audio -K "$@"
-          ;;
-        *)
-          command adb "$@"
-          ;;
-    esac
+  case "$1" in
+    loganal)
+      shift
+      if [[ -z "$1" || -z "$2" ]]; then
+        echo "Usage: adb loganal <pid> <path>"
+        return 1
+      fi
+      local pid="$1"
+      local file="$2"
+      grep -E "^[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}[[:space:]]+${pid}\>|^[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}[[:space:]]+[0-9]+[[:space:]]+${pid}\>" "$file"
+      ;;
+    packcat)
+      shift
+      if [[ -z "$1" ]]; then
+        echo "Usage: adb packcat <package.name> [logcat args]"
+        return 1
+      fi
+      local pkg="$1"
+      shift
+      local pid
+      pid=$(command adb shell pidof "$pkg")
+      if [[ -z "$pid" ]]; then
+        echo "Process for package '$pkg' not found."
+        return 1
+      fi
+      command adb logcat --pid="$pid" "$@"
+      ;;
+    screen)
+      shift
+      scrcpy --video-codec=h265 -m1024 --max-fps=60 --no-audio -K "$@"
+      ;;
+    *)
+      command adb "$@"
+      ;;
+  esac
 }
 
 # Homebrew
-brew(){
+brew() {
   case "$1" in
     fullupgrade)
-      brew update && brew upgrade && brew cleanup -s
+      command brew update && command brew upgrade && command brew cleanup -s
       ;;
     file)
       shift
@@ -252,7 +433,7 @@ brew(){
           mv "$brewfile" "$backup"
         fi
       fi
-      brew bundle dump --file="$brewfile" --describe --force
+      command brew bundle dump --file="$brewfile" --describe --force
       ;;
     *)
       command brew "$@"
@@ -261,232 +442,241 @@ brew(){
 }
 
 # Projects
-source "$CONFIG_DIR/scripts/project.sh"
+[[ -f "$CONFIG_DIR/scripts/project.sh" ]] && source "$CONFIG_DIR/scripts/project.sh"
 
 # ESP-IDF
 export IDF_PATH="$HOME/esp/esp-idf"
-idf(){
+idf() {
   case "$1" in
-  get)
-    shift
-    . $IDF_PATH/export.sh
+    get)
+      shift
+      . "$IDF_PATH/export.sh"
 
-    if command -v idf.py >/dev/null 2>&1 && [ -n "${1-}" ]; then
-      idf.py "$@"
-      return $?
-    fi
-    ;;
-  trace)
-    shift
-    if [ -z "$1" ] || [ -z "$2" ]; then
-      echo "Error: Missing arguments."
-      echo "Usage: idf trace path/to/project.elf \"0x400...:0x3ff... 0x400...\""
-      exit 1
-    fi
+      if command -v idf.py >/dev/null 2>&1 && [[ -n "${1-}" ]]; then
+        idf.py "$@"
+        return $?
+      fi
+      ;;
+    trace)
+      shift
+      if [[ -z "$1" || -z "$2" ]]; then
+        echo "Error: Missing arguments."
+        echo 'Usage: idf trace path/to/project.elf "0x400...:0x3ff... 0x400..."'
+        return 1
+      fi
 
-    ELF_FILE="$1"
-    BACKTRACE="$2"
+      local ELF_FILE="$1"
+      local BACKTRACE="$2"
 
-    if [ ! -f "$ELF_FILE" ]; then
+      if [[ ! -f "$ELF_FILE" ]]; then
         echo "Error: ELF file '$ELF_FILE' not found."
-        exit 1
-    fi
+        return 1
+      fi
 
-    ADDR2LINE="xtensa-esp32-elf-addr2line"
+      local ADDR2LINE="xtensa-esp32-elf-addr2line"
 
-    if ! command -v "$ADDR2LINE" &> /dev/null; then
+      if ! command -v "$ADDR2LINE" >/dev/null 2>&1; then
         echo "Info: $ADDR2LINE not found. Attempting to load ESP-IDF environment..."
 
-        if [ -f "$IDF_PATH/export.sh" ]; then
-            . "$IDF_PATH/export.sh" > /dev/null 2>&1
+        if [[ -f "$IDF_PATH/export.sh" ]]; then
+          . "$IDF_PATH/export.sh" >/dev/null 2>&1
         else
-            echo "Error: $ADDR2LINE is not in PATH and $IDF_PATH/export.sh was not found."
-            echo "Please ensure ESP-IDF is installed and set correctly."
-            exit 1
+          echo "Error: $ADDR2LINE is not in PATH and $IDF_PATH/export.sh was not found."
+          echo "Please ensure ESP-IDF is installed and set correctly."
+          return 1
         fi
-    fi
+      fi
 
-    if ! command -v "$ADDR2LINE" &> /dev/null; then
+      if ! command -v "$ADDR2LINE" >/dev/null 2>&1; then
         echo "Error: $ADDR2LINE is still not available after trying to source ESP-IDF."
-        exit 1
-    fi
+        return 1
+      fi
 
-    echo "Decoding Backtrace using: $(basename "$ELF_FILE")"
-    echo "------------------------------------------------"
+      echo "Decoding Backtrace using: $(basename "$ELF_FILE")"
+      echo "------------------------------------------------"
 
-    for entry in $(echo $BACKTRACE); do
-        # Extract the PC address (before the colon)
+      local entry addr
+      for entry in ${(z)BACKTRACE}; do
         addr=$(echo "$entry" | cut -d':' -f1)
-        # -p: pretty-print
-        # -f: show function names
-        # -i: show inlines
-        # -a: show addresses
-        # -C: demangle C++ names
-        $ADDR2LINE -pfiaC -e "$ELF_FILE" "$addr"
-    done
+        "$ADDR2LINE" -pfiaC -e "$ELF_FILE" "$addr"
+      done
 
-    echo "------------------------------------------------"
-    ;;
-  use)
-    shift
-    if [ -z "$1" ]; then
+      echo "------------------------------------------------"
+      ;;
+    use)
+      shift
+      if [[ -z "$1" ]]; then
         echo "Usage: idf use <version>"
         echo "Example: idf use v5.4.2"
         return 1
-    fi
+      fi
 
-    VERSION="$1"
-    ESP_ROOT="$HOME/esp"
-    IDF_DIR="$ESP_ROOT/esp-idf-$VERSION"
+      local VERSION="$1"
+      local ESP_ROOT="$HOME/esp"
+      local IDF_DIR="$ESP_ROOT/esp-idf-$VERSION"
 
-    mkdir -p "$ESP_ROOT"
+      mkdir -p "$ESP_ROOT"
 
-    echo "Using ESP-IDF version $VERSION"
-    if [ ! -d "$IDF_DIR" ]; then
+      echo "Using ESP-IDF version $VERSION"
+      if [[ ! -d "$IDF_DIR" ]]; then
         echo "Cloning ESP-IDF $VERSION into $IDF_DIR"
         git clone --recursive https://github.com/espressif/esp-idf.git "$IDF_DIR"
-    fi
-    cd "$IDF_DIR"
+      fi
+      cd "$IDF_DIR" || return 1
 
-    echo "Fetching updates"
-    git fetch --all --tags
+      echo "Fetching updates"
+      git fetch --all --tags
 
-    echo "Checking out $VERSION"
-    git checkout "$VERSION"
+      echo "Checking out $VERSION"
+      git checkout "$VERSION"
 
-    echo "Cleaning previous submodules"
-    git submodule deinit -f --all || true
-    git reset --hard
-    git clean -fdx
+      echo "Cleaning previous submodules"
+      git submodule deinit -f --all || true
+      git reset --hard
+      git clean -fdx
 
-    echo "Updating submodules"
-    git submodule update --init --recursive
+      echo "Updating submodules"
+      git submodule update --init --recursive
 
-    echo "Installing tools + Python env"
-    ./install.sh
+      echo "Installing tools + Python env"
+      ./install.sh
 
-    echo "Activating ESP-IDF environment"
-    . ./export.sh
+      echo "Activating ESP-IDF environment"
+      . ./export.sh
 
-    echo "ESP-IDF ready: $(idf.py --version)"
-    ;;
-  *)
-    if command -v idf.py >/dev/null 2>&1; then
-      idf.py "$@"
-      return $?
-    fi
+      echo "ESP-IDF ready: $(idf.py --version)"
+      ;;
+    *)
+      if command -v idf.py >/dev/null 2>&1; then
+        idf.py "$@"
+        return $?
+      fi
 
-    local export_sh="$IDF_PATH/export.sh"
-    if [[ -f "$export_sh" ]]; then
-      . "$export_sh" > /dev/null 2>&1
-    else
-      echo "idf: idf.py not found and export script missing: $export_sh" >&2
-      return 127
-    fi
+      local export_sh="$IDF_PATH/export.sh"
+      if [[ -f "$export_sh" ]]; then
+        . "$export_sh" >/dev/null 2>&1
+      else
+        echo "idf: idf.py not found and export script missing: $export_sh" >&2
+        return 127
+      fi
 
-    if command -v idf.py >/dev/null 2>&1; then
-      idf.py "$@"
-    else
-      echo "idf: idf.py still not found after sourcing $export_sh" >&2
-      return 127
-    fi
-    ;;
+      if command -v idf.py >/dev/null 2>&1; then
+        idf.py "$@"
+      else
+        echo "idf: idf.py still not found after sourcing $export_sh" >&2
+        return 127
+      fi
+      ;;
   esac
 }
 
-code(){
+code() {
   case "$1" in
-  export)
-    shift 
-    if [ -z "$1" ]; then
-      echo "Usage: code export <path>"
-      return 1
-    fi
+    export)
+      shift
+      if [[ -z "$1" ]]; then
+        echo "Usage: code export <path>"
+        return 1
+      fi
 
-    local dst_dir="$1"
-    local user_dir="$HOME/Library/Application Support/VSCodium/User"
-    local src_settings="$user_dir/settings.json"
-    local dst_settings="$dst_dir/settings.json"
-    local dst_exts="$dst_dir/extensions"
+      local dst_dir="$1"
+      local user_dir=""
+      local src_settings=""
+      local dst_settings="$dst_dir/settings.json"
+      local dst_exts="$dst_dir/extensions"
 
-    local codium_bin=""
-    if command -v codium >/dev/null 2>&1; then
-      codium_bin="codium"
-    elif [[ -x "/Applications/VSCodium.app/Contents/Resources/app/bin/codium" ]]; then
-      codium_bin="/Applications/VSCodium.app/Contents/Resources/app/bin/codium"
-    elif [[ -x "$HOME/Applications/VSCodium.app/Contents/Resources/app/bin/codium" ]]; then
-      codium_bin="$HOME/Applications/VSCodium.app/Contents/Resources/app/bin/codium"
-    else
-      echo "vscodium_export: couldn't find 'codium' CLI. Install it or ensure VSCodium.app exists in /Applications." >&2
-      return 127
-    fi
+      if [[ "$OS" = "macos" ]]; then
+        user_dir="$HOME/Library/Application Support/VSCodium/User"
+      else
+        user_dir="${XDG_CONFIG_HOME:-$HOME/.config}/VSCodium/User"
+      fi
+      src_settings="$user_dir/settings.json"
 
-    mkdir -p "$dst_dir"
+      local codium_bin=""
+      if command -v codium >/dev/null 2>&1; then
+        codium_bin="codium"
+      elif [[ -x "/Applications/VSCodium.app/Contents/Resources/app/bin/codium" ]]; then
+        codium_bin="/Applications/VSCodium.app/Contents/Resources/app/bin/codium"
+      elif [[ -x "$HOME/Applications/VSCodium.app/Contents/Resources/app/bin/codium" ]]; then
+        codium_bin="$HOME/Applications/VSCodium.app/Contents/Resources/app/bin/codium"
+      else
+        echo "code export: couldn't find 'codium' CLI." >&2
+        return 127
+      fi
 
-    if [[ -f "$src_settings" ]]; then
+      mkdir -p "$dst_dir"
+
+      if [[ -f "$src_settings" ]]; then
+        cp -f "$src_settings" "$dst_settings"
+        echo "Exported settings -> $dst_settings"
+      else
+        echo "code export: no settings.json found at: $src_settings (skipping settings export)" >&2
+      fi
+
+      "$codium_bin" --list-extensions | LC_ALL=C sort > "$dst_exts"
+      echo "Exported extensions -> $dst_exts"
+      ;;
+    import)
+      shift
+      if [[ -z "$1" ]]; then
+        echo "Usage: code import <path>"
+        return 1
+      fi
+
+      local src_dir="$1"
+      local src_settings="$src_dir/settings.json"
+      local src_exts="$src_dir/extensions"
+      local user_dir=""
+      local dst_settings=""
+      local codium_bin=""
+
+      if [[ "$OS" = "macos" ]]; then
+        user_dir="$HOME/Library/Application Support/VSCodium/User"
+      else
+        user_dir="${XDG_CONFIG_HOME:-$HOME/.config}/VSCodium/User"
+      fi
+      dst_settings="$user_dir/settings.json"
+
+      if command -v codium >/dev/null 2>&1; then
+        codium_bin="codium"
+      elif [[ -x "/Applications/VSCodium.app/Contents/Resources/app/bin/codium" ]]; then
+        codium_bin="/Applications/VSCodium.app/Contents/Resources/app/bin/codium"
+      elif [[ -x "$HOME/Applications/VSCodium.app/Contents/Resources/app/bin/codium" ]]; then
+        codium_bin="$HOME/Applications/VSCodium.app/Contents/Resources/app/bin/codium"
+      else
+        echo "code import: couldn't find 'codium' CLI." >&2
+        return 127
+      fi
+
+      if [[ ! -f "$src_settings" ]]; then
+        echo "code import: missing $src_settings" >&2
+        return 2
+      fi
+
+      mkdir -p "$user_dir"
       cp -f "$src_settings" "$dst_settings"
-      echo "Exported settings -> $dst_settings"
-    else
-      echo "vscodium_export: no settings.json found at: $src_settings (skipping settings export)" >&2
-    fi
+      echo "Imported settings -> $dst_settings"
 
-    "$codium_bin" --list-extensions | LC_ALL=C sort > "$dst_exts"
-    echo "Exported extensions -> $dst_exts"
-    ;;
-  import)
-    shift
-    if [ -z "$1" ]; then
-      echo "Usage: code import <path>"
-      return 1
-    fi
+      if [[ ! -f "$src_exts" ]]; then
+        echo "code import: missing $src_exts (skipping extensions install)" >&2
+        return 0
+      fi
 
-    local src_dir="$1"
-    local src_settings="$src_dir/settings.json"
-    local src_exts="$src_dir/extensions"
+      echo "Installing extensions from -> $src_exts"
+      local line ext
+      while IFS= read -r line || [[ -n "$line" ]]; do
+        ext="${line%%#*}"
+        ext="$(echo "$ext" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+        [[ -z "$ext" ]] && continue
 
-    local user_dir="$HOME/Library/Application Support/VSCodium/User"
-    local dst_settings="$user_dir/settings.json"
+        echo "  + $ext"
+        "$codium_bin" --install-extension "$ext" --force >/dev/null
+      done < "$src_exts"
 
-    local codium_bin=""
-    if command -v codium >/dev/null 2>&1; then
-      codium_bin="codium"
-    elif [[ -x "/Applications/VSCodium.app/Contents/Resources/app/bin/codium" ]]; then
-      codium_bin="/Applications/VSCodium.app/Contents/Resources/app/bin/codium"
-    elif [[ -x "$HOME/Applications/VSCodium.app/Contents/Resources/app/bin/codium" ]]; then
-      codium_bin="$HOME/Applications/VSCodium.app/Contents/Resources/app/bin/codium"
-    else
-      echo "vscodium_import: couldn't find 'codium' CLI. Install it or ensure VSCodium.app exists in /Applications." >&2
-      return 127
-    fi
-
-    if [[ ! -f "$src_settings" ]]; then
-      echo "vscodium_import: missing $src_settings" >&2
-      return 2
-    fi
-    mkdir -p "$user_dir"
-    cp -f "$src_settings" "$dst_settings"
-    echo "Imported settings -> $dst_settings"
-
-    if [[ ! -f "$src_exts" ]]; then
-      echo "vscodium_import: missing $src_exts (skipping extensions install)" >&2
-      return 0
-    fi
-
-    echo "Installing extensions from -> $src_exts"
-    local line ext
-    while IFS= read -r line || [[ -n "$line" ]]; do
-      ext="${line%%#*}"
-      ext="$(echo "$ext" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
-      [[ -z "$ext" ]] && continue
-
-      echo "  + $ext"
-      "$codium_bin" --install-extension "$ext" --force >/dev/null
-    done < "$src_exts"
-
-    echo "Done."
-    ;;
-  *)
-    command codium "$@"
-    ;;
+      echo "Done."
+      ;;
+    *)
+      command codium "$@"
+      ;;
   esac
 }
