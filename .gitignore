@@ -1,0 +1,11 @@
+ssh
+ssh/**
+ssh/**/*
+vim/undo/**
+vim/.netrwhist
+!vim/undo/.keep
+.DS_STORE
+Nextcloud
+Nextcloud/**/*
+!Nextcloud/nextcloud.cfg
+!Nextcloud/sync-exclude.lst

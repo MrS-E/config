@@ -1,97 +1,89 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-set -e
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-CONFIG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BREWFILE="$CONFIG_DIR/Brewfile"
-SSH_DIR="$CONFIG_DIR/ssh"
+log() {
+  printf '%s\n' "$*"
+}
 
-echo "Starting setup..."
+link_path() {
+  local src="$1"
+  local dest="$2"
 
-# 1. Install Homebrew if not installed
-if ! command -v brew &> /dev/null; then
-  echo "Installing Homebrew..."
-  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-else
-  echo "Homebrew already installed."
-fi
-
-# Add Homebrew to PATH if it's not in PATH (for new installations)
-if ! command -v brew &> /dev/null; then
-  eval "$(/opt/homebrew/bin/brew shellenv)" # for Apple Silicon
-  eval "$(/usr/local/bin/brew shellenv)"    # for Intel
-fi
-
-# 2. Symlink config files
-FILES=(zshrc vimrc gitconfig)
-for file in "${FILES[@]}"; do
-  SRC="$CONFIG_DIR/$file"
-  DEST="$HOME/.$file"
-  if [ -L "$DEST" ] || [ -f "$DEST" ]; then
-    echo "Removing existing file or link: $DEST"
-    rm -f "$DEST"
+  if [[ ! -e "$src" ]]; then
+    log "skip: source does not exist: $src"
+    return 0
   fi
-  echo "Creating symlink for $file"
-  ln -s "$SRC" "$DEST"
-done
 
-# 3. Symlink SSH directory
-if [ -d "$SSH_DIR" ]; then
-  if [ -L "$HOME/.ssh" ] || [ -d "$HOME/.ssh" ]; then
-    echo "Removing existing ~/.ssh directory or symlink"
-    rm -rf "$HOME/.ssh"
+  mkdir -p "$(dirname "$dest")"
+
+  if [[ -L "$dest" ]]; then
+    ln -sfn "$src" "$dest"
+    log "linked: $dest -> $src"
+    return 0
   fi
-  echo "Creating symlink for ssh directory"
-  ln -s "$SSH_DIR" "$HOME/.ssh"
-fi
 
-# 4. Ensure ssh-agent is running (macOS only)
-if [[ "$(uname)" == "Darwin" ]]; then
-  if ! pgrep -u "$USER" ssh-agent > /dev/null; then
-    echo "Starting ssh-agent..."
-    eval "$(ssh-agent -s)"
+  if [[ -e "$dest" ]]; then
+    local backup="${dest}.bak.$(date +%Y%m%d%H%M%S)"
+    mv "$dest" "$backup"
+    log "backup: $dest -> $backup"
   fi
-fi
 
-# 5. Add SSH keys to Apple Keychain (macOS only)
-if [[ "$(uname)" == "Darwin" ]] && [ -d "$HOME/.ssh" ]; then
-  SSH_KEYS=$(find "$HOME/.ssh" -type f -not -name "*.pub" -perm 600 2>/dev/null)
+  ln -sfn "$src" "$dest"
+  log "linked: $dest -> $src"
+}
 
-  if [ -n "$SSH_KEYS" ]; then
-    for key in $SSH_KEYS; do
-      if ! ssh-add -l 2>/dev/null | grep -q "$key"; then
-        echo "Adding SSH key $key to Apple keychain..."
-        ssh-add --apple-use-keychain "$key"
+setup_symlinks() {
+  log "Setting up symlinks..."
+
+  mkdir -p "$HOME/.config"
+  mkdir -p "$HOME/.ssh"
+
+  link_path "$REPO_DIR/zshrc" "$HOME/.zshrc"
+  link_path "$REPO_DIR/vimrc" "$HOME/.vimrc"
+  link_path "$REPO_DIR/gitconfig" "$HOME/.gitconfig"
+
+  link_path "$REPO_DIR/vim" "$HOME/.vim"
+  link_path "$REPO_DIR/nvim" "$HOME/.config/nvim"
+  link_path "$REPO_DIR/lazygit" "$HOME/.config/lazygit"
+
+  [[ -d "$REPO_DIR/ghostty" ]] && link_path "$REPO_DIR/ghostty" "$HOME/.config/ghostty"
+  [[ -d "$REPO_DIR/Nextcloud" ]] && link_path "$REPO_DIR/Nextcloud" "$HOME/.config/Nextcloud"
+
+  [[ -f "$REPO_DIR/ssh/config" ]] && link_path "$REPO_DIR/ssh/config" "$HOME/.ssh/config"
+  [[ -f "$REPO_DIR/ssh/known_hosts" ]] && link_path "$REPO_DIR/ssh/known_hosts" "$HOME/.ssh/known_hosts"
+
+  chmod 700 "$HOME/.ssh" || true
+}
+
+run_platform_setup() {
+  case "$(uname -s)" in
+    Darwin)
+      if [[ -x "$REPO_DIR/setup.macos.sh" ]]; then
+        "$REPO_DIR/setup.macos.sh"
       else
-        echo "SSH key $key is already loaded in ssh-agent."
+        log "warn: setup.macos.sh not found or not executable"
       fi
-    done
-  else
-    echo "No private SSH keys found in ~/.ssh."
-  fi
-fi
+      ;;
+    Linux)
+      if [[ -x "$REPO_DIR/setup.fedora.sh" ]]; then
+        "$REPO_DIR/setup.fedora.sh"
+      else
+        log "warn: no Linux-specific setup script selected"
+      fi
+      ;;
+    *)
+      log "warn: unsupported OS: $(uname -s)"
+      ;;
+  esac
+}
 
-# 5. Install vim theme
-mkdir -p ~/.vim/pack/themes/start
-cd ~/.vim/pack/themes/start
-if [ ! -d "dracula" ]; then
-  echo "Installing dracular for vim"
-  git clone https://github.com/dracula/vim.git dracula
-fi
-cd -
+main() {
+  log "Starting base setup..."
+  setup_symlinks
+  run_platform_setup
+  log "Base setup complete."
+}
 
-# 6. Install Homebrew packages from Brewfile
-if [ -f "$BREWFILE" ]; then
-  echo "Installing Homebrew packages from Brewfile..."
-  brew bundle --file="$BREWFILE"
-else
-  echo "No Brewfile found at $BREWFILE"
-  echo "To create one use brew bundle dump --describe --file=~/Brewfile --force"
-fi
-
-echo "✅ Setup complete."
-# additional tools:
-# app store
-# https://developer.apple.com/download/all/?q=additional%20tools
-# https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-Desktop/Download#infotabs
-# https://lp.digilent.com/complete-waveforms-download/
+main "$@"

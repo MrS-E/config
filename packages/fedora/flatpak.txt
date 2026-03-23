@@ -1,0 +1,7 @@
+com.makemkv.MakeMKV
+com.spotify.Client
+io.github.crealityofficial.CrealityPrint
+md.obsidian.Obsidian
+net.cozic.joplin_desktop
+org.raspberrypi.rpi-imager
+org.zotero.Zotero

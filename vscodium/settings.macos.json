@@ -1,0 +1,7 @@
+{
+  "markdown-preview-enhanced.plantumlJarPath": "/opt/homebrew/Cellar/plantuml/1.2025.4/libexec/plantuml.jar",
+  "idf.pythonInstallPath": "/Users/simeon.stix/.pyenv/shims/python",
+  "idf.espIdfPath": "/Users/simeon.stix/esp/esp-idf",
+  "idf.toolsPath": "/Users/simeon.stix/.espressif",
+  "idf.gitPath": "git"
+}
