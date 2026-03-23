@@ -151,6 +151,17 @@ alias swic='git switch -c'
 alias gittree='git log --graph --decorate --oneline'
 alias lazy='lazygit'
 
+# Rails 
+alias rg:mo='rails generate model'
+alias rg:mi='rails generate migration'
+alias rg:v='rails generate view'
+alias rg:c='rails generate controller'
+alias rdb:c='rails db:create'
+alias rdb:d='rails db:drop'
+alias rdb:s='rails db:seed'
+alias rdb:m='rails db:migrate'
+alias rdb:cms='rails db:create db:migrate db:seed'
+
 # History
 alias shistory='history 0 | grep'
 

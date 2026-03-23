@@ -60,17 +60,29 @@ setup_symlinks() {
 run_platform_setup() {
   case "$(uname -s)" in
     Darwin)
-      if [[ -x "$REPO_DIR/setup.macos.sh" ]]; then
-        "$REPO_DIR/setup.macos.sh"
-      else
+      [[ -x "$REPO_DIR/setup.macos.sh" ]] || {
         log "warn: setup.macos.sh not found or not executable"
-      fi
+        return 0
+      }
+      "$REPO_DIR/setup.macos.sh"
       ;;
     Linux)
-      if [[ -x "$REPO_DIR/setup.fedora.sh" ]]; then
-        "$REPO_DIR/setup.fedora.sh"
+      if [[ -f /etc/fedora-release ]]; then
+        if command -v rpm-ostree >/dev/null 2>&1; then
+          [[ -x "$REPO_DIR/setup.atomic-fedora.sh" ]] || {
+            log "warn: setup.atomic-fedora.sh not found or not executable"
+            return 0
+          }
+          "$REPO_DIR/setup.atomic-fedora.sh"
+        else
+          [[ -x "$REPO_DIR/setup.fedora.sh" ]] || {
+            log "warn: setup.fedora.sh not found or not executable"
+            return 0
+          }
+          "$REPO_DIR/setup.fedora.sh"
+        fi
       else
-        log "warn: no Linux-specific setup script selected"
+        log "warn: unsupported Linux distribution"
       fi
       ;;
     *)

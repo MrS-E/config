@@ -1,0 +1,10 @@
+java-21-openjdk
+thefuck
+pandoc
+plantuml
+shc
+yarnpkg
+python3-pip
+git
+curl
+unzip
