@@ -1,11 +1,25 @@
-ssh
-ssh/**
-ssh/**/*
-vim/undo/**
-vim/.netrwhist
+# =========================
+# SSH (ignore everything)
+# =========================
+ssh/*
+!ssh/config
+# !ssh/known_hosts
+
+# =========================
+# Vim
+# =========================
+vim/undo/*
 !vim/undo/.keep
-.DS_STORE
-Nextcloud
-Nextcloud/**/*
+vim/.netrwhist
+
+# =========================
+# macOS
+# =========================
+.DS_Store
+
+# =========================
+# Nextcloud
+# =========================
+Nextcloud/*
 !Nextcloud/nextcloud.cfg
 !Nextcloud/sync-exclude.lst
