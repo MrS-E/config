@@ -3,7 +3,7 @@
 [user]
 	signingkey = ./git_code
 	name = Simeon Stix
-	email = stixsim1@students.zhaw.ch
+	email = simeon.stix@smoca.ch
 [core]
 	autocrlf = input
 	editor = codium --wait --new-window
