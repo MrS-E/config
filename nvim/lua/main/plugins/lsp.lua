@@ -101,6 +101,7 @@ return {
         end,
         config = function()
             local lspconfig = require('lspconfig')
+            local util = require('lspconfig.util')
             local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
             local buffer_autoformat = function(bufnr)
@@ -163,7 +164,7 @@ return {
             require('mason').setup()
 
             require('mason-lspconfig').setup({
-                ensure_installed = { 'eslint', 'clangd' },
+                ensure_installed = { 'eslint', 'clangd', 'lua_ls' },
                 handlers = {
                     function(server_name)
                         local opts = {
@@ -181,11 +182,32 @@ return {
                                     validate = 'on',
                                 },
                             }
+                        elseif server_name == 'lua_ls' then
+                            opts.settings = {
+                                Lua = {
+                                    diagnostics = {
+                                        globals = { 'vim' },
+                                    },
+                                },
+                            }
                         end
 
                         lspconfig[server_name].setup(opts)
                     end,
                 },
+            })
+
+            lspconfig.sourcekit.setup({
+                capabilities = capabilities,
+                cmd = {
+                    '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/sourcekit-lsp',
+                },
+                root_dir = function(fname)
+                    return util.root_pattern('buildServer.json')(fname)
+                        or util.root_pattern('*.xcodeproj', '*.xcworkspace')(fname)
+                        or util.find_git_ancestor(fname)
+                        or util.root_pattern('Package.swift')(fname)
+                end,
             })
         end,
     },

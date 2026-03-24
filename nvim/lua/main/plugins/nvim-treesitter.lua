@@ -5,7 +5,7 @@ return {
         local configs = require("nvim-treesitter.configs")
 
         configs.setup({
-            ensure_installed = { "lua", "vim", "javascript", "html", "rust", "typescript", "glsl", "java" },
+            ensure_installed = { "lua", 'gdscript', 'godot_resource', 'gdshader', "vim", "javascript", "html", "rust", "typescript", "glsl", "wgsl", "java" },
             sync_install = false,
             highlight = { enable = true },
             indent = { enable = true },
