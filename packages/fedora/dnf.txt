@@ -326,6 +326,8 @@ NetworkManager-ssh-gnome
 NetworkManager-vpnc-gnome
 NetworkManager-wifi
 NetworkManager-wwan
+nextcloud-client
+nextcloud-client-nautilus
 nfs-utils
 ninja-build
 nmap-ncat
@@ -448,6 +450,7 @@ rsyslog
 rygel
 samba-client
 sane-backends-drivers-scanners
+scenebuilder
 scrcpy
 seahorse
 selinux-policy-targeted
