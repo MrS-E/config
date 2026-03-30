@@ -6,22 +6,30 @@ set -euo pipefail
 # Usage:
 #   work-finder [-d YYYY-MM-DD] [-a AUTHOR_REGEX] ROOT [ROOT ...]
 #   eval "$(/path/to/work-finder --shell-integration)"
+#
+# Env:
+#   WORK_FINDER_JOBS   Number of parallel jobs (default: CPU count)
 
 usage() {
   cat <<'EOF'
 Usage:
-  work-finder [-d YYYY-MM-DD] [-a AUTHOR_REGEX] ROOT [ROOT ...]
+  work-finder [-d YYYY-MM-DD] [-a AUTHOR_REGEX] [-G] ROOT [ROOT ...]
   work-finder --shell-integration
 
 Options:
   -d YYYY-MM-DD   Day to inspect. Defaults to today.
   -a AUTHOR_REGEX Regex matched against git author name/email.
+  -G              Skip non-git file scanning.
   -h              Show this help.
+
+Environment:
+  WORK_FINDER_JOBS   Number of parallel jobs (default: CPU count)
 
 Examples:
   work-finder ~/code ~/scratch
   work-finder -d 2026-03-29 ~/code ~/notes
   work-finder -a "me@example.com|My Name" ~/work ~/lab
+  work-finder -G ~/work
 EOF
 }
 
@@ -42,11 +50,12 @@ _work_finder_complete() {
   local curcontext="\$curcontext" state line
   typeset -A opt_args
 
-  _arguments -s \
-    '(-h --help)'{-h,--help}'[Show help]' \
-    '-d[Day to inspect]:date (YYYY-MM-DD):' \
-    '-a[Author regex]:author regex:' \
-    '*:root directory:_files -/'
+_arguments -s \
+  '(-h --help)'{-h,--help}'[Show help]' \
+  '-d[Day to inspect]:date (YYYY-MM-DD):' \
+  '-a[Author regex]:author regex:' \
+  '-G[Skip non-git file scanning]' \
+  '*:root directory:_files -/'
 }
 
 compdef _work_finder_complete work-finder
@@ -94,13 +103,26 @@ stat_mtime() {
   stat -f %m "$file"
 }
 
+default_jobs() {
+  if command -v sysctl >/dev/null 2>&1; then
+    sysctl -n hw.ncpu 2>/dev/null || echo 4
+  elif command -v getconf >/dev/null 2>&1; then
+    getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4
+  else
+    echo 4
+  fi
+}
+
 TARGET_DAY="$(today_ymd)"
 AUTHOR_REGEX=""
+SKIP_NON_GIT=0
+JOBS="${WORK_FINDER_JOBS:-$(default_jobs)}"
 
-while getopts ":d:a:h" opt; do
+while getopts ":d:a:Gh" opt; do
   case "$opt" in
     d) TARGET_DAY="$OPTARG" ;;
     a) AUTHOR_REGEX="$OPTARG" ;;
+    G) SKIP_NON_GIT=1 ;;
     h)
       usage
       exit 0
@@ -152,32 +174,72 @@ if [[ -z "$AUTHOR_REGEX" ]]; then
   fi
 fi
 
-declare -a REPOS=()
+REPOS=()
 
 repo_seen() {
   local candidate="$1"
   local existing
 
-  [[ ${#REPOS[@]:-0} -eq 0 ]] && return 1
-
-  for existing in "${REPOS[@]}"; do
+  for existing in ${REPOS+"${REPOS[@]}"}; do
     [[ "$existing" == "$candidate" ]] && return 0
   done
   return 1
 }
 
-find_git_repos() {
+find_git_repos_to_file() {
   local root="$1"
+  local outfile="$2"
+
+  : >"$outfile"
   [[ -d "$root" ]] || return 0
 
-  while IFS= read -r -d '' gitdir; do
-    local repo_root
-    repo_root="$(dirname "$gitdir")"
+  find "$root" -type d -name .git -prune -print0 2>/dev/null |
+    while IFS= read -r -d '' gitdir; do
+      dirname "$gitdir"
+    done >>"$outfile"
+}
 
-    if ! repo_seen "$repo_root"; then
-      REPOS+=("$repo_root")
+discover_repos_parallel() {
+  local tmpdir="$1"
+  shift
+
+  local pids=()
+  local active_pids=()
+  local outfiles=()
+  local root outfile pid idx=0
+
+  for root in "$@"; do
+    while [[ "${#active_pids[@]}" -ge "$JOBS" ]]; do
+      wait "${active_pids[0]}" || true
+      active_pids=("${active_pids[@]:1}")
+    done
+
+    outfile="$tmpdir/repos.$idx.list"
+    find_git_repos_to_file "$root" "$outfile" &
+    pid="$!"
+    pids+=("$pid")
+    active_pids+=("$pid")
+    outfiles+=("$outfile")
+    idx=$((idx + 1))
+  done
+
+  for pid in "${active_pids[@]}"; do
+    wait "$pid" || true
+  done
+
+  REPOS=()
+  while IFS= read -r repo; do
+    [[ -n "$repo" ]] || continue
+    if ! repo_seen "$repo"; then
+      REPOS+=("$repo")
     fi
-  done < <(find "$root" -type d -name .git -prune -print0 2>/dev/null)
+  done < <(cat "${outfiles[@]}" 2>/dev/null | sort -u)
+}
+
+count_files_under_root() {
+  local root="$1"
+  [[ -d "$root" ]] || { echo 0; return; }
+  find "$root" -type f 2>/dev/null | wc -l | tr -d ' '
 }
 
 get_default_branch() {
@@ -302,10 +364,16 @@ report_repo() {
   fi
 }
 
+report_repo_to_file() {
+  local repo="$1"
+  local outfile="$2"
+  report_repo "$repo" >"$outfile"
+}
+
 is_inside_any_repo() {
   local path="$1"
   local repo
-  for repo in "${REPOS[@]}"; do
+  for repo in ${REPOS+"${REPOS[@]}"}; do
     case "$path" in
       "$repo"/*|"$repo") return 0 ;;
     esac
@@ -318,13 +386,13 @@ report_non_git_files() {
   [[ -d "$root" ]] || return 0
 
   local printed_header=0
+  local file mtime
 
   while IFS= read -r -d '' file; do
     if is_inside_any_repo "$file"; then
       continue
     fi
 
-    local mtime
     mtime="$(stat_mtime "$file" 2>/dev/null || true)"
     [[ -n "$mtime" ]] || continue
 
@@ -342,18 +410,170 @@ report_non_git_files() {
   fi
 }
 
+report_non_git_files_to_file() {
+  local root="$1"
+  local outfile="$2"
+  report_non_git_files "$root" >"$outfile"
+}
+
+progress_total=0
+progress_width=32
+
+progress_init() {
+  progress_total="$1"
+}
+
+progress_draw() {
+  local done="$1"
+  local total="$2"
+  local filled empty percent bar empty_bar
+
+  if [[ "$total" -le 0 ]]; then
+    total=1
+  fi
+
+  percent=$(( done * 100 / total ))
+  filled=$(( done * progress_width / total ))
+  empty=$(( progress_width - filled ))
+
+  printf -v bar '%*s' "$filled" ''
+  bar="${bar// /#}"
+  printf -v empty_bar '%*s' "$empty" ''
+  empty_bar="${empty_bar// /-}"
+
+  printf '\r[%s%s] %3d%% (%d/%d)' "$bar" "$empty_bar" "$percent" "$done" "$total"
+}
+
+progress_finish() {
+  progress_draw "$progress_total" "$progress_total"
+  printf '\n'
+}
+
+run_repo_reports_parallel() {
+  local tmpdir="$1"
+  shift
+
+  local active_pids=()
+  local files=()
+  local repo outfile pid idx=0 total="$#" done=0
+
+  progress_init "$total"
+
+  for repo in "$@"; do
+    while [[ "${#active_pids[@]}" -ge "$JOBS" ]]; do
+      wait "${active_pids[0]}" || true
+      done=$((done + 1))
+      progress_draw "$done" "$total"
+      active_pids=("${active_pids[@]:1}")
+    done
+
+    outfile="$tmpdir/repo.$idx.out"
+    report_repo_to_file "$repo" "$outfile" &
+    pid="$!"
+    active_pids+=("$pid")
+    files+=("$outfile")
+    idx=$((idx + 1))
+  done
+
+  for pid in "${active_pids[@]}"; do
+    wait "$pid" || true
+    done=$((done + 1))
+    progress_draw "$done" "$total"
+  done
+  progress_finish
+
+  local file
+  for file in "${files[@]}"; do
+    cat "$file"
+  done
+}
+
+run_non_git_parallel() {
+  local tmpdir="$1"
+  shift
+
+  local active_pids=()
+  local files=()
+  local root outfile pid idx=0 total="$#" done=0
+
+  progress_init "$total"
+
+  for root in "$@"; do
+    while [[ "${#active_pids[@]}" -ge "$JOBS" ]]; do
+      wait "${active_pids[0]}" || true
+      done=$((done + 1))
+      progress_draw "$done" "$total"
+      active_pids=("${active_pids[@]:1}")
+    done
+
+    outfile="$tmpdir/nongit.$idx.out"
+    report_non_git_files_to_file "$root" "$outfile" &
+    pid="$!"
+    active_pids+=("$pid")
+    files+=("$outfile")
+    idx=$((idx + 1))
+  done
+
+  for pid in "${active_pids[@]}"; do
+    wait "$pid" || true
+    done=$((done + 1))
+    progress_draw "$done" "$total"
+  done
+  progress_finish
+
+  local file
+  for file in "${files[@]}"; do
+    cat "$file"
+  done
+}
+
+spinner() {
+  local pid="$1"
+  local msg="$2"
+  local delay=0.1
+  local spin='|/-\'
+  local i=0
+
+  while kill -0 "$pid" 2>/dev/null; do
+    printf '\r[%c] %s' "${spin:$i:1}" "$msg"
+    i=$(( (i + 1) % 4 ))
+    sleep "$delay"
+  done
+
+  wait "$pid" || return 1
+  printf '\r[✔] %s\n' "$msg"
+}
+
 echo "Date:   $TARGET_DAY"
 echo "Author: $AUTHOR_REGEX"
+echo "Jobs:   $JOBS"
 echo
 
-for root in "${ROOTS[@]}"; do
-  find_git_repos "$root"
-done
+tmpdir="$(mktemp -d "${TMPDIR:-/tmp}/work-finder.XXXXXX")"
+trap 'rm -rf "$tmpdir"' EXIT
 
-for repo in "${REPOS[@]}"; do
-  report_repo "$repo"
-done
+discover_repos_parallel "$tmpdir" "${ROOTS[@]}" &
+spinner "$!" "Discovering repos..."
+echo "Found repos: ${#REPOS[@]}"
 
-for root in "${ROOTS[@]}"; do
-  report_non_git_files "$root"
-done
+if [[ "$SKIP_NON_GIT" -eq 0 ]]; then
+  file_estimate=0
+  for root in "${ROOTS[@]}"; do
+    c="$(count_files_under_root "$root")"
+    file_estimate=$((file_estimate + c))
+  done
+  echo "Estimated files to inspect: $file_estimate"
+else
+  echo "Estimated files to inspect: skipped (-G)"
+fi
+echo
+
+if [[ "${#REPOS[@]}" -gt 0 ]]; then
+  echo "Scanning git repos..."
+  run_repo_reports_parallel "$tmpdir" "${REPOS[@]}"
+fi
+
+if [[ "$SKIP_NON_GIT" -eq 0 ]]; then
+  echo "Scanning non-git files..."
+  run_non_git_parallel "$tmpdir" "${ROOTS[@]}"
+fi
