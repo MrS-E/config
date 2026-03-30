@@ -1,0 +1,324 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# scan-work.sh
+#
+# Usage:
+#   scan-work.sh [-d YYYY-MM-DD] [-a AUTHOR_REGEX] ROOT [ROOT ...]
+#   eval "$(/path/to/scan-work.sh --shell-integration)"
+#
+# Examples:
+#   scan-work.sh ~/code ~/scratch
+#   scan-work.sh -d 2026-03-29 ~/code ~/notes
+#   scan-work.sh -a "me@example.com|My Name" ~/work ~/lab
+#
+# Notes:
+# - Requires: bash, git, find, date, stat
+# - "AUTHOR_REGEX" is matched against git author name/email.
+# - If -a is omitted, it uses your global git user.name and user.email.
+# - "Merged" detection is best-effort and checks merge commits on the repo's default branch.
+
+usage() {
+  cat <<'EOF'
+Usage:
+  scan-work.sh [-d YYYY-MM-DD] [-a AUTHOR_REGEX] ROOT [ROOT ...]
+  scan-work.sh --shell-integration
+
+Options:
+  -d YYYY-MM-DD   Day to inspect. Defaults to today.
+  -a AUTHOR_REGEX Regex matched against git author name/email.
+  -h              Show this help.
+
+Examples:
+  scan-work.sh ~/code ~/scratch
+  scan-work.sh -d 2026-03-29 ~/code ~/notes
+  scan-work.sh -a "me@example.com|My Name" ~/work ~/lab
+EOF
+}
+
+emit_shell_integration() {
+  local script_path
+  if command -v realpath >/dev/null 2>&1; then
+    script_path="$(realpath "$0" 2>/dev/null || printf '%s' "$0")"
+  else
+    script_path="$0"
+  fi
+
+  cat <<EOF
+work-finder() {
+  "$script_path" "\$@"
+}
+
+_work_finder_complete() {
+  local curcontext="\$curcontext" state line
+  typeset -A opt_args
+
+_arguments -s \
+  '(-h --help)'{-h,--help}'[Show help]' \
+  '-d[Day to inspect]:date (YYYY-MM-DD):' \
+  '-a[Author regex]:author regex:' \
+  '*:root directory:_files -/'
+}
+
+compdef _work_finder_complete work-finder
+EOF
+}
+
+if [[ "${1:-}" == "--shell-integration" ]]; then
+  emit_shell_integration
+  exit 0
+fi
+
+TARGET_DAY="$(date +%F)"
+AUTHOR_REGEX=""
+
+while getopts ":d:a:h" opt; do
+  case "$opt" in
+    d) TARGET_DAY="$OPTARG" ;;
+    a) AUTHOR_REGEX="$OPTARG" ;;
+    h)
+      usage
+      exit 0
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      usage >&2
+      exit 1
+      ;;
+    \?)
+      echo "Unknown option: -$OPTARG" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+if [[ $# -lt 1 ]]; then
+  usage >&2
+  exit 1
+fi
+
+ROOTS=("$@")
+
+# Validate date
+if ! date -d "$TARGET_DAY" +%F >/dev/null 2>&1; then
+  echo "Invalid date: $TARGET_DAY" >&2
+  exit 1
+fi
+
+DAY_START="$(date -d "$TARGET_DAY 00:00:00" '+%Y-%m-%d %H:%M:%S')"
+DAY_END="$(date -d "$TARGET_DAY 23:59:59" '+%Y-%m-%d %H:%M:%S')"
+DAY_START_EPOCH="$(date -d "$DAY_START" +%s)"
+DAY_END_EPOCH="$(date -d "$DAY_END" +%s)"
+
+# Build default author regex from git config if not provided
+if [[ -z "$AUTHOR_REGEX" ]]; then
+  git_name="$(git config --global --get user.name || true)"
+  git_email="$(git config --global --get user.email || true)"
+
+  if [[ -n "$git_name" && -n "$git_email" ]]; then
+    AUTHOR_REGEX="${git_name}|${git_email}"
+  elif [[ -n "$git_email" ]]; then
+    AUTHOR_REGEX="${git_email}"
+  elif [[ -n "$git_name" ]]; then
+    AUTHOR_REGEX="${git_name}"
+  else
+    echo "Could not infer author from git config. Use -a AUTHOR_REGEX." >&2
+    exit 1
+  fi
+fi
+
+declare -A REPO_SEEN=()
+declare -a REPOS=()
+
+find_git_repos() {
+  local root="$1"
+  [[ -d "$root" ]] || return 0
+
+  while IFS= read -r -d '' gitdir; do
+    local repo_root
+    repo_root="$(dirname "$gitdir")"
+    if [[ -z "${REPO_SEEN["$repo_root"]+x}" ]]; then
+      REPO_SEEN["$repo_root"]=1
+      REPOS+=("$repo_root")
+    fi
+  done < <(find "$root" -type d -name .git -prune -print0 2>/dev/null)
+}
+
+get_default_branch() {
+  local repo="$1"
+  (
+    cd "$repo"
+
+    local branch
+    branch="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null || true)"
+    if [[ -n "$branch" ]]; then
+      echo "${branch#origin/}"
+      exit 0
+    fi
+
+    branch="$(git branch --show-current 2>/dev/null || true)"
+    if [[ -n "$branch" ]]; then
+      echo "$branch"
+      exit 0
+    fi
+
+    if git show-ref --verify --quiet refs/heads/main; then
+      echo "main"
+    elif git show-ref --verify --quiet refs/heads/master; then
+      echo "master"
+    else
+      git for-each-ref --format='%(refname:short)' refs/heads | head -n1
+    fi
+  )
+}
+
+extract_branch_name_from_merge_subject() {
+  local subject="$1"
+
+  if [[ "$subject" =~ ^Merge\ branch\ \'([^\']+)\' ]]; then
+    echo "${BASH_REMATCH[1]}"
+    return
+  fi
+
+  if [[ "$subject" =~ ^Merge\ remote-tracking\ branch\ \'([^\']+)\' ]]; then
+    echo "${BASH_REMATCH[1]}"
+    return
+  fi
+
+  if [[ "$subject" =~ ^Merge\ pull\ request\ .+\ from\ (.+)$ ]]; then
+    echo "${BASH_REMATCH[1]}"
+    return
+  fi
+
+  echo "unknown-branch"
+}
+
+find_merge_for_commit() {
+  local repo="$1"
+  local main_branch="$2"
+  local commit="$3"
+
+  (
+    cd "$repo"
+
+    git merge-base --is-ancestor "$commit" "$main_branch" 2>/dev/null || exit 0
+
+    while IFS= read -r merge; do
+      [[ -n "$merge" ]] || continue
+
+      local p1 p2
+      p1="$(git rev-parse "${merge}^1" 2>/dev/null || true)"
+      p2="$(git rev-parse "${merge}^2" 2>/dev/null || true)"
+      [[ -n "$p1" && -n "$p2" ]] || continue
+
+      if git merge-base --is-ancestor "$commit" "$p2" 2>/dev/null &&
+         ! git merge-base --is-ancestor "$commit" "$p1" 2>/dev/null; then
+        local subj branch
+        subj="$(git log -1 --format='%s' "$merge")"
+        branch="$(extract_branch_name_from_merge_subject "$subj")"
+        printf '%s\t%s\t%s\n' "$merge" "$branch" "$subj"
+        exit 0
+      fi
+    done < <(git rev-list --first-parent --merges "$main_branch")
+  )
+}
+
+report_repo() {
+  local repo="$1"
+  local main_branch
+  main_branch="$(get_default_branch "$repo")"
+
+  local found_any=0
+  local merge_info merge_sha merge_branch merge_subject
+
+  while IFS=$'\t' read -r commit author_name author_email cdate subject; do
+    [[ -n "$commit" ]] || continue
+    if [[ $found_any -eq 0 ]]; then
+      echo "REPO: $repo"
+      [[ -n "$main_branch" ]] && echo "  default-branch: $main_branch"
+      found_any=1
+    fi
+
+    echo "  commit: $(git -C "$repo" rev-parse --short "$commit")  $subject"
+    echo "    author: $author_name <$author_email>"
+    echo "    date:   $cdate"
+
+    if [[ -n "$main_branch" ]]; then
+      merge_info="$(find_merge_for_commit "$repo" "$main_branch" "$commit" || true)"
+      if [[ -n "$merge_info" ]]; then
+        IFS=$'\t' read -r merge_sha merge_branch merge_subject <<< "$merge_info"
+        echo "    merged-via: $(git -C "$repo" rev-parse --short "$merge_sha")  $merge_subject"
+        echo "    merged-branch: $merge_branch"
+      fi
+    fi
+  done < <(
+    git -C "$repo" log --all \
+      --since="$DAY_START" \
+      --until="$DAY_END" \
+      --author="$AUTHOR_REGEX" \
+      --format=$'%H\t%an\t%ae\t%ad\t%s' \
+      --date=iso-strict 2>/dev/null || true
+  )
+
+  if [[ $found_any -eq 1 ]]; then
+    echo
+  fi
+}
+
+is_inside_any_repo() {
+  local path="$1"
+  local repo
+  for repo in "${REPOS[@]}"; do
+    case "$path" in
+      "$repo"/*|"$repo") return 0 ;;
+    esac
+  done
+  return 1
+}
+
+report_non_git_files() {
+  local root="$1"
+  [[ -d "$root" ]] || return 0
+
+  local printed_header=0
+
+  while IFS= read -r -d '' file; do
+    if is_inside_any_repo "$file"; then
+      continue
+    fi
+
+    local mtime
+    mtime="$(stat -c %Y "$file" 2>/dev/null || true)"
+    [[ -n "$mtime" ]] || continue
+
+    if (( mtime >= DAY_START_EPOCH && mtime <= DAY_END_EPOCH )); then
+      if [[ $printed_header -eq 0 ]]; then
+        echo "NON-GIT MODIFIED FILES UNDER: $root"
+        printed_header=1
+      fi
+      echo "  $file"
+    fi
+  done < <(find "$root" -type f -print0 2>/dev/null)
+
+  if [[ $printed_header -eq 1 ]]; then
+    echo
+  fi
+}
+
+echo "Date:   $TARGET_DAY"
+echo "Author: $AUTHOR_REGEX"
+echo
+
+for root in "${ROOTS[@]}"; do
+  find_git_repos "$root"
+done
+
+for repo in "${REPOS[@]}"; do
+  report_repo "$repo"
+done
+
+for root in "${ROOTS[@]}"; do
+  report_non_git_files "$root"
+done
