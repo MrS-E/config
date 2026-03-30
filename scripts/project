@@ -1,0 +1,332 @@
+#!/usr/bin/env bash
+set -u
+
+# ---- project: tiny project switcher ----------------------------------------------------
+# Usage:
+#   project -a myproj ~/src/myproj
+#   project -d myproj "Cool service"
+#   project myproj              # prints path when called directly
+#   project -i myproj           # show info
+#   project -l                  # list grouped by path
+#   project --print-path myproj # print only the path
+#   eval "$(/path/to/project --shell-integration)"  # enable shell wrapper + zsh completion
+
+: "${PROJECT_DB_DIR:="$HOME/.local/share/projectctl"}"
+
+project__dbdir() {
+  local d="${PROJECT_DB_DIR:-$HOME/.local/share/projectctl}"
+
+  if command -v mkdir >/dev/null 2>&1; then
+    mkdir -p "$d" 2>/dev/null || true
+  elif [[ -x /bin/mkdir ]]; then
+    /bin/mkdir -p "$d" 2>/dev/null || true
+  elif [[ -x /usr/bin/mkdir ]]; then
+    /usr/bin/mkdir -p "$d" 2>/dev/null || true
+  else
+    printf '\033[33mWarning:\033[0m cannot find mkdir; please create %s manually\n' "$d" >&2
+  fi
+
+  printf '%s\n' "$d"
+}
+
+project__file() {
+  local n="$1"
+  n="${n//[^A-Za-z0-9._-]/_}"
+  printf '%s/%s.proj' "$(project__dbdir)" "$n"
+}
+
+project__save() {
+  local name="$1" path="$2" desc="$3" file
+  file="$(project__file "$name")"
+
+  if command -v realpath >/dev/null 2>&1; then
+    path="$(realpath -m -- "$path" 2>/dev/null || printf '%s' "$path")"
+  fi
+
+  {
+    printf 'name=%q\n' "$name"
+    printf 'path=%q\n' "$path"
+    printf 'desc=%q\n' "$desc"
+  } >"$file"
+}
+
+project__load() {
+  local name="$1" file
+  file="$(project__file "$name")"
+  [[ -f "$file" ]] || return 1
+
+  local name="" path="" desc=""
+  # shellcheck disable=SC1090
+  . "$file" 2>/dev/null || return 1
+
+  printf '%s\n%s\n' "${path:-}" "${desc:-}"
+}
+
+project__exists() {
+  [[ -f "$(project__file "$1")" ]]
+}
+
+project__error() { printf '\033[31m❌ %s\033[0m\n' "$*" >&2; }
+project__info()  { printf '\033[36m➜ %s\033[0m\n' "$*"; }
+project__ok()    { printf '\033[32m✔ %s\033[0m\n' "$*"; }
+
+project__help() {
+  cat <<'EOF'
+project - tiny project switcher
+
+Commands:
+  project NAME              print path for project NAME
+  project --print-path NAME print only the path
+  project -a NAME PATH      add/update mapping
+  project -d NAME "desc"    set/replace description
+  project -i NAME           show path + description
+  project -l                list projects grouped by path
+  project -h                help
+
+Notes:
+  • Data: $PROJECT_DB_DIR (default: ~/.local/share/projectctl).
+  • As a normal executable, this script cannot cd your current shell.
+  • Use --shell-integration from ~/.zshrc to enable a shell wrapper that can cd.
+EOF
+}
+
+project__list() {
+  local f path name desc
+  local tmp="${TMPDIR:-/tmp}/project.$$.tmp"
+  : >"$tmp" || {
+    project__error "Cannot create temp file"
+    return 1
+  }
+
+  shopt -s nullglob
+  for f in "$(project__dbdir)"/*.proj; do
+    [[ -e "$f" ]] || continue
+
+    path=""
+    name=""
+    desc=""
+    # shellcheck disable=SC1090
+    . "$f" 2>/dev/null || continue
+
+    printf '%s\t%s\t%s\n' "${path:-}" "${name:-}" "${desc:-}" >>"$tmp"
+  done
+  shopt -u nullglob
+
+  if [[ ! -s "$tmp" ]]; then
+    project__info "No projects saved yet. Use: project -a NAME PATH"
+    rm -f "$tmp"
+    return 0
+  fi
+
+  if command -v sort >/dev/null 2>&1; then
+    local tmp_sorted="${TMPDIR:-/tmp}/project.$$.sorted"
+    sort -t$'\t' -k1,1 "$tmp" >"$tmp_sorted" && mv "$tmp_sorted" "$tmp"
+  fi
+
+  local current_path="" names="" descs=""
+  while IFS=$'\t' read -r path name desc; do
+    if [[ "$path" != "$current_path" && -n "$current_path" ]]; then
+      printf '\033[1m%s\033[0m\n' "${names%, }"
+      [[ -n "$descs" ]] && printf '%s\n' "$descs"
+      printf '%s\n\n' "$current_path"
+      names=""
+      descs=""
+    fi
+
+    current_path="$path"
+    names+="$name, "
+    [[ -n "$desc" ]] && descs="${descs:+$descs, }$desc"
+  done <"$tmp"
+
+  if [[ -n "$current_path" ]]; then
+    printf '\033[1m%s\033[0m\n' "${names%, }"
+    [[ -n "$descs" ]] && printf '%s\n' "$descs"
+    printf '%s\n' "$current_path"
+  fi
+  printf '\n'
+
+  rm -f "$tmp"
+}
+
+project__emit_shell_integration() {
+  local script_path
+  if command -v realpath >/dev/null 2>&1; then
+    script_path="$(realpath "$0" 2>/dev/null || printf '%s' "$0")"
+  else
+    script_path="$0"
+  fi
+
+  cat <<EOF
+project() {
+  if [[ \$# -eq 1 && "\$1" != -* ]]; then
+    local target
+    target="\$("$script_path" --print-path "\$1")" || return
+    builtin cd "\$target" || return
+  else
+    "$script_path" "\$@"
+  fi
+}
+
+_project_complete() {
+  local -a opts projs
+  local dbdir
+  dbdir="\${PROJECT_DB_DIR:-\$HOME/.local/share/projectctl}"
+
+  opts=(-a -d -i -l -h --help)
+  projs=()
+  [[ -d "\$dbdir" ]] && projs=(\${(@f)\$(command ls -1 "\$dbdir" 2>/dev/null | sed 's/\\.proj\$//')})
+
+  case "\${words[2]:-}" in
+    -i|-d)
+      _describe -t projects 'project names' projs && return
+      ;;
+  esac
+
+  _arguments \
+    '(-a -d -i -l -h --help)--help[Show help]' \
+    '(-a -d -i -l -h --help)-h[Show help]' \
+    '(-a -d -i -h --help)-l[List projects]' \
+    '(-d -i -l -h --help)-a[Add project]:name: :path:_files -/' \
+    '(-a -i -l -h --help)-d[Set description]:name:->project_name:description:' \
+    '(-a -d -l -h --help)-i[Info]:name:->project_name' \
+    '(--print-path)--print-path[Print project path]:name:->project_name' \
+    '*:project name:->project_name'
+
+  case "\$state" in
+    project_name)
+      _describe -t projects 'project names' projs
+      ;;
+  esac
+}
+
+compdef _project_complete project
+EOF
+}
+
+main() {
+  local PATH="$PATH:/usr/bin:/bin:/usr/local/bin"
+  project__dbdir >/dev/null
+
+  if [[ $# -eq 0 || "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    project__help
+    return 0
+  fi
+
+  case "$1" in
+    --shell-integration)
+      project__emit_shell_integration
+      ;;
+
+    -a)
+      local name="${2:-}" path="${3:-}"
+      if [[ -z "$name" || -z "$path" ]]; then
+        project__error "Usage: project -a NAME PATH"
+        return 2
+      fi
+      if [[ ! -d "$path" ]]; then
+        project__error "Path does not exist: $path"
+        return 2
+      fi
+      project__save "$name" "$path" ""
+      project__ok "Saved '$name' → $path"
+      ;;
+
+    -d)
+      local name="${2:-}"
+      shift 2 || true
+      local desc="$*"
+
+      if [[ -z "$name" ]]; then
+        project__error 'Usage: project -d NAME "description"'
+        return 2
+      fi
+      if ! project__exists "$name"; then
+        project__error "No such project: $name"
+        return 1
+      fi
+
+      local path curdesc
+      local -a project_data=()
+      mapfile -t project_data < <(project__load "$name") || return 1
+      path="${project_data[0]:-}"
+      curdesc="${project_data[1]:-}"
+
+      project__save "$name" "$path" "$desc"
+      project__ok "Description set for '$name'"
+      ;;
+
+    -i)
+      local name="${2:-}"
+      if [[ -z "$name" ]]; then
+        project__error "Usage: project -i NAME"
+        return 2
+      fi
+      if ! project__exists "$name"; then
+        project__error "No such project: $name"
+        return 1
+      fi
+
+      local path desc
+      local -a project_data=()
+      mapfile -t project_data < <(project__load "$name") || return 1
+      path="${project_data[0]:-}"
+      desc="${project_data[1]:-}"
+
+      printf '\033[1m%s\033[0m\n' "$name"
+      printf '  Path: %s\n' "$path"
+      [[ -n "$desc" ]] && printf '  Desc: %s\n' "$desc"
+      ;;
+
+    -l)
+      project__list
+      ;;
+
+    --print-path)
+      local name="${2:-}"
+      if [[ -z "$name" ]]; then
+        project__error "Usage: project --print-path NAME"
+        return 2
+      fi
+      if ! project__exists "$name"; then
+        project__error "No such project: $name"
+        return 1
+      fi
+
+      local path desc
+      local -a project_data=()
+      mapfile -t project_data < <(project__load "$name") || return 1
+      path="${project_data[0]:-}"
+      desc="${project_data[1]:-}"
+
+      if [[ ! -d "$path" ]]; then
+        project__error "Path no longer exists: $path"
+        return 1
+      fi
+
+      printf '%s\n' "$path"
+      ;;
+
+    *)
+      local name="$1"
+      if ! project__exists "$name"; then
+        project__error "No such project: $name"
+        return 1
+      fi
+
+      local path desc
+      local -a project_data=()
+      mapfile -t project_data < <(project__load "$name") || return 1
+      path="${project_data[0]:-}"
+      desc="${project_data[1]:-}"
+
+      if [[ ! -d "$path" ]]; then
+        project__error "Path no longer exists: $path"
+        return 1
+      fi
+
+      printf '%s\n' "$path"
+      ;;
+  esac
+}
+
+main "$@"

@@ -465,8 +465,19 @@ if (( $+commands[brew] )); then
     esac
   }
 fi 
-# Projects
-[[ -f "$CONFIG_DIR/scripts/project.sh" ]] && source "$CONFIG_DIR/scripts/project.sh"
+
+# Custom Utility
+local CUSTOM_SCRIPTS="$CONFIG_DIR/scripts"
+
+if [[ -d "$CUSTOM_SCRIPTS" ]]; then
+  export PATH="$CUSTOM_SCRIPTS:$PATH"
+
+  for script in "$CUSTOM_SCRIPTS"/*; do
+    [[ -f "$script" && -x "$script" ]] || continue
+
+    eval "$("$script" --shell-integration 2>/dev/null)" || true
+  done
+fi
 
 # ESP-IDF
 export IDF_PATH="$HOME/esp/esp-idf"
@@ -569,6 +580,7 @@ idf() {
       . ./export.sh
 
       echo "ESP-IDF ready: $(idf.py --version)"
+      cd -
       ;;
     *)
       if command -v idf.py >/dev/null 2>&1; then
