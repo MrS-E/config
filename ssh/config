@@ -1,10 +1,10 @@
 Include ~/.ssh/config.d/*
 
 Host *
-    UseKeychain yes
     AddKeysToAgent yes
     ForwardAgent yes
-    IdentityFile ~/.ssh/id_rsa
+    # UseKeychain yes
+    # IdentityFile ~/.ssh/id_rsa
 
 Host *
   ControlMaster auto
