@@ -1,0 +1,5 @@
+Host debug-pi
+  Hostname influx-debug.local
+  IdentityFile ~/.ssh/id_rsa
+  User debugpi
+  Port 22
