@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# scan-work.sh
+# work-finder
 #
 # Usage:
-#   scan-work.sh [-d YYYY-MM-DD] [-a AUTHOR_REGEX] ROOT [ROOT ...]
-#   eval "$(/path/to/scan-work.sh --shell-integration)"
+#   work-finder [-d YYYY-MM-DD] [-a AUTHOR_REGEX] ROOT [ROOT ...]
+#   eval "$(/path/to/work-finder --shell-integration)"
 #
 # Examples:
-#   scan-work.sh ~/code ~/scratch
-#   scan-work.sh -d 2026-03-29 ~/code ~/notes
-#   scan-work.sh -a "me@example.com|My Name" ~/work ~/lab
+#   work-finder ~/code ~/scratch
+#   work-finder -d 2026-03-29 ~/code ~/notes
+#   work-finder -a "me@example.com|My Name" ~/work ~/lab
 #
 # Notes:
 # - Requires: bash, git, find, date, stat
@@ -21,8 +21,8 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  scan-work.sh [-d YYYY-MM-DD] [-a AUTHOR_REGEX] ROOT [ROOT ...]
-  scan-work.sh --shell-integration
+  work-finder [-d YYYY-MM-DD] [-a AUTHOR_REGEX] ROOT [ROOT ...]
+  work-finder --shell-integration
 
 Options:
   -d YYYY-MM-DD   Day to inspect. Defaults to today.
@@ -30,9 +30,9 @@ Options:
   -h              Show this help.
 
 Examples:
-  scan-work.sh ~/code ~/scratch
-  scan-work.sh -d 2026-03-29 ~/code ~/notes
-  scan-work.sh -a "me@example.com|My Name" ~/work ~/lab
+  work-finder ~/code ~/scratch
+  work-finder -d 2026-03-29 ~/code ~/notes
+  work-finder -a "me@example.com|My Name" ~/work ~/lab
 EOF
 }
 
@@ -63,6 +63,25 @@ _arguments -s \
 compdef _work_finder_complete work-finder
 EOF
 }
+
+parse_date() {
+  local input="$1"
+
+  # GNU date
+  if date -d "$input" +%F >/dev/null 2>&1; then
+    date -d "$input" '+%Y-%m-%d %H:%M:%S'
+    return 0
+  fi
+
+  # BSD/macOS date
+  if date -j -f "%Y-%m-%d" "$input" +%F >/dev/null 2>&1; then
+    date -j -f "%Y-%m-%d" "$input" '+%Y-%m-%d %H:%M:%S'
+    return 0
+  fi
+
+  return 1
+}
+
 
 if [[ "${1:-}" == "--shell-integration" ]]; then
   emit_shell_integration
@@ -102,15 +121,29 @@ fi
 ROOTS=("$@")
 
 # Validate date
-if ! date -d "$TARGET_DAY" +%F >/dev/null 2>&1; then
+DAY_START="$(parse_date "$TARGET_DAY 00:00:00")" || {
   echo "Invalid date: $TARGET_DAY" >&2
   exit 1
-fi
+}
 
-DAY_START="$(date -d "$TARGET_DAY 00:00:00" '+%Y-%m-%d %H:%M:%S')"
-DAY_END="$(date -d "$TARGET_DAY 23:59:59" '+%Y-%m-%d %H:%M:%S')"
-DAY_START_EPOCH="$(date -d "$DAY_START" +%s)"
-DAY_END_EPOCH="$(date -d "$DAY_END" +%s)"
+DAY_END="$(parse_date "$TARGET_DAY 23:59:59")" || {
+  echo "Invalid date: $TARGET_DAY" >&2
+  exit 1
+}
+
+# epoch conversion
+to_epoch() {
+  local input="$1"
+
+  if date -d "$input" +%s >/dev/null 2>&1; then
+    date -d "$input" +%s
+  else
+    date -j -f "%Y-%m-%d %H:%M:%S" "$input" +%s
+  fi
+}
+
+DAY_START_EPOCH="$(to_epoch "$DAY_START")"
+DAY_END_EPOCH="$(to_epoch "$DAY_END")"
 
 # Build default author regex from git config if not provided
 if [[ -z "$AUTHOR_REGEX" ]]; then
