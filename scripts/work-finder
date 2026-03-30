@@ -163,7 +163,7 @@ if [[ -z "$AUTHOR_REGEX" ]]; then
   git_email="$(git config --global --get user.email || true)"
 
   if [[ -n "$git_name" && -n "$git_email" ]]; then
-    AUTHOR_REGEX="${git_name}|${git_email}"
+    AUTHOR_REGEX="${git_name}\\|${git_email}"
   elif [[ -n "$git_email" ]]; then
     AUTHOR_REGEX="${git_email}"
   elif [[ -n "$git_name" ]]; then
