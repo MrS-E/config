@@ -6,17 +6,6 @@ set -euo pipefail
 # Usage:
 #   work-finder [-d YYYY-MM-DD] [-a AUTHOR_REGEX] ROOT [ROOT ...]
 #   eval "$(/path/to/work-finder --shell-integration)"
-#
-# Examples:
-#   work-finder ~/code ~/scratch
-#   work-finder -d 2026-03-29 ~/code ~/notes
-#   work-finder -a "me@example.com|My Name" ~/work ~/lab
-#
-# Notes:
-# - Requires: bash, git, find, date, stat
-# - "AUTHOR_REGEX" is matched against git author name/email.
-# - If -a is omitted, it uses your global git user.name and user.email.
-# - "Merged" detection is best-effort and checks merge commits on the repo's default branch.
 
 usage() {
   cat <<'EOF'
@@ -53,42 +42,59 @@ _work_finder_complete() {
   local curcontext="\$curcontext" state line
   typeset -A opt_args
 
-_arguments -s \
-  '(-h --help)'{-h,--help}'[Show help]' \
-  '-d[Day to inspect]:date (YYYY-MM-DD):' \
-  '-a[Author regex]:author regex:' \
-  '*:root directory:_files -/'
+  _arguments -s \
+    '(-h --help)'{-h,--help}'[Show help]' \
+    '-d[Day to inspect]:date (YYYY-MM-DD):' \
+    '-a[Author regex]:author regex:' \
+    '*:root directory:_files -/'
 }
 
 compdef _work_finder_complete work-finder
 EOF
 }
 
-parse_date() {
-  local input="$1"
-
-  # GNU date
-  if date -d "$input" +%F >/dev/null 2>&1; then
-    date -d "$input" '+%Y-%m-%d %H:%M:%S'
-    return 0
-  fi
-
-  # BSD/macOS date
-  if date -j -f "%Y-%m-%d" "$input" +%F >/dev/null 2>&1; then
-    date -j -f "%Y-%m-%d" "$input" '+%Y-%m-%d %H:%M:%S'
-    return 0
-  fi
-
-  return 1
-}
-
-
 if [[ "${1:-}" == "--shell-integration" ]]; then
   emit_shell_integration
   exit 0
 fi
 
-TARGET_DAY="$(date +%F)"
+today_ymd() {
+  date +%F
+}
+
+valid_ymd() {
+  local input="$1"
+
+  if date -d "$input" +%F >/dev/null 2>&1; then
+    return 0
+  fi
+
+  date -j -f "%Y-%m-%d" "$input" +%F >/dev/null 2>&1
+}
+
+to_epoch() {
+  local input="$1"
+
+  if date -d "$input" +%s >/dev/null 2>&1; then
+    date -d "$input" +%s
+    return 0
+  fi
+
+  date -j -f "%Y-%m-%d %H:%M:%S" "$input" +%s
+}
+
+stat_mtime() {
+  local file="$1"
+
+  if stat -c %Y "$file" >/dev/null 2>&1; then
+    stat -c %Y "$file"
+    return 0
+  fi
+
+  stat -f %m "$file"
+}
+
+TARGET_DAY="$(today_ymd)"
 AUTHOR_REGEX=""
 
 while getopts ":d:a:h" opt; do
@@ -120,32 +126,16 @@ fi
 
 ROOTS=("$@")
 
-# Validate date
-DAY_START="$(parse_date "$TARGET_DAY 00:00:00")" || {
+if ! valid_ymd "$TARGET_DAY"; then
   echo "Invalid date: $TARGET_DAY" >&2
   exit 1
-}
+fi
 
-DAY_END="$(parse_date "$TARGET_DAY 23:59:59")" || {
-  echo "Invalid date: $TARGET_DAY" >&2
-  exit 1
-}
-
-# epoch conversion
-to_epoch() {
-  local input="$1"
-
-  if date -d "$input" +%s >/dev/null 2>&1; then
-    date -d "$input" +%s
-  else
-    date -j -f "%Y-%m-%d %H:%M:%S" "$input" +%s
-  fi
-}
-
+DAY_START="$TARGET_DAY 00:00:00"
+DAY_END="$TARGET_DAY 23:59:59"
 DAY_START_EPOCH="$(to_epoch "$DAY_START")"
 DAY_END_EPOCH="$(to_epoch "$DAY_END")"
 
-# Build default author regex from git config if not provided
 if [[ -z "$AUTHOR_REGEX" ]]; then
   git_name="$(git config --global --get user.name || true)"
   git_email="$(git config --global --get user.email || true)"
@@ -162,8 +152,19 @@ if [[ -z "$AUTHOR_REGEX" ]]; then
   fi
 fi
 
-declare -A REPO_SEEN=()
 declare -a REPOS=()
+
+repo_seen() {
+  local candidate="$1"
+  local existing
+
+  [[ ${#REPOS[@]:-0} -eq 0 ]] && return 1
+
+  for existing in "${REPOS[@]}"; do
+    [[ "$existing" == "$candidate" ]] && return 0
+  done
+  return 1
+}
 
 find_git_repos() {
   local root="$1"
@@ -172,8 +173,8 @@ find_git_repos() {
   while IFS= read -r -d '' gitdir; do
     local repo_root
     repo_root="$(dirname "$gitdir")"
-    if [[ -z "${REPO_SEEN["$repo_root"]+x}" ]]; then
-      REPO_SEEN["$repo_root"]=1
+
+    if ! repo_seen "$repo_root"; then
       REPOS+=("$repo_root")
     fi
   done < <(find "$root" -type d -name .git -prune -print0 2>/dev/null)
@@ -268,6 +269,7 @@ report_repo() {
 
   while IFS=$'\t' read -r commit author_name author_email cdate subject; do
     [[ -n "$commit" ]] || continue
+
     if [[ $found_any -eq 0 ]]; then
       echo "REPO: $repo"
       [[ -n "$main_branch" ]] && echo "  default-branch: $main_branch"
@@ -323,7 +325,7 @@ report_non_git_files() {
     fi
 
     local mtime
-    mtime="$(stat -c %Y "$file" 2>/dev/null || true)"
+    mtime="$(stat_mtime "$file" 2>/dev/null || true)"
     [[ -n "$mtime" ]] || continue
 
     if (( mtime >= DAY_START_EPOCH && mtime <= DAY_END_EPOCH )); then
