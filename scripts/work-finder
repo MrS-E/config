@@ -201,12 +201,12 @@ find_git_repos_to_file() {
 
 discover_repos_parallel() {
   local tmpdir="$1"
-  shift
+  local outfile="$2"
+  shift 2
 
-  local pids=()
   local active_pids=()
   local outfiles=()
-  local root outfile pid idx=0
+  local root chunkfile pid idx=0
 
   for root in "$@"; do
     while [[ "${#active_pids[@]}" -ge "$JOBS" ]]; do
@@ -214,12 +214,11 @@ discover_repos_parallel() {
       active_pids=("${active_pids[@]:1}")
     done
 
-    outfile="$tmpdir/repos.$idx.list"
-    find_git_repos_to_file "$root" "$outfile" &
+    chunkfile="$tmpdir/repos.$idx.list"
+    find_git_repos_to_file "$root" "$chunkfile" &
     pid="$!"
-    pids+=("$pid")
     active_pids+=("$pid")
-    outfiles+=("$outfile")
+    outfiles+=("$chunkfile")
     idx=$((idx + 1))
   done
 
@@ -227,13 +226,7 @@ discover_repos_parallel() {
     wait "$pid" || true
   done
 
-  REPOS=()
-  while IFS= read -r repo; do
-    [[ -n "$repo" ]] || continue
-    if ! repo_seen "$repo"; then
-      REPOS+=("$repo")
-    fi
-  done < <(cat "${outfiles[@]}" 2>/dev/null | sort -u)
+  cat "${outfiles[@]}" 2>/dev/null | sort -u >"$outfile"
 }
 
 count_files_under_root() {
@@ -527,6 +520,20 @@ run_non_git_parallel() {
   done
 }
 
+load_repos_from_file() {
+  local infile="$1"
+  REPOS=()
+
+  [[ -f "$infile" ]] || return 0
+
+  while IFS= read -r repo; do
+    [[ -n "$repo" ]] || continue
+    if ! repo_seen "$repo"; then
+      REPOS+=("$repo")
+    fi
+  done <"$infile"
+}
+
 spinner() {
   local pid="$1"
   local msg="$2"
@@ -552,8 +559,11 @@ echo
 tmpdir="$(mktemp -d "${TMPDIR:-/tmp}/work-finder.XXXXXX")"
 trap 'rm -rf "$tmpdir"' EXIT
 
-discover_repos_parallel "$tmpdir" "${ROOTS[@]}" &
+repo_list_file="$tmpdir/all-repos.list"
+
+discover_repos_parallel "$tmpdir" "$repo_list_file" "${ROOTS[@]}" &
 spinner "$!" "Discovering repos..."
+load_repos_from_file "$repo_list_file"
 echo "Found repos: ${#REPOS[@]}"
 
 if [[ "$SKIP_NON_GIT" -eq 0 ]]; then
