@@ -1,0 +1,12 @@
+Include ~/.ssh/config.d/*
+
+Host *
+    UseKeychain yes
+    AddKeysToAgent yes
+    ForwardAgent yes
+    IdentityFile ~/.ssh/id_rsa
+
+Host *
+  ControlMaster auto
+  ControlPath /tmp/ssh_%r@%h_%p
+  ControlPersist 600
