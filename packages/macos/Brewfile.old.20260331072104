@@ -1,6 +1,5 @@
 tap "finestructure/tap"
 tap "grishka/grishka"
-tap "homebrew-ffmpeg/ffmpeg"
 tap "nikitabobko/tap"
 # Cryptography and SSL/TLS Toolkit
 brew "openssl@3"
@@ -40,14 +39,16 @@ brew "coreutils"
 brew "cppcheck"
 # Get a file from an HTTP, HTTPS or FTP server
 brew "curl"
-# Library for USB device access
-brew "libusb"
 # USB programmer
 brew "dfu-util"
 # Load/unload environment variables based on $PWD
 brew "direnv"
 # .NET Core
 brew "dotnet"
+# Low-level access to audio, keyboard, mouse, joystick, and graphics
+brew "sdl2"
+# Play, record, convert, and stream select audio and video codecs
+brew "ffmpeg"
 # Command-line fuzzy finder written in Go
 brew "fzf"
 # GNU compiler collection
@@ -76,18 +77,12 @@ brew "libtool"
 brew "graphviz"
 # GNU grep, egrep and fgrep
 brew "grep"
-# Low-level access to audio, keyboard, mouse, joystick, and graphics
-brew "sdl2"
-# Play, record, convert, and stream select audio and video codecs
-brew "ffmpeg", args: ["with-webp", "with-xvid"]
 # GNOME Python bindings (based on GObject Introspection)
 brew "pygobject3"
 # Development framework for multimedia applications
 brew "gstreamer"
 # C/C++ and Java libraries for Unicode and globalization
 brew "icu4c@76"
-# Tools and libraries to manipulate images in select formats
-brew "imagemagick"
 # Cross-platform Java Version Manager
 brew "jabba"
 # Interpreted, interactive, object-oriented programming language
@@ -132,14 +127,12 @@ brew "nss"
 brew "nvm"
 # Create, run, and share large language models (LLMs)
 brew "ollama"
-# Development kit for the Java programming language
-brew "openjdk@21"
 # Cryptography and SSL/TLS Toolkit
 brew "openssl@1.1"
 # Draw UML diagrams
 brew "plantuml"
-# Generate podman quadlet files from a podman command or compose file
-brew "podlet"
+# Your Gateway to Embedded Software Development Excellence
+brew "platformio"
 # Tool for managing OCI containers and pods
 brew "podman"
 # Alternative to docker-compose using podman
@@ -186,16 +179,10 @@ brew "zsh-autosuggestions"
 brew "zsh-syntax-highlighting"
 # Describe your project
 brew "finestructure/tap/arena"
-# Play, record, convert, and stream audio and video
-brew "homebrew-ffmpeg/ffmpeg/ffmpeg", args: ["with-webp", "with-xvid"]
 # Android SDK component
 cask "android-platform-tools"
-# Network scanner
-cask "angry-ip-scanner"
 # Electronics prototyping platform
 cask "arduino-ide"
-# Utility improving 3rd party mouse performance and functionalities
-cask "bettermouse"
 # Web security testing toolkit
 cask "burp-suite"
 # Visually compare and merge files
@@ -208,14 +195,14 @@ cask "firefox"
 cask "freecad"
 # Web browser
 cask "google-chrome"
-# Hex editor for reverse engineers
-cask "imhex"
 # Terminal emulator as alternative to Apple's Terminal app
 cask "iterm2"
 # JetBrains tools manager
 cask "jetbrains-toolbox"
 # CAD application
 cask "librecad"
+# Software for Logitech devices
+cask "logi-options+"
 # Privacy-first, open-source platform for knowledge sharing and management
 cask "logseq"
 # Connect to your Android devices
@@ -226,9 +213,6 @@ cask "mactex"
 cask "meshlab"
 # Open source implementation of Microsoft's .NET Framework
 cask "mono-mdk-for-visual-studio"
-cask "mqtt-explorer"
-# Desktop sync client for Nextcloud software products
-cask "nextcloud-vfs"
 # Command-line tools for Nordic nRF Semiconductors
 cask "nordic-nrf-command-line-tools"
 # Knowledge base that works on top of a local folder of plain text Markdown files
@@ -255,14 +239,8 @@ cask "segger-jlink"
 cask "slack"
 # Music streaming service
 cask "spotify"
-# Mesh VPN based on WireGuard
-cask "tailscale-app"
-# JDK from the Eclipse Foundation (Adoptium)
-cask "temurin@8"
 # LaTeX editor
 cask "texifier"
-# Customizable email client
-cask "thunderbird"
 # Virtual machines UI using QEMU
 cask "utm"
 # Multimedia player
@@ -287,7 +265,6 @@ vscode "bleastprogram.cpp-compiler"
 vscode "cheshirekow.cmake-format"
 vscode "christian-kohler.npm-intellisense"
 vscode "christian-kohler.path-intellisense"
-vscode "continue.continue"
 vscode "cschlosser.doxdocgen"
 vscode "davidanson.vscode-markdownlint"
 vscode "dbaeumer.vscode-eslint"
@@ -318,20 +295,16 @@ vscode "guyutongxue.cpp-reference"
 vscode "gydunhn.javascript-essentials"
 vscode "gydunhn.typescript-essentials"
 vscode "gydunhn.vsc-essentials-core"
-vscode "hangxingliu.vscode-systemd-support"
 vscode "ibm.output-colorizer"
 vscode "james-yu.latex-workshop"
 vscode "jbenden.c-cpp-flylint"
-vscode "jeanp413.open-remote-ssh"
 vscode "jebbs.plantuml"
 vscode "jeff-hykin.better-cpp-syntax"
 vscode "jeff-hykin.better-shellscript-syntax"
 vscode "jeffersonqin.latex-snippets-jeff"
 vscode "jock.svg"
 vscode "kotlin-darcula-syntax.kotlin-darcula-syntax"
-vscode "llvm-vs-code-extensions.lldb-dap"
 vscode "llvm-vs-code-extensions.vscode-clangd"
-vscode "lordimmaculate.platformio-ide"
 vscode "ltex-plus.vscode-ltex-plus"
 vscode "mads-hartmann.bash-ide-vscode"
 vscode "magicstack.magicpython"
@@ -362,11 +335,11 @@ vscode "pokey.parse-tree"
 vscode "postman.postman-for-vscode"
 vscode "prisma.prisma-insider"
 vscode "project-accelerate.shared-state-store"
+vscode "qwtel.sqlite-viewer"
 vscode "rail5.bashpp"
 vscode "redhat.java"
 vscode "redhat.vscode-xml"
 vscode "redocly.openapi-vs-code"
-vscode "repreng.csv"
 vscode "rintoj.json-organizer"
 vscode "rogalmic.bash-debug"
 vscode "rpinski.shebang-snippets"
@@ -376,7 +349,7 @@ vscode "sndst00m.vscode-native-svg-preview"
 vscode "sr-team.clang-tidy-sr-team-fork"
 vscode "sr-team.vscode-clangd-cmake"
 vscode "sr-team.vscode-cpp-file-renamer"
-vscode "swiftlang.swift-vscode"
+vscode "sswg.swift-lang"
 vscode "swiftstream.swiftstream"
 vscode "tecosaur.latex-utilities"
 vscode "timonwong.shellcheck"
