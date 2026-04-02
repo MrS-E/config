@@ -1,12 +1,12 @@
 
-Host macminim4 tailscale-macminim4 debianmini k3smaster tailscale-k3smaster k3sslave1
+Host minix macminim4 tailscale-macminim4 debianmini k3smaster tailscale-k3smaster k3sslave1
     Port 22
     IdentityFile ~/.ssh/id_cloud
 
 Host macminim4 tailscale-macminim4
     User sstix
 
-Host k3smaster tailscale-k3smaster k3sslave1
+Host minix tailscale-minix  k3smaster tailscale-k3smaster k3sslave1
     User cloud
 
 ################
@@ -26,6 +26,10 @@ Host k3smaster
 Host k3sslave1
     HostName k3sslave1.local
 
+Host minix
+    HostName minixz150.local
+    HostName 10.10.0.55
+
 ################
 # TAILSCALE
 ################
@@ -35,3 +39,7 @@ Host tailscale-macminim4
 
 Host tailscale-k3smaster
     HostName k3smaster.tail0091f3.ts.net
+
+Host tailscale-minix
+    HostName minixz150.tail0091f3.ts.net
+
