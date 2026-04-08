@@ -176,7 +176,7 @@ alias 7z='7zz'
 alias vimrc='vim $HOME/.vimrc'
 alias zshrc='vim $HOME/.zshrc'
 alias zshsrc='source $HOME/.zshrc'
-alias sshrc='vim $HOME/.ssh/config'
+alias sshrc='vim $HOME/.ssh/config.d'
 alias hosts='vim $HOME/.ssh/known_hosts'
 
 ##########
