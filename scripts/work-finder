@@ -1,0 +1,589 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# work-finder
+#
+# Usage:
+#   work-finder [-d YYYY-MM-DD] [-a AUTHOR_REGEX] ROOT [ROOT ...]
+#   eval "$(/path/to/work-finder --shell-integration)"
+#
+# Env:
+#   WORK_FINDER_JOBS   Number of parallel jobs (default: CPU count)
+
+usage() {
+  cat <<'EOF'
+Usage:
+  work-finder [-d YYYY-MM-DD] [-a AUTHOR_REGEX] [-G] ROOT [ROOT ...]
+  work-finder --shell-integration
+
+Options:
+  -d YYYY-MM-DD   Day to inspect. Defaults to today.
+  -a AUTHOR_REGEX Regex matched against git author name/email.
+  -G              Skip non-git file scanning.
+  -h              Show this help.
+
+Environment:
+  WORK_FINDER_JOBS   Number of parallel jobs (default: CPU count)
+
+Examples:
+  work-finder ~/code ~/scratch
+  work-finder -d 2026-03-29 ~/code ~/notes
+  work-finder -a "me@example.com|My Name" ~/work ~/lab
+  work-finder -G ~/work
+EOF
+}
+
+emit_shell_integration() {
+  local script_path
+  if command -v realpath >/dev/null 2>&1; then
+    script_path="$(realpath "$0" 2>/dev/null || printf '%s' "$0")"
+  else
+    script_path="$0"
+  fi
+
+  cat <<EOF
+work-finder() {
+  "$script_path" "\$@"
+}
+
+_work_finder_complete() {
+  local curcontext="\$curcontext" state line
+  typeset -A opt_args
+
+_arguments -s \
+  '(-h --help)'{-h,--help}'[Show help]' \
+  '-d[Day to inspect]:date (YYYY-MM-DD):' \
+  '-a[Author regex]:author regex:' \
+  '-G[Skip non-git file scanning]' \
+  '*:root directory:_files -/'
+}
+
+compdef _work_finder_complete work-finder
+EOF
+}
+
+if [[ "${1:-}" == "--shell-integration" ]]; then
+  emit_shell_integration
+  exit 0
+fi
+
+today_ymd() {
+  date +%F
+}
+
+valid_ymd() {
+  local input="$1"
+
+  if date -d "$input" +%F >/dev/null 2>&1; then
+    return 0
+  fi
+
+  date -j -f "%Y-%m-%d" "$input" +%F >/dev/null 2>&1
+}
+
+to_epoch() {
+  local input="$1"
+
+  if date -d "$input" +%s >/dev/null 2>&1; then
+    date -d "$input" +%s
+    return 0
+  fi
+
+  date -j -f "%Y-%m-%d %H:%M:%S" "$input" +%s
+}
+
+stat_mtime() {
+  local file="$1"
+
+  if stat -c %Y "$file" >/dev/null 2>&1; then
+    stat -c %Y "$file"
+    return 0
+  fi
+
+  stat -f %m "$file"
+}
+
+default_jobs() {
+  if command -v sysctl >/dev/null 2>&1; then
+    sysctl -n hw.ncpu 2>/dev/null || echo 4
+  elif command -v getconf >/dev/null 2>&1; then
+    getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4
+  else
+    echo 4
+  fi
+}
+
+TARGET_DAY="$(today_ymd)"
+AUTHOR_REGEX=""
+SKIP_NON_GIT=0
+JOBS="${WORK_FINDER_JOBS:-$(default_jobs)}"
+
+while getopts ":d:a:Gh" opt; do
+  case "$opt" in
+    d) TARGET_DAY="$OPTARG" ;;
+    a) AUTHOR_REGEX="$OPTARG" ;;
+    G) SKIP_NON_GIT=1 ;;
+    h)
+      usage
+      exit 0
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      usage >&2
+      exit 1
+      ;;
+    \?)
+      echo "Unknown option: -$OPTARG" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+if [[ $# -lt 1 ]]; then
+  usage >&2
+  exit 1
+fi
+
+ROOTS=("$@")
+
+if ! valid_ymd "$TARGET_DAY"; then
+  echo "Invalid date: $TARGET_DAY" >&2
+  exit 1
+fi
+
+DAY_START="$TARGET_DAY 00:00:00"
+DAY_END="$TARGET_DAY 23:59:59"
+DAY_START_EPOCH="$(to_epoch "$DAY_START")"
+DAY_END_EPOCH="$(to_epoch "$DAY_END")"
+
+if [[ -z "$AUTHOR_REGEX" ]]; then
+  git_name="$(git config --global --get user.name || true)"
+  git_email="$(git config --global --get user.email || true)"
+
+  if [[ -n "$git_name" && -n "$git_email" ]]; then
+    AUTHOR_REGEX="${git_name}\\|${git_email}"
+  elif [[ -n "$git_email" ]]; then
+    AUTHOR_REGEX="${git_email}"
+  elif [[ -n "$git_name" ]]; then
+    AUTHOR_REGEX="${git_name}"
+  else
+    echo "Could not infer author from git config. Use -a AUTHOR_REGEX." >&2
+    exit 1
+  fi
+fi
+
+REPOS=()
+
+repo_seen() {
+  local candidate="$1"
+  local existing
+
+  for existing in ${REPOS+"${REPOS[@]}"}; do
+    [[ "$existing" == "$candidate" ]] && return 0
+  done
+  return 1
+}
+
+find_git_repos_to_file() {
+  local root="$1"
+  local outfile="$2"
+
+  : >"$outfile"
+  [[ -d "$root" ]] || return 0
+
+  find "$root" -type d -name .git -prune -print0 2>/dev/null |
+    while IFS= read -r -d '' gitdir; do
+      dirname "$gitdir"
+    done >>"$outfile"
+}
+
+discover_repos_parallel() {
+  local tmpdir="$1"
+  local outfile="$2"
+  shift 2
+
+  local active_pids=()
+  local outfiles=()
+  local root chunkfile pid idx=0
+
+  for root in "$@"; do
+    while [[ "${#active_pids[@]}" -ge "$JOBS" ]]; do
+      wait "${active_pids[0]}" || true
+      active_pids=("${active_pids[@]:1}")
+    done
+
+    chunkfile="$tmpdir/repos.$idx.list"
+    find_git_repos_to_file "$root" "$chunkfile" &
+    pid="$!"
+    active_pids+=("$pid")
+    outfiles+=("$chunkfile")
+    idx=$((idx + 1))
+  done
+
+  for pid in "${active_pids[@]}"; do
+    wait "$pid" || true
+  done
+
+  cat "${outfiles[@]}" 2>/dev/null | sort -u >"$outfile"
+}
+
+count_files_under_root() {
+  local root="$1"
+  [[ -d "$root" ]] || { echo 0; return; }
+  find "$root" -type f 2>/dev/null | wc -l | tr -d ' '
+}
+
+get_default_branch() {
+  local repo="$1"
+  (
+    cd "$repo"
+
+    local branch
+    branch="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null || true)"
+    if [[ -n "$branch" ]]; then
+      echo "${branch#origin/}"
+      exit 0
+    fi
+
+    branch="$(git branch --show-current 2>/dev/null || true)"
+    if [[ -n "$branch" ]]; then
+      echo "$branch"
+      exit 0
+    fi
+
+    if git show-ref --verify --quiet refs/heads/main; then
+      echo "main"
+    elif git show-ref --verify --quiet refs/heads/master; then
+      echo "master"
+    else
+      git for-each-ref --format='%(refname:short)' refs/heads | head -n1
+    fi
+  )
+}
+
+extract_branch_name_from_merge_subject() {
+  local subject="$1"
+
+  if [[ "$subject" =~ ^Merge\ branch\ \'([^\']+)\' ]]; then
+    echo "${BASH_REMATCH[1]}"
+    return
+  fi
+
+  if [[ "$subject" =~ ^Merge\ remote-tracking\ branch\ \'([^\']+)\' ]]; then
+    echo "${BASH_REMATCH[1]}"
+    return
+  fi
+
+  if [[ "$subject" =~ ^Merge\ pull\ request\ .+\ from\ (.+)$ ]]; then
+    echo "${BASH_REMATCH[1]}"
+    return
+  fi
+
+  echo "unknown-branch"
+}
+
+find_merge_for_commit() {
+  local repo="$1"
+  local main_branch="$2"
+  local commit="$3"
+
+  (
+    cd "$repo"
+
+    git merge-base --is-ancestor "$commit" "$main_branch" 2>/dev/null || exit 0
+
+    while IFS= read -r merge; do
+      [[ -n "$merge" ]] || continue
+
+      local p1 p2
+      p1="$(git rev-parse "${merge}^1" 2>/dev/null || true)"
+      p2="$(git rev-parse "${merge}^2" 2>/dev/null || true)"
+      [[ -n "$p1" && -n "$p2" ]] || continue
+
+      if git merge-base --is-ancestor "$commit" "$p2" 2>/dev/null &&
+         ! git merge-base --is-ancestor "$commit" "$p1" 2>/dev/null; then
+        local subj branch
+        subj="$(git log -1 --format='%s' "$merge")"
+        branch="$(extract_branch_name_from_merge_subject "$subj")"
+        printf '%s\t%s\t%s\n' "$merge" "$branch" "$subj"
+        exit 0
+      fi
+    done < <(git rev-list --first-parent --merges "$main_branch")
+  )
+}
+
+report_repo() {
+  local repo="$1"
+  local main_branch
+  main_branch="$(get_default_branch "$repo")"
+
+  local found_any=0
+  local merge_info merge_sha merge_branch merge_subject
+
+  while IFS=$'\t' read -r commit author_name author_email cdate subject; do
+    [[ -n "$commit" ]] || continue
+
+    if [[ $found_any -eq 0 ]]; then
+      echo "REPO: $repo"
+      [[ -n "$main_branch" ]] && echo "  default-branch: $main_branch"
+      found_any=1
+    fi
+
+    echo "  commit: $(git -C "$repo" rev-parse --short "$commit")  $subject"
+    echo "    author: $author_name <$author_email>"
+    echo "    date:   $cdate"
+
+    if [[ -n "$main_branch" ]]; then
+      merge_info="$(find_merge_for_commit "$repo" "$main_branch" "$commit" || true)"
+      if [[ -n "$merge_info" ]]; then
+        IFS=$'\t' read -r merge_sha merge_branch merge_subject <<< "$merge_info"
+        echo "    merged-via: $(git -C "$repo" rev-parse --short "$merge_sha")  $merge_subject"
+        echo "    merged-branch: $merge_branch"
+      fi
+    fi
+  done < <(
+    git -C "$repo" log --all \
+      --since="$DAY_START" \
+      --until="$DAY_END" \
+      --author="$AUTHOR_REGEX" \
+      --format=$'%H\t%an\t%ae\t%ad\t%s' \
+      --date=iso-strict 2>/dev/null || true
+  )
+
+  if [[ $found_any -eq 1 ]]; then
+    echo
+  fi
+}
+
+report_repo_to_file() {
+  local repo="$1"
+  local outfile="$2"
+  report_repo "$repo" >"$outfile"
+}
+
+is_inside_any_repo() {
+  local path="$1"
+  local repo
+  for repo in ${REPOS+"${REPOS[@]}"}; do
+    case "$path" in
+      "$repo"/*|"$repo") return 0 ;;
+    esac
+  done
+  return 1
+}
+
+report_non_git_files() {
+  local root="$1"
+  [[ -d "$root" ]] || return 0
+
+  local printed_header=0
+  local file mtime
+
+  while IFS= read -r -d '' file; do
+    if is_inside_any_repo "$file"; then
+      continue
+    fi
+
+    mtime="$(stat_mtime "$file" 2>/dev/null || true)"
+    [[ -n "$mtime" ]] || continue
+
+    if (( mtime >= DAY_START_EPOCH && mtime <= DAY_END_EPOCH )); then
+      if [[ $printed_header -eq 0 ]]; then
+        echo "NON-GIT MODIFIED FILES UNDER: $root"
+        printed_header=1
+      fi
+      echo "  $file"
+    fi
+  done < <(find "$root" -type f -print0 2>/dev/null)
+
+  if [[ $printed_header -eq 1 ]]; then
+    echo
+  fi
+}
+
+report_non_git_files_to_file() {
+  local root="$1"
+  local outfile="$2"
+  report_non_git_files "$root" >"$outfile"
+}
+
+progress_total=0
+progress_width=32
+
+progress_init() {
+  progress_total="$1"
+}
+
+progress_draw() {
+  local done="$1"
+  local total="$2"
+  local filled empty percent bar empty_bar
+
+  if [[ "$total" -le 0 ]]; then
+    total=1
+  fi
+
+  percent=$(( done * 100 / total ))
+  filled=$(( done * progress_width / total ))
+  empty=$(( progress_width - filled ))
+
+  printf -v bar '%*s' "$filled" ''
+  bar="${bar// /#}"
+  printf -v empty_bar '%*s' "$empty" ''
+  empty_bar="${empty_bar// /-}"
+
+  printf '\r[%s%s] %3d%% (%d/%d)' "$bar" "$empty_bar" "$percent" "$done" "$total"
+}
+
+progress_finish() {
+  progress_draw "$progress_total" "$progress_total"
+  printf '\n'
+}
+
+run_repo_reports_parallel() {
+  local tmpdir="$1"
+  shift
+
+  local active_pids=()
+  local files=()
+  local repo outfile pid idx=0 total="$#" done=0
+
+  progress_init "$total"
+
+  for repo in "$@"; do
+    while [[ "${#active_pids[@]}" -ge "$JOBS" ]]; do
+      wait "${active_pids[0]}" || true
+      done=$((done + 1))
+      progress_draw "$done" "$total"
+      active_pids=("${active_pids[@]:1}")
+    done
+
+    outfile="$tmpdir/repo.$idx.out"
+    report_repo_to_file "$repo" "$outfile" &
+    pid="$!"
+    active_pids+=("$pid")
+    files+=("$outfile")
+    idx=$((idx + 1))
+  done
+
+  for pid in "${active_pids[@]}"; do
+    wait "$pid" || true
+    done=$((done + 1))
+    progress_draw "$done" "$total"
+  done
+  progress_finish
+
+  local file
+  for file in "${files[@]}"; do
+    cat "$file"
+  done
+}
+
+run_non_git_parallel() {
+  local tmpdir="$1"
+  shift
+
+  local active_pids=()
+  local files=()
+  local root outfile pid idx=0 total="$#" done=0
+
+  progress_init "$total"
+
+  for root in "$@"; do
+    while [[ "${#active_pids[@]}" -ge "$JOBS" ]]; do
+      wait "${active_pids[0]}" || true
+      done=$((done + 1))
+      progress_draw "$done" "$total"
+      active_pids=("${active_pids[@]:1}")
+    done
+
+    outfile="$tmpdir/nongit.$idx.out"
+    report_non_git_files_to_file "$root" "$outfile" &
+    pid="$!"
+    active_pids+=("$pid")
+    files+=("$outfile")
+    idx=$((idx + 1))
+  done
+
+  for pid in "${active_pids[@]}"; do
+    wait "$pid" || true
+    done=$((done + 1))
+    progress_draw "$done" "$total"
+  done
+  progress_finish
+
+  local file
+  for file in "${files[@]}"; do
+    cat "$file"
+  done
+}
+
+load_repos_from_file() {
+  local infile="$1"
+  REPOS=()
+
+  [[ -f "$infile" ]] || return 0
+
+  while IFS= read -r repo; do
+    [[ -n "$repo" ]] || continue
+    if ! repo_seen "$repo"; then
+      REPOS+=("$repo")
+    fi
+  done <"$infile"
+}
+
+spinner() {
+  local pid="$1"
+  local msg="$2"
+  local delay=0.1
+  local spin='|/-\'
+  local i=0
+
+  while kill -0 "$pid" 2>/dev/null; do
+    printf '\r[%c] %s' "${spin:$i:1}" "$msg"
+    i=$(( (i + 1) % 4 ))
+    sleep "$delay"
+  done
+
+  wait "$pid" || return 1
+  printf '\r[✔] %s\n' "$msg"
+}
+
+echo "Date:   $TARGET_DAY"
+echo "Author: $AUTHOR_REGEX"
+echo "Jobs:   $JOBS"
+echo
+
+tmpdir="$(mktemp -d "${TMPDIR:-/tmp}/work-finder.XXXXXX")"
+trap 'rm -rf "$tmpdir"' EXIT
+
+repo_list_file="$tmpdir/all-repos.list"
+
+discover_repos_parallel "$tmpdir" "$repo_list_file" "${ROOTS[@]}" &
+spinner "$!" "Discovering repos..."
+load_repos_from_file "$repo_list_file"
+echo "Found repos: ${#REPOS[@]}"
+
+if [[ "$SKIP_NON_GIT" -eq 0 ]]; then
+  file_estimate=0
+  for root in "${ROOTS[@]}"; do
+    c="$(count_files_under_root "$root")"
+    file_estimate=$((file_estimate + c))
+  done
+  echo "Estimated files to inspect: $file_estimate"
+else
+  echo "Estimated files to inspect: skipped (-G)"
+fi
+echo
+
+if [[ "${#REPOS[@]}" -gt 0 ]]; then
+  echo "Scanning git repos..."
+  run_repo_reports_parallel "$tmpdir" "${REPOS[@]}"
+fi
+
+if [[ "$SKIP_NON_GIT" -eq 0 ]]; then
+  echo "Scanning non-git files..."
+  run_non_git_parallel "$tmpdir" "${ROOTS[@]}"
+fi
