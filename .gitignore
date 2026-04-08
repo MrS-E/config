@@ -3,6 +3,8 @@
 # =========================
 ssh/*
 !ssh/config
+!ssh/config.d/
+ssh/config.d/dienstwerk
 # !ssh/known_hosts
 
 # =========================
