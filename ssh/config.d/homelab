@@ -27,7 +27,7 @@ Host k3sslave1
     HostName k3sslave1.local
 
 Host minix
-    HostName minixz150.local
+    #HostName minixz150.local
     HostName 10.10.0.55
 
 ################
