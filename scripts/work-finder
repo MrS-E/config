@@ -238,7 +238,7 @@ count_files_under_root() {
 get_default_branch() {
   local repo="$1"
   (
-    cd "$repo"
+    cd "$repo" || exit 0
 
     local branch
     branch="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null || true)"
@@ -290,9 +290,16 @@ find_merge_for_commit() {
   local commit="$3"
 
   (
-    cd "$repo"
+    cd "$repo" || exit 0
 
-    git merge-base --is-ancestor "$commit" "$main_branch" 2>/dev/null || exit 0
+    local main_ref
+    main_ref="$(git rev-parse --verify --quiet "refs/heads/$main_branch" 2>/dev/null || true)"
+    if [[ -z "$main_ref" ]]; then
+      main_ref="$(git rev-parse --verify --quiet "refs/remotes/origin/$main_branch" 2>/dev/null || true)"
+    fi
+    [[ -n "$main_ref" ]] || exit 0
+
+    git merge-base --is-ancestor "$commit" "$main_ref" 2>/dev/null || exit 0
 
     while IFS= read -r merge; do
       [[ -n "$merge" ]] || continue
@@ -310,7 +317,7 @@ find_merge_for_commit() {
         printf '%s\t%s\t%s\n' "$merge" "$branch" "$subj"
         exit 0
       fi
-    done < <(git rev-list --first-parent --merges "$main_branch")
+    done < <(git rev-list --first-parent --merges "$main_ref")
   )
 }
 
