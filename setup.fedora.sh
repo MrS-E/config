@@ -135,6 +135,10 @@ install_proton_bridge() {
   popd >/dev/null
 }
 
+install_bun() {
+  curl -fsSL https://bun.com/install | bash
+}
+
 setup_services() {
   sudo systemctl enable --now tailscaled
   sudo tailscale set --operator="$USER" || true
@@ -165,6 +169,7 @@ main() {
   install_zsh_plugins
   install_toolbox
   install_proton_bridge
+  install_bun
   setup_services
 
   log "Fedora setup complete."
