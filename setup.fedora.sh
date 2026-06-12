@@ -139,6 +139,10 @@ install_bun() {
   curl -fsSL https://bun.com/install | bash
 }
 
+install_junie() {
+  curl -fsSL https://junie.jetbrains.com/install.sh | bash
+}
+
 setup_services() {
   sudo systemctl enable --now tailscaled
   sudo tailscale set --operator="$USER" || true
@@ -170,6 +174,7 @@ main() {
   install_toolbox
   install_proton_bridge
   install_bun
+  install_junie
   setup_services
 
   log "Fedora setup complete."

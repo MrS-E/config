@@ -220,9 +220,9 @@ if [[ -d /usr/share/bash-completion/completions ]]; then
   done
 fi
 
-[[ -d /usr/share/zsh/site-functions ]] && FPATH="/usr/share/zsh/site-functions:$FPATH"
-
-if command -v brew >/dev/null 2>&1; then
+if [[ -d /usr/share/zsh/site-functions ]]; then
+  FPATH="/usr/share/zsh/site-functions:$FPATH"
+elif command -v brew >/dev/null 2>&1; then
   FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
 fi
 
@@ -298,6 +298,12 @@ fi
 ##########
 
 export PATH="$PATH:/usr/local/bin"
+
+##########
+# Jetbrains Junie
+##########
+
+export PATH="$HOME/.local/bin:$PATH"
 
 ##########
 # NVM
@@ -798,5 +804,3 @@ code() {
       ;;
   esac
 }
-
-
