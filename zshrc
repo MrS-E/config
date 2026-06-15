@@ -179,6 +179,19 @@ alias zshsrc='source $HOME/.zshrc'
 alias sshrc='vim $HOME/.ssh/config.d'
 alias hosts='vim $HOME/.ssh/known_hosts'
 
+# logs
+#alias logs="awk '
+#{
+#  ts=$1
+#  sec = int(ts/1000)        # ms -> seconds (integer)
+#  cmd = "date -r " sec " \"+%Y-%m-%d %H:%M:%S\""
+#  cmd | getline d
+#  close(cmd)
+#  $1 = d
+#  print
+#}
+#'"
+
 ##########
 # Completion
 ##########
@@ -354,6 +367,18 @@ fi
 # export ZEPHYR_SDK_INSTALL_DIR="$HOME/zephyr-sdk-0.17.1"
 
 ##########
+# bun
+##########
+if [[ -s "/home/sstix/.bun/_bun" ]]; then 
+  # completion
+  source "/home/sstix/.bun/_bun"
+
+  # bun
+  export BUN_INSTALL="$HOME/.bun"
+  export PATH="$BUN_INSTALL/bin:$PATH"
+fi
+
+##########
 # GNU grep (Homebrew)
 ##########
 if command -v brew >/dev/null 2>&1; then
@@ -435,6 +460,41 @@ adb() {
       ;;
     *)
       command adb "$@"
+      ;;
+  esac
+}
+
+# Git
+git() {
+  case "$1" in
+    redate)
+      shift
+        GIT_COMMITTER_DATE="$1" git commit --amend --no-edit --date="$1"
+      ;;
+    contributors)
+      shift
+      {
+        echo "| name (email) | commits | adds | deletes |"
+        git log --format='@@@ %aN <%aE>' --numstat |
+        awk '
+          /^@@@ / {
+            author = substr($0, 5)
+            commits[author]++
+            next
+          }
+          $1 ~ /^[0-9-]+$/ && $2 ~ /^[0-9-]+$/ {
+            if ($1 != "-") adds[author] += $1
+            if ($2 != "-") dels[author] += $2
+          }
+          END {
+            for (a in commits)
+              printf("| %-30s | %-7d | %-7d | %-7d |\n", a, commits[a], adds[a]+0, dels[a]+0)
+          }
+        ' | sort -t'|' -k3,3nr
+      } | column -t -s'|'
+      ;;
+    *)
+      command git "$@"
       ;;
   esac
 }
@@ -786,3 +846,5 @@ code() {
       ;;
   esac
 }
+
+
