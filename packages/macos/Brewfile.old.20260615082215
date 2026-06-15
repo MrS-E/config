@@ -1,7 +1,6 @@
 tap "finestructure/tap"
 tap "grishka/grishka"
-tap "homebrew-ffmpeg/ffmpeg", trusted: true
-tap "jetbrains/junie", trusted: true
+tap "homebrew-ffmpeg/ffmpeg"
 tap "nikitabobko/tap"
 # Cryptography and SSL/TLS Toolkit
 brew "openssl@3"
@@ -49,8 +48,6 @@ brew "dfu-util"
 brew "direnv"
 # .NET Core
 brew "dotnet"
-# YAML Parser
-brew "libyaml"
 # Command-line fuzzy finder written in Go
 brew "fzf"
 # GNU compiler collection
@@ -107,6 +104,8 @@ brew "lftp"
 brew "libpq", link: true
 # General purpose TCP-IP emulator
 brew "libslirp"
+# YAML Parser
+brew "libyaml"
 # LTeX+ Language Server: maintained fork of LTeX Language Server
 brew "ltex-ls-plus"
 # Utility for directing compilation
@@ -131,12 +130,12 @@ brew "node"
 brew "nss"
 # Manage multiple Node.js versions
 brew "nvm"
+# Create, run, and share large language models (LLMs)
+brew "ollama"
 # Development kit for the Java programming language
 brew "openjdk@21"
 # Cryptography and SSL/TLS Toolkit
 brew "openssl@1.1"
-# Minimal dumb-terminal emulation program
-brew "picocom"
 # Draw UML diagrams
 brew "plantuml"
 # Generate podman quadlet files from a podman command or compose file
@@ -185,10 +184,10 @@ brew "zsh-autocomplete"
 brew "zsh-autosuggestions"
 # Fish shell like syntax highlighting for zsh
 brew "zsh-syntax-highlighting"
+# Describe your project
+brew "finestructure/tap/arena"
 # Play, record, convert, and stream audio and video
 brew "homebrew-ffmpeg/ffmpeg/ffmpeg", args: ["with-webp", "with-xvid"]
-# Junie CLI
-brew "jetbrains/junie/junie"
 # Android SDK component
 cask "android-platform-tools"
 # Network scanner
@@ -225,8 +224,8 @@ cask "macdroid"
 cask "mactex"
 # Mesh processing system
 cask "meshlab"
-# Meet, chat, call, and collaborate in just one place
-cask "microsoft-teams"
+# Open source implementation of Microsoft's .NET Framework
+cask "mono-mdk-for-visual-studio"
 cask "mqtt-explorer"
 # Desktop sync client for Nextcloud software products
 cask "nextcloud-vfs"
