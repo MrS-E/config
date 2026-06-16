@@ -1,4 +1,6 @@
 {
-    "effortPerModel": "{}",
-    "modelForLaunch": "gpt-5.3-codex"
+    "sessionCount": "1",
+    "effortPerModel": "{\"custom:supergemma4\":\"medium\"}",
+    "modelForLaunch": "custom:supergemma4",
+    "shareAnonymousStatistics": "false"
 }

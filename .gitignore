@@ -33,7 +33,7 @@ junie/*
 !junie/settings.json
 !junie/config.json
 !junie/*.md
-!junie/1468.30
+!junie/versions
 !junie/mcp
 !junie/models
 !junie/skills
