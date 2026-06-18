@@ -1,6 +1,7 @@
 {
-    "sessionCount": "1",
-    "effortPerModel": "{\"custom:supergemma4\":\"medium\"}",
-    "modelForLaunch": "custom:supergemma4",
-    "shareAnonymousStatistics": "false"
+    "sessionCount": "3",
+    "effortPerModel": "{\"custom:supergemma4\":\"medium\",\"gpt-5.3-codex\":\"low\"}",
+    "modelForLaunch": "gpt-5.3-codex",
+    "shareAnonymousStatistics": "false",
+    "providerForLaunch": "openai"
 }
