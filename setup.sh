@@ -48,6 +48,8 @@ setup_symlinks() {
   link_path "$REPO_DIR/nvim" "$HOME/.config/nvim"
   link_path "$REPO_DIR/lazygit" "$HOME/.config/lazygit"
 
+  link_path "$REPO_DIR/junie" "$HOME/.junie"
+
   [[ -d "$REPO_DIR/ghostty" ]] && link_path "$REPO_DIR/ghostty" "$HOME/.config/ghostty"
   [[ -d "$REPO_DIR/Nextcloud" ]] && link_path "$REPO_DIR/Nextcloud" "$HOME/.config/Nextcloud"
 

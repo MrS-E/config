@@ -1,0 +1,15 @@
+{
+  "baseUrl": "http://100.124.60.67:8000/v1/responses",
+  "apiType": "OpenAIResponses",
+  "apiKey": "REDACTED",
+  "id": "supergemma4-26b-uncensored-mlx-4bit-v2",
+  "temperature": 0.3,
+  "primaryModel": {
+    "id": "supergemma4-26b-uncensored-mlx-4bit-v2",
+    "temperature": 0.2
+  },
+  "fasterModel": {
+    "id": "Qwen3.5-4B-4bit",
+    "temperature": 0.2
+  }
+}
