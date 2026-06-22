@@ -2,7 +2,7 @@
   "baseUrl": "http://100.124.60.67:8000/v1/responses",
   "id": "Qwen3.5-27B-Claude-4.6-Opus-Distilled-MLX-4bit",
   "apiType": "OpenAIResponses",
-  "apiKey": "omlx-REDACTED",
+  "apiKey": "REDACTED",
   "temperature": 0.4,
   "fasterModel": {
     "id": "Llama-3.2-3B-Instruct-4bit",

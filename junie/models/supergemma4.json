@@ -1,7 +1,7 @@
 {
   "baseUrl": "http://100.124.60.67:8000/v1/responses",
   "apiType": "OpenAIResponses",
-  "apiKey": "omlx-REDACTED",
+  "apiKey": "REDACTED",
   "id": "supergemma4-26b-uncensored-mlx-4bit-v2",
   "temperature": 0.3,
   "primaryModel": {

@@ -1,5 +1,17 @@
 # config
 
+## Setup
+
+### Repo
+
+Git Filters:
+```bash
+git config filter.scrub-apikey.clean \
+  "sed -E 's/(\"apiKey\"[[:space:]]*:[[:space:]]*)\"[^\"]*\"/\\1\"REDACTED\"/'"
+git config filter.scrub-apikey.smudge cat
+git config filter.scrub-apikey.required true
+```
+
 ## TODO
 
 ### Mac
