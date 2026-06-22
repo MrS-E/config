@@ -1,0 +1,11 @@
+{
+  "baseUrl": "http://100.124.60.67:8000/v1/chat/completions",
+  "id": "Devstral-Small-2-24B-Instruct-2512-4bit",
+  "apiType": "OpenAICompletion",
+  "apiKey": "REDACTED",
+  "temperature": 0.15,
+  "fasterModel": {
+    "id": "Qwen2.5-Coder-7B-q8-mlx",
+    "temperature": 0.3
+  }
+}

@@ -25,3 +25,18 @@ vim/.netrwhist
 Nextcloud/*
 !Nextcloud/nextcloud.cfg
 !Nextcloud/sync-exclude.lst
+
+# =========================
+# junie
+# =========================
+junie/*
+!junie/settings.json
+!junie/config.json
+!junie/*.md
+!junie/versions
+!junie/mcp
+!junie/models
+!junie/skills
+!junie/commands
+!junie/agents
+!junie/vendor
