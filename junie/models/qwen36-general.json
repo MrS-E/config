@@ -1,0 +1,11 @@
+{
+  "baseUrl": "http://100.124.60.67:8000/v1/responses",
+  "id": "Qwen3.6-27B-4bit",
+  "apiType": "OpenAIResponses",
+  "apiKey": "omlx-REDACTED",
+  "temperature": 0.5,
+  "fasterModel": {
+    "id": "Qwen2.5-Coder-14B-Instruct-MLX-4bit",
+    "temperature": 0.3
+  } 
+}

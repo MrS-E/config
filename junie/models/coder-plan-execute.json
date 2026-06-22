@@ -1,0 +1,11 @@
+{
+  "baseUrl": "http://100.124.60.67:8000/v1/chat/completions",
+  "id": "lmstudio-community/Qwen2.5-Coder-32B-Instruct-MLX-4bit",
+  "apiType": "OpenAICompletion",
+  "apiKey": "omlx-REDACTED",
+  "temperature": 0.2,
+  "fasterModel": {
+    "id": "Qwen2.5-Coder-7B-q8-mlx",
+    "temperature": 0.3
+  }
+}
