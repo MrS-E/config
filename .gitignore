@@ -4,6 +4,9 @@
 ssh/*
 !ssh/config
 !ssh/config.d/
+!ssh/providers.mac
+!ssh/providers.fedora
+!ssh/pkcs11-filter.sh
 ssh/config.d/dienstwerk
 # !ssh/known_hosts
 
