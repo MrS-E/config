@@ -24,7 +24,7 @@ run() {
   log "Setting up symlinks..."
 
   ensure_dir "$HOME/.config"
-  ensure_dir "$HOME/.ssh"
+  # ensure_dir "$HOME/.ssh"
 
   ensure_symlink "$REPO_DIR/zshrc"     "$HOME/.zshrc"
   ensure_symlink "$REPO_DIR/vimrc"     "$HOME/.vimrc"
@@ -33,6 +33,7 @@ run() {
   ensure_symlink "$REPO_DIR/vim"      "$HOME/.vim"
   ensure_symlink "$REPO_DIR/nvim"     "$HOME/.config/nvim"
   ensure_symlink "$REPO_DIR/lazygit"  "$HOME/.config/lazygit"
+  ensure_symlink "$REPO_DIR/ssh"      "$HOME/.ssh"
 
   ensure_symlink "$REPO_DIR/junie" "$HOME/.junie"
 
@@ -41,8 +42,8 @@ run() {
   [[ -d "$REPO_DIR/ghostty" ]]   && ensure_symlink "$REPO_DIR/ghostty"   "$HOME/.config/ghostty"
   [[ -d "$REPO_DIR/Nextcloud" ]] && ensure_symlink "$REPO_DIR/Nextcloud" "$HOME/.config/Nextcloud"
 
-  [[ -f "$REPO_DIR/ssh/config" ]]       && ensure_symlink "$REPO_DIR/ssh/config"       "$HOME/.ssh/config"
-  [[ -f "$REPO_DIR/ssh/known_hosts" ]] && ensure_symlink "$REPO_DIR/ssh/known_hosts" "$HOME/.ssh/known_hosts"
+  # [[ -f "$REPO_DIR/ssh/config" ]]       && ensure_symlink "$REPO_DIR/ssh/config"       "$HOME/.ssh/config"
+  # [[ -f "$REPO_DIR/ssh/known_hosts" ]] && ensure_symlink "$REPO_DIR/ssh/known_hosts" "$HOME/.ssh/known_hosts"
 
   chmod 700 "$HOME/.ssh" || true
 }
