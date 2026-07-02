@@ -1,7 +1,6 @@
 tap "finestructure/tap"
 tap "grishka/grishka"
 tap "homebrew-ffmpeg/ffmpeg", trusted: true
-tap "jetbrains/junie", trusted: true
 tap "nikitabobko/tap"
 # Cryptography and SSL/TLS Toolkit
 brew "openssl@3"
@@ -199,8 +198,6 @@ brew "zsh-autosuggestions"
 brew "zsh-syntax-highlighting"
 # Play, record, convert, and stream audio and video
 brew "homebrew-ffmpeg/ffmpeg/ffmpeg", args: ["with-webp", "with-xvid"]
-# Junie CLI
-brew "jetbrains/junie/junie"
 # Android SDK component
 cask "android-platform-tools"
 # Network scanner
