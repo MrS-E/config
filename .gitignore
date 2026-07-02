@@ -43,3 +43,8 @@ junie/settings.json
 !junie/commands
 !junie/agents
 !junie/vendor
+
+# =========================
+# Test harness artifacts
+# =========================
+tests/baselines/current/

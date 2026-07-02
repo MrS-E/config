@@ -1,0 +1,51 @@
+# Mocked macOS test container.
+#
+# Podman cannot run real macOS. This Linux container mocks `uname`, `brew`,
+# `ssh-agent`, and `ssh-add` so setup.macos.sh can be exercised for OS
+# detection, dispatch, and contract behavior. This is path/contract
+# validation, NOT real Homebrew validation. See tests/README.md.
+FROM fedora:40
+
+RUN dnf -y install --setopt=install_weak_deps=False \
+        bats git sudo wget curl tar unzip which findutils procps-ng \
+        zsh vim neovim openssh && \
+    dnf -y clean all
+
+RUN useradd -m -G wheel tester && \
+    echo "tester ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/tester && \
+    chmod 0440 /etc/sudoers.d/tester
+
+# --- Mock uname: report Darwin for -s, pass through otherwise ----------------
+RUN printf '%s\n' \
+    '#!/usr/bin/env bash' \
+    'if [[ "${1:-}" == "-s" ]]; then echo Darwin; exit 0; fi' \
+    'if [[ -z "${1:-}" ]]; then echo Darwin; exit 0; fi' \
+    'exec /usr/bin/uname "$@"' \
+    > /usr/local/bin/uname && chmod +x /usr/local/bin/uname
+
+# --- Mock brew ---------------------------------------------------------------
+RUN printf '%s\n' \
+    '#!/usr/bin/env bash' \
+    'case "${1:-}" in' \
+    '  bundle)  echo "mock brew bundle: $*"; exit 0 ;;' \
+    '  shellenv) echo "export PATH=/opt/homebrew/bin:$PATH"; exit 0 ;;' \
+    '  --version) echo "Homebrew 4.0.0 (mock)"; exit 0 ;;' \
+    '  *) echo "mock brew: $*"; exit 0 ;;' \
+    'esac' \
+    > /usr/local/bin/brew && chmod +x /usr/local/bin/brew
+
+# --- Mock ssh-agent / ssh-add ------------------------------------------------
+RUN printf '%s\n' \
+    '#!/usr/bin/env bash' \
+    'echo "mock ssh-agent (pid $$)"; exit 0' \
+    > /usr/local/bin/ssh-agent && chmod +x /usr/local/bin/ssh-agent
+
+RUN printf '%s\n' \
+    '#!/usr/bin/env bash' \
+    'echo "mock ssh-add: $*"; exit 0' \
+    > /usr/local/bin/ssh-add && chmod +x /usr/local/bin/ssh-add
+
+WORKDIR /workspace
+USER tester
+ENV HOME=/home/tester
+ENV TEST_OS=macos
