@@ -1,12 +1,12 @@
 Host debug-pi
   Hostname influx-debug.local
-  PKCS11Provider /opt/homebrew/lib/opensc-pkcs11.so
+  PKCS11Provider @OPENSC@
   IdentityFile ~/.ssh/yubikey-9a.pub
   IdentitiesOnly yes
   User debugpi
   Port 22
 
 Host *.smoca.ch
-    PKCS11Provider /opt/homebrew/lib/opensc-pkcs11.so
+    PKCS11Provider @OPENSC@
     IdentityFile ~/.ssh/yubikey-9a.pub
     IdentitiesOnly yes

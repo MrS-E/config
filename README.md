@@ -4,13 +4,17 @@
 
 ### Repo
 
-Git Filters:
+Git Filters (run once after cloning):
 ```bash
-git config filter.scrub-apikey.clean \
-  "sed -E 's/(\"apiKey\"[[:space:]]*:[[:space:]]*)\"[^\"]*\"/\\1\"REDACTED\"/'"
-git config filter.scrub-apikey.smudge cat
-git config filter.scrub-apikey.required true
+./setup.git-filters.sh
 ```
+
+This configures two clean/smudge filters:
+- `scrub-apikey` — redacts API keys in `junie/models/*.json` on commit
+- `pkcs11-provider` — tokenizes PKCS#11 provider paths in `ssh/config.d/*` on
+  commit (`@YKCS11@`, `@OPENSC@`) and resolves them to the current platform's
+  real paths on checkout. Provider paths are defined in `ssh/providers.mac` and
+  `ssh/providers.fedora`.
 
 ## TODO
 
