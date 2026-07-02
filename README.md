@@ -23,7 +23,7 @@ Cross-platform dotfiles repository supporting **macOS**, **Fedora**, **Fedora At
 | OS | Setup Script | Package Managers | Status |
 |---|---|---|---|
 | **macOS** | `setup.macos.sh` | Homebrew | ✅ Active |
-| **Fedora** | `setup.fedora.sh` | dnf, COPR, Flatpak | 🧪 Untested |
+| **Fedora** | `setup.fedora.sh` | dnf, COPR, Flatpak |  ✅ Active |
 | **Fedora Atomic** | `setup.atomic-fedora.sh` | rpm-ostree, Flatpak, Toolbx | 🧪 Untested |
 | **Manjaro** | `setup.manjaro.sh` | pacman, AUR (yay) | 🧪 Untested |
 
@@ -171,8 +171,6 @@ directory anymore, and no host duplication. Host stanzas live once in
 
 #### Caveats
 
-- `ssh/config.d/dienstwerk` is gitignored, so the filter never touches it — it
-  keeps whatever real paths are on disk (currently macOS).
 - `providers.fedora` still holds `TODO_VERIFY_*` placeholders; until real Fedora
   paths are filled in, smudge on Linux would inject those literal `TODO_...`
   strings, which SSH would then fail to load. Verify on real hardware.
@@ -400,7 +398,6 @@ source <(path/to/work-finder --shell-integration)
 | `homelab` | Homelab devices: `minix`, `macminim4`, `debianmini`, `k3smaster`, `k3sslave1` (all via Tailscale, YubiKey PKCS11) |
 | `infra` | Infrastructure: `debug-pi` (local dev board), `*.smoca.ch` hosts (both with OpenSC PKCS11 via YubiKey) |
 | `zhaw` | ZHAW university: `github.zhaw.ch` (with `id_zhaw` SSH key) |
-| `dienstwerk` | Work hosts (gitignored — not shared publicly) |
 
 ### YubiKey PKCS11
 
@@ -590,12 +587,11 @@ Both scripts are auto-loaded by `zshrc` via shell integration, so their commands
 
 ### Adding SSH Hosts
 
-1. **Choose the right `config.d/` file**: `private` (personal), `homelab` (home lab), `infra` (infrastructure), `zhaw` (university), or `dienstwerk` (work — gitignored).
+1. **Choose the right `config.d/` file**: `private` (personal), `homelab` (home lab), `infra` (infrastructure), `zhaw` (university) or a new one.
 2. Add the `Host` stanza. If using YubiKey PKCS11, use the token placeholders:
    - `@YKCS11@` — resolved to `libykcs11.dylib` on macOS, Fedora path on Linux
    - `@OPENSC@` — resolved to `opensc-pkcs11.so` on macOS, Fedora path on Linux
 3. Commit — the git filter will automatically tokenize provider paths.
-4. If adding dienstwerk hosts: note they are gitignored; paths stay as real macOS values.
 
 ### Adding Neovim Plugins
 
