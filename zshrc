@@ -2,7 +2,7 @@
 # ENV
 ##########
 export EDITOR=vim
-export VISUAL=3
+export VISUAL=vim
 export XDG_CONFIG_HOME="$HOME/.config"
 
 # Path of this config file / directory (works when sourced by zsh)
