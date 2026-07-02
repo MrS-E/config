@@ -33,7 +33,7 @@ Nextcloud/*
 # junie
 # =========================
 junie/*
-!junie/settings.json
+junie/settings.json
 !junie/config.json
 !junie/*.md
 !junie/versions

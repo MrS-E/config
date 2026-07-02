@@ -1,7 +1,0 @@
-{
-    "sessionCount": "31",
-    "effortPerModel": "{\"custom:supergemma4\":\"medium\",\"gpt-5.3-codex\":\"low\",\"custom:qwable\":\"medium\",\"custom:coder-plan-execute\":\"medium\",\"custom:devstral-agentic\":\"medium\",\"custom:thinker-fast-exec\":\"medium\",\"custom:qwable-large\":\"medium\",\"custom:qwable-small\":\"medium\",\"custom:gml-5.2\":\"medium\",\"gpt-5.5\":\"high\"}",
-    "modelForLaunch": "custom:gml-5.2",
-    "shareAnonymousStatistics": "false",
-    "braveMode": "AUTO"
-}

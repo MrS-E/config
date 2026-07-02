@@ -552,7 +552,7 @@ cat vscodium/extensions | xargs -L1 codium --install-extension
 
 ## Junie Configuration
 
-- **`settings.json`**: Junie AI assistant settings
+- **`settings.json`**: Junie AI assistant settings (local-only; not tracked by git — each machine keeps its own copy)
 - **Model configs**: API keys in `junie/models/*.json` are protected by the `scrub-apikey` git filter — they never appear in commits (redacted to `REDACTED`)
 - **Logs excluded** from repo (gitignored)
 
