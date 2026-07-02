@@ -165,6 +165,8 @@ brew "skopeo"
 brew "socat"
 # Audio processing library
 brew "sound-touch"
+# Cross-shell prompt
+brew "starship"
 # Tool to enforce Swift style and conventions
 brew "swiftlint"
 # Easiest, most secure way to use WireGuard and 2FA

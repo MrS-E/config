@@ -36,6 +36,8 @@ run() {
 
   ensure_symlink "$REPO_DIR/junie" "$HOME/.junie"
 
+  ensure_symlink "$REPO_DIR/starship.toml" "$HOME/.config/starship.toml"
+
   [[ -d "$REPO_DIR/ghostty" ]]   && ensure_symlink "$REPO_DIR/ghostty"   "$HOME/.config/ghostty"
   [[ -d "$REPO_DIR/Nextcloud" ]] && ensure_symlink "$REPO_DIR/Nextcloud" "$HOME/.config/Nextcloud"
 

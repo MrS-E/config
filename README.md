@@ -70,7 +70,7 @@ config/
 | `setup.sh` | Orchestration-only runner. Detects OS, discovers numbered step scripts under `setup/general/` and `setup/<os>/`, applies selection filters (`--all`, `--only`, `--exclude`, `--interactive`), and runs each step as a separate process via `presteps` then `run`. No setup logic lives here. |
 | `setup/general/` | OS-agnostic steps that run first on every platform: symlink dotfiles, register git filters, create shared editor directories. `common.bash` provides platform-neutral primitives (logging, symlink helpers, git clone guards, manifest parsing). |
 | `setup/<os>/` | Platform-specific numbered steps with companion manifests and a `common.bash` helper library. Steps are idempotent — safe to run repeatedly. |
-| `zshrc` | ZSH config: OS/hardware detection, history settings, aliases, platform-aware clip/clippaste helpers, completion system, starship prompt, version managers (NVM, JABBA, PYENV, RBENV, bun), ZSH plugins, custom script shell-integration. |
+| `zshrc` | ZSH config: OS/hardware detection, history settings, aliases, platform-aware clip/clippaste helpers, completion system, Starship prompt with custom fallback, version managers (NVM, JABBA, PYENV, RBENV, bun), ZSH plugins, custom script shell-integration. |
 | `gitconfig` | Git config: GPG SSH signing, codium/vscode as difftool/mergetool, LFS, pull rebase, credential cache. |
 | `vimrc` | Vim config: persistent undo, custom theme, indentation, whitespace display, statusline. |
 | `vim/` | Vim custom color scheme (`cyberpunk_scarlet_protocol_adjusted.vim`) and persistent undo directory. |
@@ -375,7 +375,7 @@ The `zshrc` is the most complex config file. It handles:
 
 ### Prompt
 
-Uses **Starship** prompt (`starship.toml` not in this repo). Falls back gracefully if not installed.
+Uses **Starship** prompt with a full-featured `starship.toml` in this repo. Falls back gracefully to a custom prompt if Starship is not installed.
 
 ### Version Managers
 
@@ -724,7 +724,6 @@ These are concrete suggestions to improve the config over time. None are blocker
 - **Add shellcheck CI**: All setup scripts are shell (`sh`/`bash`). A pre-commit hook or CI step running `shellcheck` would catch common issues.
 - **Untrack `known_hosts.old` and `.netrwhist`**: These auto-generated files are tracked in git but are ephemeral data, not config. Consider removing from tracking or adding to `.gitignore`.
 - **Document `code export`/`code import` workflow**: The VSCodium settings sync flow is powerful but not obvious. Consider a dedicated section showing end-to-end usage.
-- **Write a `starship.toml`**: The zshrc references Starship prompt but the `starship.toml` isn't in this repo. Adding it would make the prompt portable.
 
 ## TODO
 
