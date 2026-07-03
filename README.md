@@ -740,10 +740,9 @@ These are concrete suggestions to improve the config over time. None are blocker
 - [x] terminal config (ghostty)
 - [x] vscode(ium) config (base + overlay)
 - [x] neovim (lazy.nvim, 27 plugins)
-- [ ] Segger Ozone setup (`setup/macos/07-ozone.sh`)
-- [ ] Digilent WaveForms setup (`setup/macos/09-waveforms.sh`)
 - [ ] Nordic Connect Desktop setup (`setup/macos/08-nrf-connect.sh`)
 - [ ] Xcode Additional Tools setup (`setup/macos/11-xcode-additional-tools.sh`)
+- [ ] Segger SystemView setup
 - [ ] Nordic SDK directories
 
 ### Linux
