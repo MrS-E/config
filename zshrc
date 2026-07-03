@@ -738,7 +738,8 @@ code() {
               ."markdown-preview-enhanced.plantumlJarPath",
               ."idf.pythonInstallPath",
               ."idf.espIdfPath",
-              ."idf.toolsPath"
+              ."idf.toolsPath",
+              ."idf.gitPath"
             )
           '
 
@@ -747,7 +748,8 @@ code() {
               "markdown-preview-enhanced.plantumlJarPath": ."markdown-preview-enhanced.plantumlJarPath",
               "idf.pythonInstallPath": ."idf.pythonInstallPath",
               "idf.espIdfPath": ."idf.espIdfPath",
-              "idf.toolsPath": ."idf.toolsPath"
+              "idf.toolsPath": ."idf.toolsPath",
+              "idf.gitPath": ."idf.gitPath"
             }
             | with_entries(select(.value != null))
           '

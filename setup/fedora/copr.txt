@@ -1,2 +1,2 @@
-atim:lazygit
-zeno:scrcpy
+atim/lazygit
+zeno/scrcpy
