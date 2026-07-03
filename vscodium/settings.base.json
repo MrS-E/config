@@ -1,0 +1,22 @@
+{
+  "files.autoSave": "afterDelay",
+  "markdown-preview-enhanced.markdownFileExtensions": [
+    ".md",
+    ".markdown",
+    ".mdown",
+    ".mkdn",
+    ".mkd",
+    ".rmd",
+    ".qmd",
+    ".mdx"
+  ],
+  "idf.hasWalkthroughBeenShown": true,
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "extensions.autoUpdate": false,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnType": true,
+  "workbench.colorTheme": "Light 2026"
+}
