@@ -56,6 +56,7 @@ config/
 ├── vimrc                       # Vim configuration
 ├── vim/                        # Vim custom color scheme + persistent undo
 ├── nvim/                       # Neovim (lazy.nvim, 27 plugins, LSP)
+├── kitty/                      # Kitty terminal emulator
 ├── ghostty/                    # Ghostty terminal emulator
 ├── lazygit/                    # Lazygit TUI keybinding overrides
 ├── vscodium/                   # VSCodium (base+overlay settings pattern)
@@ -75,6 +76,7 @@ config/
 | `vimrc` | Vim config: persistent undo, custom theme, indentation, whitespace display, statusline. |
 | `vim/` | Vim custom color scheme (`cyberpunk_scarlet_protocol_adjusted.vim`) and persistent undo directory. |
 | `nvim/` | Neovim config: `lazy.nvim` package manager, 27 plugins (LSP, Telescope, Treesitter, lualine, nvim-tree, harpoon, trouble, which-key, vimtex, Java JDTLS, Godot LSP, GPTModels, etc.). |
+| `kitty/` | Kitty terminal emulator: preferred cross-platform terminal for macOS, GNOME, and KDE with Cyberpunk Scarlet Protocol theme, xterm-compatible `TERM`, Swiss-friendly shortcuts, tabs, splits, clipboard, and shell integration. |
 | `ghostty/` | Ghostty terminal emulator: appearance, Swiss keyboard keybindings, custom Cyberpunk Scarlet Protocol theme. |
 | `lazygit/` | Lazygit TUI: custom keybinding overrides. |
 | `vscodium/` | VSCodium: base+overlay settings (`settings.base.json` + platform-specific overlays), extensions list, `code export`/`code import` zsh functions. |
@@ -232,7 +234,7 @@ OS-agnostic steps that run first on every platform:
 
 | Step | Description |
 |---|---|
-| `01-symlinks.sh` | Symlink dotfiles (zshrc, vimrc, gitconfig, nvim, lazygit, ghostty, ssh, etc.) into `$HOME` |
+| `01-symlinks.sh` | Symlink dotfiles (zshrc, vimrc, gitconfig, nvim, lazygit, kitty, ghostty, ssh, etc.) into `$HOME` |
 | `02-git-filters.sh` | Register `pkcs11-provider` and `scrub-apikey` git clean/smudge filters |
 | `03-vim-base.sh` | Create shared editor directories (`~/.vim/undo`) |
 
@@ -560,6 +562,14 @@ Uses **lazy.nvim** — bootstrapped from `lazy_init.lua`, which auto-installs la
 - **Java**: JDTLS via `mason`, configured in `plugins/java.lua`; `ftplugin/java.lua` with Java-specific keymaps
 - **LaTeX**: `vimtex` with forward/inverse search
 - **Godot**: GDScript language server configured in `gdscript.lua`
+
+## Kitty Configuration
+
+- **Preferred terminal**: cross-platform replacement for iTerm2 on macOS and the default GNOME/KDE terminals on Linux
+- **Compatibility**: sets `TERM=xterm-256color` instead of `xterm-kitty` so SSH hosts, serial consoles, rescue shells, `vim`, `systemctl`, and other TUI tools work without Kitty terminfo installed remotely
+- **Appearance**: custom Cyberpunk Scarlet Protocol theme matched to the existing Ghostty/Vim colors
+- **Keyboard**: Apple-style tab/split/clipboard shortcuts, Swiss-friendly bindings for tab navigation and vertical splits, and Option/Alt word movement
+- **Behavior**: shell integration, large scrollback, copy-on-select, quiet bell, tabs, splits, and fullscreen/edit-config shortcuts
 
 ## Ghostty Configuration
 
