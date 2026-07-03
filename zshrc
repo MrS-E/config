@@ -276,15 +276,19 @@ fi
 ##########
 # Prompt
 ##########
-precmd_functions=(render_prompt)
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+else
+  precmd_functions=(render_prompt)
 
-function render_prompt {
-  PROMPT=""
-  PROMPT+="%(1j.%B%%%b .)"
-  PROMPT+="%~ "
-  PROMPT+="%(?.%F{green}.%F{red})%B$%b%f "
-  RPROMPT="%(?..%F{red}[%?]%f)"
-}
+  function render_prompt {
+    PROMPT=""
+    PROMPT+="%(1j.%B%%%b .)"
+    PROMPT+="%~ "
+    PROMPT+="%(?.%F{green}.%F{red})%B$%b%f "
+    RPROMPT="%(?..%F{red}[%?]%f)"
+  }
+fi
 
 ##########
 # Homebrew

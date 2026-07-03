@@ -29,6 +29,7 @@ run() {
   ensure_symlink "$REPO_DIR/zshrc"     "$HOME/.zshrc"
   ensure_symlink "$REPO_DIR/vimrc"     "$HOME/.vimrc"
   ensure_symlink "$REPO_DIR/gitconfig" "$HOME/.gitconfig"
+    ensure_symlink "$REPO_DIR/starship.toml" "$HOME/.config/starship.toml"
 
   ensure_symlink "$REPO_DIR/vim"      "$HOME/.vim"
   ensure_symlink "$REPO_DIR/nvim"     "$HOME/.config/nvim"
