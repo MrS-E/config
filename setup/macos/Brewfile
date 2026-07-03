@@ -200,8 +200,6 @@ brew "zsh-autosuggestions"
 brew "zsh-syntax-highlighting"
 # Play, record, convert, and stream audio and video
 brew "homebrew-ffmpeg/ffmpeg/ffmpeg", args: ["with-webp", "with-xvid"]
-# LLM inference server optimized for Apple Silicon
-brew "jundot/omlx/omlx", link: false
 # Android SDK component
 cask "android-platform-tools"
 # Network scanner
@@ -226,8 +224,6 @@ cask "freecad"
 cask "google-chrome"
 # Hex editor for reverse engineers
 cask "imhex"
-# Terminal emulator as alternative to Apple's Terminal app
-cask "iterm2"
 # JetBrains tools manager
 cask "jetbrains-toolbox"
 # GPU-based terminal emulator
@@ -283,8 +279,6 @@ cask "temurin@8"
 cask "texifier"
 # Customizable email client
 cask "thunderbird"
-# Virtual machines UI using QEMU
-cask "utm"
 # Multimedia player
 cask "vlc"
 # Binary releases of VS Code without MS branding/telemetry/licensing
