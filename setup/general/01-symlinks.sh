@@ -15,7 +15,7 @@ presteps() {
 help() {
   cat <<'EOF'
 Symlink dotfiles (zshrc, vimrc, gitconfig, vim/, nvim/, lazygit/, junie/,
-ghostty/, Nextcloud/, ssh config) into $HOME. Idempotent: existing correct
+kitty/, ghostty/, Nextcloud/, ssh config) into $HOME. Idempotent: existing correct
 symlinks are left untouched; pre-existing non-symlinks are backed up once.
 EOF
 }
@@ -29,6 +29,7 @@ run() {
   ensure_symlink "$REPO_DIR/zshrc"     "$HOME/.zshrc"
   ensure_symlink "$REPO_DIR/vimrc"     "$HOME/.vimrc"
   ensure_symlink "$REPO_DIR/gitconfig" "$HOME/.gitconfig"
+    ensure_symlink "$REPO_DIR/starship.toml" "$HOME/.config/starship.toml"
 
   ensure_symlink "$REPO_DIR/vim"      "$HOME/.vim"
   ensure_symlink "$REPO_DIR/nvim"     "$HOME/.config/nvim"
@@ -37,8 +38,7 @@ run() {
 
   ensure_symlink "$REPO_DIR/junie" "$HOME/.junie"
 
-  ensure_symlink "$REPO_DIR/starship.toml" "$HOME/.config/starship.toml"
-
+  [[ -d "$REPO_DIR/kitty" ]]    && ensure_symlink "$REPO_DIR/kitty"    "$HOME/.config/kitty"
   [[ -d "$REPO_DIR/ghostty" ]]   && ensure_symlink "$REPO_DIR/ghostty"   "$HOME/.config/ghostty"
   [[ -d "$REPO_DIR/Nextcloud" ]] && ensure_symlink "$REPO_DIR/Nextcloud" "$HOME/.config/Nextcloud"
 
