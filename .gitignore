@@ -39,6 +39,7 @@ junie/settings.json
 !junie/versions
 !junie/mcp
 !junie/models
+junie/models/*smoca*
 !junie/skills
 !junie/commands
 !junie/agents
