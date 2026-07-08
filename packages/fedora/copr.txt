@@ -1,2 +1,0 @@
-atim:lazygit
-zeno:scrcpy
