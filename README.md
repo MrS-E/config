@@ -249,6 +249,8 @@ OS-agnostic steps that run first on every platform:
 | `03-ssh-agent.sh` | Start ssh-agent if not running |
 | `04-ssh-keychain.sh` | Add SSH keys to Apple keychain |
 | `05-vim-theme.sh` | Clone Dracula vim theme |
+| `06-junie.sh` | Install Junie CLI |
+| `07-waveforms.sh` | Download and install Digilent WaveForms from the official `.dmg` (not in Brewfile; falls back to the browser if Cloudflare blocks `curl`) |
 
 ### Fedora Steps (`setup/fedora/`)
 
