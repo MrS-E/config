@@ -283,8 +283,6 @@ cask "thunderbird"
 cask "vlc"
 # Binary releases of VS Code without MS branding/telemetry/licensing
 cask "vscodium"
-# Virtual instrumentation software for electronic testing
-cask "waveforms"
 # Network protocol analyzer
 cask "wireshark-app"
 # Collect, organise, cite, and share research sources
