@@ -1,5 +1,5 @@
 
-Host minix macminim4 tailscale-macminim4 debianmini k3smaster tailscale-k3smaster k3sslave1
+Host minix macminim4 tailscale-macminim4 debianmini k3smaster tailscale-k3smaster k3sslave1 homeassistant
     Port 22
     IdentityFile ~/.ssh/id_cloud
 
@@ -29,6 +29,10 @@ Host k3sslave1
 Host minix
     #HostName minixz150.local
     HostName 10.10.0.55
+
+Host homeassistant
+    HostName 10.10.0.60
+    User hassio
 
 ################
 # TAILSCALE
