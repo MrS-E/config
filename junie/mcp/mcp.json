@@ -1,8 +1,10 @@
 {
-  "mcpServers": {
-    "xcode": {
-      "command": "xcrun",
-      "args": ["mcpbridge"]
+    "mcpServers": {
+        "xcode": {
+            "command": "xcrun",
+            "args": [
+                "mcpbridge"
+            ]
+        }
     }
-  }
 }
