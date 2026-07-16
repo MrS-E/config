@@ -21,6 +21,7 @@ unzip
 tar
 
 # Host desktop / utilities
+kitty
 wireshark
 openscad
 eog

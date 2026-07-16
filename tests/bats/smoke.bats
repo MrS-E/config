@@ -38,6 +38,12 @@ load "/workspace/tests/bats/helpers/assertions.bash"
   assert_symlink_to "$HOME/.config/ghostty" "$REPO_DIR/ghostty"
 }
 
+@test "setup.sh links kitty config when present" {
+  assert [ -d "$REPO_DIR/kitty" ]
+  run_setup_allow_fail --only general/01-symlinks.sh
+  assert_symlink_to "$HOME/.config/kitty" "$REPO_DIR/kitty"
+}
+
 @test "setup.sh links ssh config" {
   assert [ -f "$REPO_DIR/ssh/config" ]
   run_setup_allow_fail --only general/01-symlinks.sh
