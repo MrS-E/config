@@ -543,6 +543,7 @@ xsel
 yarnpkg
 yelp
 yq
+yubico-piv-tool
 zip
 zlib-ng-compat-devel
 zram-generator-defaults

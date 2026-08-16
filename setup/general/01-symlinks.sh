@@ -45,7 +45,9 @@ run() {
   # [[ -f "$REPO_DIR/ssh/config" ]]       && ensure_symlink "$REPO_DIR/ssh/config"       "$HOME/.ssh/config"
   # [[ -f "$REPO_DIR/ssh/known_hosts" ]] && ensure_symlink "$REPO_DIR/ssh/known_hosts" "$HOME/.ssh/known_hosts"
 
-  chmod 700 "$HOME/.ssh" || true
+  if [[ ! -L "$HOME/.ssh" ]]; then
+    chmod 700 "$HOME/.ssh" || true
+  fi
 }
 
 case "${1:-}" in

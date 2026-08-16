@@ -16,9 +16,21 @@ IMAGE_PREFIX ?= setup-test
 REPO_ROOT   := $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 WORKSPACE   := /workspace
 
+# The workspace contains user-owned dotfiles that must not be relabeled on an
+# enforcing SELinux host. Disable labeling for the disposable test container;
+# other hosts retain Podman's private bind-mount label.
+SELINUX_STATE := $(shell getenforce 2>/dev/null || true)
+ifeq ($(SELINUX_STATE),Enforcing)
+PODMAN_SECURITY_OPTS ?= --security-opt label=disable
+WORKSPACE_MOUNT     := $(REPO_ROOT):$(WORKSPACE)
+else
+PODMAN_SECURITY_OPTS ?=
+WORKSPACE_MOUNT     := $(REPO_ROOT):$(WORKSPACE):Z
+endif
+
 # bats files executed per target (paths relative to the repo root / WORKDIR)
 BATS_COMMON  := tests/bats/smoke.bats tests/bats/idempotency.bats
-BATS_FEDORA  := $(BATS_COMMON) tests/bats/assertions-fedora.bats
+BATS_FEDORA  := $(BATS_COMMON) tests/bats/assertions-fedora.bats tests/bats/ssh-pkcs11-fedora.bats
 BATS_MANJARO := $(BATS_COMMON) tests/bats/assertions-manjaro.bats
 BATS_ATOMIC  := $(BATS_COMMON) tests/bats/assertions-fedora-atomic.bats
 BATS_MACOS   := $(BATS_COMMON) tests/bats/assertions-macos.bats
@@ -51,7 +63,8 @@ build-macos:
 # ---------------------------------------------------------------------------
 define run_bats
 	$(PODMAN) run --rm \
-		-v $(REPO_ROOT):$(WORKSPACE):Z \
+		$(PODMAN_SECURITY_OPTS) \
+		-v $(WORKSPACE_MOUNT) \
 		-e HOME=/home/tester \
 		-e TEST_OS=$(1) \
 		--user tester \
