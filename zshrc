@@ -276,23 +276,29 @@ fi
 ##########
 # Prompt
 ##########
-precmd_functions=(render_prompt)
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+else
+  precmd_functions=(render_prompt)
 
-function render_prompt {
-  PROMPT=""
-  PROMPT+="%(1j.%B%%%b .)"
-  PROMPT+="%~ "
-  PROMPT+="%(?.%F{green}.%F{red})%B$%b%f "
-  RPROMPT="%(?..%F{red}[%?]%f)"
-}
+  function render_prompt {
+    PROMPT=""
+    PROMPT+="%(1j.%B%%%b .)"
+    PROMPT+="%~ "
+    PROMPT+="%(?.%F{green}.%F{red})%B$%b%f "
+    RPROMPT="%(?..%F{red}[%?]%f)"
+  }
+fi
 
 ##########
 # Homebrew
 ##########
 if ! command -v brew >/dev/null 2>&1; then
-  [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+  [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)" 
   [[ -x /usr/local/bin/brew ]] && eval "$(/usr/local/bin/brew shellenv)"
 fi
+[[ -x /opt/homebrew/bin/brew ]] && export PATH="/opt/homebrew/sbin:/opt/homebrew/bin:$PATH"
+# TODO add brew paths for intel mac
 
 ##########
 # FZF

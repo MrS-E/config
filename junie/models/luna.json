@@ -1,0 +1,11 @@
+{
+  "baseUrl": "https://openrouter.ai/api/v1/responses",
+  "id": "openai/gpt-5.6-luna-pro",
+  "apiType": "OpenAIResponses",
+  "apiKey": "REDACTED",
+  "temperature": 0.4,
+  "fasterModel": {
+    "id": "openai/gpt-5.6-luna",
+    "temperature": 0.3
+  }
+}
