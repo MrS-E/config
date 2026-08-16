@@ -3,7 +3,7 @@ Host minix macminim4 tailscale-macminim4 debianmini k3smaster tailscale-k3smaste
     Port 22
     IdentityFile ~/.ssh/id_cloud
 
-Host macminim4 tailscale-macminim4
+Host macminim4 tailscale-macminim4 storage
     User sstix
 
 Host minix tailscale-minix  k3smaster tailscale-k3smaster k3sslave1
@@ -12,6 +12,9 @@ Host minix tailscale-minix  k3smaster tailscale-k3smaster k3sslave1
 ################
 # LOCAL
 ################
+
+Host storage
+    HostName 10.10.0.47
 
 Host macminim4
     HostName macm424g.local
