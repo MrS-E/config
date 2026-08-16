@@ -1,6 +1,0 @@
-{
-    "sessionCount": "5",
-    "effortPerModel": "{\"custom:supergemma4\":\"medium\",\"gpt-5.3-codex\":\"low\",\"custom:qwable\":\"medium\"}",
-    "modelForLaunch": "custom:qwable",
-    "shareAnonymousStatistics": "false"
-}

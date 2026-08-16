@@ -1,0 +1,4 @@
+# PKCS#11 provider paths for macOS (Homebrew).
+# Consumed by pkcs11-filter.sh (smudge) to resolve @YKCS11@ / @OPENSC@ tokens.
+YKCS11=/opt/homebrew/lib/libykcs11.dylib
+OPENSC=/opt/homebrew/lib/opensc-pkcs11.so

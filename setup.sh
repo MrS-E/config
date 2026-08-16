@@ -57,6 +57,11 @@ setup_symlinks() {
   [[ -f "$REPO_DIR/ssh/known_hosts" ]] && link_path "$REPO_DIR/ssh/known_hosts" "$HOME/.ssh/known_hosts"
 
   chmod 700 "$HOME/.ssh" || true
+
+  # Configure git clean/smudge filters (run once per clone)
+  if [[ -x "$REPO_DIR/setup.git-filters.sh" ]]; then
+    "$REPO_DIR/setup.git-filters.sh"
+  fi
 }
 
 run_platform_setup() {

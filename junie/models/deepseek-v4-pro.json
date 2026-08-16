@@ -1,0 +1,11 @@
+{
+  "baseUrl": "https://openrouter.ai/api/v1/responses",
+  "id": "deepseek/deepseek-v4-pro",
+  "apiType": "OpenAIResponses",
+  "apiKey": "REDACTED",
+  "temperature": 0.4,
+  "fasterModel": {
+    "id": "deepseek/deepseek-v4-pro",
+    "temperature": 0.3
+  }
+}

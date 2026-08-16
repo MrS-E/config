@@ -1,0 +1,5 @@
+# PKCS#11 provider paths for Fedora/Linux.
+# TODO: verify these paths on a real Fedora machine with opensc/ykcs11 installed.
+# Consumed by pkcs11-filter.sh (smudge) to resolve @YKCS11@ / @OPENSC@ tokens.
+YKCS11=TODO_VERIFY_FEDORA_YKCS11_PATH
+OPENSC=TODO_VERIFY_FEDORA_OPENSC_PATH

@@ -1,7 +1,8 @@
-
 Host minix tailscale-minix macminim4 tailscale-macminim4 storage debianmini system
     Port 22
-    IdentityFile ~/.ssh/id_cloud
+    PKCS11Provider @YKCS11@
+    IdentityFile ~/.ssh/yubikey-9d.pub
+    IdentitiesOnly yes
 
 Host macminim4 tailscale-macminim4 storage
     User sstix
@@ -40,4 +41,3 @@ Host tailscale-macminim4
 
 Host tailscale-minix
     HostName minixz150.tail0091f3.ts.net
-
