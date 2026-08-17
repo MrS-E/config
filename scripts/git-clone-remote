@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Check if URL parameter is provided
+if [[ "${1:-}" == "--shell-integration" ]]; then
+    exit 0
+fi
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 <new-git-remote-url>"
+    exit 1
+fi
+
+NEW_REMOTE_URL="$1"
+NEW_REMOTE_NAME="new-origin"
+
+# Fetch all remote branches and prune deleted ones
+git fetch --prune origin
+
+# Create local tracking branches for all remote branches
+for branch in $(git branch -r | grep -v '\->'); do
+    git branch --track "${branch#origin/}" "$branch" 2>/dev/null || true
+done
+
+# Add new remote
+git remote add "$NEW_REMOTE_NAME" "$NEW_REMOTE_URL"
+
+# Push all branches and tags to new remote
+git push --all "$NEW_REMOTE_NAME"
+git push --tags "$NEW_REMOTE_NAME"
+
+echo "All branches and tags have been pushed to $NEW_REMOTE_NAME ($NEW_REMOTE_URL)"
