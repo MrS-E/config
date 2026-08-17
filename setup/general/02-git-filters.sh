@@ -25,8 +25,8 @@ EOF
 run() {
   log "Configuring git filters..."
 
-  ensure_git_config filter.pkcs11-provider.clean  "$REPO_DIR/ssh/pkcs11-filter.sh clean"
-  ensure_git_config filter.pkcs11-provider.smudge "$REPO_DIR/ssh/pkcs11-filter.sh smudge"
+  ensure_git_config filter.pkcs11-provider.clean  "ssh/pkcs11-filter.sh clean"
+  ensure_git_config filter.pkcs11-provider.smudge "ssh/pkcs11-filter.sh smudge"
   ensure_git_config filter.pkcs11-provider.required true
 
   ensure_git_config filter.scrub-apikey.clean \

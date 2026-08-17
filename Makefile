@@ -29,7 +29,7 @@ WORKSPACE_MOUNT     := $(REPO_ROOT):$(WORKSPACE):Z
 endif
 
 # bats files executed per target (paths relative to the repo root / WORKDIR)
-BATS_COMMON  := tests/bats/smoke.bats tests/bats/idempotency.bats
+BATS_COMMON  := tests/bats/smoke.bats tests/bats/idempotency.bats tests/bats/git-filters.bats
 BATS_FEDORA  := $(BATS_COMMON) tests/bats/assertions-fedora.bats tests/bats/ssh-pkcs11-fedora.bats
 BATS_MANJARO := $(BATS_COMMON) tests/bats/assertions-manjaro.bats
 BATS_ATOMIC  := $(BATS_COMMON) tests/bats/assertions-fedora-atomic.bats
