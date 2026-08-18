@@ -1,7 +1,7 @@
 # Mocked macOS test container.
 #
 # Podman cannot run real macOS. This Linux container mocks `uname`, `brew`,
-# `ssh-agent`, and `ssh-add` so setup.macos.sh can be exercised for OS
+# `open`, `ssh-agent`, and `ssh-add` so macOS setup steps can be exercised for OS
 # detection, dispatch, and contract behavior. This is path/contract
 # validation, NOT real Homebrew validation. See tests/README.md.
 FROM fedora:40
@@ -33,6 +33,12 @@ RUN printf '%s\n' \
     '  *) echo "mock brew: $*"; exit 0 ;;' \
     'esac' \
     > /usr/local/bin/brew && chmod +x /usr/local/bin/brew
+
+# --- Mock open ---------------------------------------------------------------
+RUN printf '%s\n' \
+    '#!/usr/bin/env bash' \
+    'echo "mock open: $*"' \
+    > /usr/local/bin/open && chmod +x /usr/local/bin/open
 
 # --- Mock ssh-agent / ssh-add ------------------------------------------------
 RUN printf '%s\n' \

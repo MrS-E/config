@@ -50,7 +50,8 @@ documented limitations of the container environment and are recorded (not
 hidden) by the baseline:
 
 - **macOS** cannot run natively in Podman. `test-macos` uses a Linux container
-  with mocked `uname` (returns `Darwin`), `brew`, `ssh-agent`, and `ssh-add`.
+  with mocked `uname` (returns `Darwin`), `brew`, `open`, `ssh-agent`, and
+  `ssh-add`.
   This validates dispatch paths and contract behavior, not real Homebrew.
 - **Fedora Atomic** has no practical rpm-ostree-capable Podman image. The
   container ships a documented mock `rpm-ostree` and mock `toolbox`; Flatpak

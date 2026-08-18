@@ -47,5 +47,6 @@ load "/workspace/tests/bats/helpers/assertions.bash"
 @test "setup.sh links ssh config" {
   assert [ -f "$REPO_DIR/ssh/config" ]
   run_setup_allow_fail --only general/01-symlinks.sh
-  assert_symlink_exists "$HOME/.ssh/config"
+  assert_symlink_to "$HOME/.ssh" "$REPO_DIR/ssh"
+  assert [ -f "$HOME/.ssh/config" ]
 }
