@@ -1,25 +1,44 @@
 #!/bin/bash
 
+pull_all_branches() {
+    # Create local tracking branches for all remote branches
+    for branch in $(git branch -r | grep -v '\->'); do
+        git branch --track "${branch#*/}" "$branch" 2>/dev/null || true
+    done
+}
+
+usage() {
+    echo "Usage: $0 <new-git-remote-url>"
+    echo "       $0 --pull-all"
+}
+
 # Check if URL parameter is provided
 if [[ "${1:-}" == "--shell-integration" ]]; then
     exit 0
 fi
 
+if [[ "${1:-}" == "--pull-all" ]]; then
+    if [[ $# -ne 1 ]]; then
+        usage
+        exit 1
+    fi
+
+    git fetch --all --prune
+    pull_all_branches
+    echo "All remote branches have been pulled locally"
+    exit 0
+fi
+
 if [ -z "$1" ]; then
-    echo "Usage: $0 <new-git-remote-url>"
+    usage
     exit 1
 fi
 
 NEW_REMOTE_URL="$1"
 NEW_REMOTE_NAME="new-origin"
 
-# Fetch all remote branches and prune deleted ones
 git fetch --prune origin
-
-# Create local tracking branches for all remote branches
-for branch in $(git branch -r | grep -v '\->'); do
-    git branch --track "${branch#origin/}" "$branch" 2>/dev/null || true
-done
+pull_all_branches
 
 # Add new remote
 git remote add "$NEW_REMOTE_NAME" "$NEW_REMOTE_URL"
