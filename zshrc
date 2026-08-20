@@ -5,6 +5,13 @@ export EDITOR=vim
 export VISUAL=vim
 export XDG_CONFIG_HOME="$HOME/.config"
 
+if [[ -d "$HOME/Library/Android/sdk" ]]; then
+  export ANDROID_HOME="$HOME/Library/Android/sdk"
+  export ANDROID_SDK_ROOT="$ANDROID_HOME"
+  export PATH="$ANDROID_HOME/platform-tools:$PATH"
+  export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+fi
+
 # Path of this config file / directory (works when sourced by zsh)
 ZSHRC_PATH="${${(%):-%N}:A}"
 CONFIG_DIR="${ZSHRC_PATH:h}"
