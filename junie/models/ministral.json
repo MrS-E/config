@@ -1,0 +1,7 @@
+{
+  "baseUrl": "https://chat.stix.foo/api/chat/completions",
+  "id": "mistralai_Ministral-3-14B-Instruct-2512-MLX-MXFP4",
+  "apiType": "OpenAICompletion",
+  "apiKey": "REDACTED",
+  "temperature": 0.6
+}
