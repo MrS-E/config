@@ -1,5 +1,0 @@
-{
-  "baseUrl": "http://192.168.2.216:8000/v1/chat/completions",
-  "id": "Qwen3.8-27B",
-  "apiType": "OpenAICompletion"
-}
