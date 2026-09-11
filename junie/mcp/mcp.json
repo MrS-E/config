@@ -12,13 +12,15 @@
             "args": [
                 "-y",
                 "chrome-devtools-mcp@latest"
-            ]
+            ],
+            "enabled": false
         },
         "browsermcp": {
             "command": "npx",
             "args": [
                 "@browsermcp/mcp@latest"
-            ]
+            ],
+            "enabled": false
         }
     }
 }
