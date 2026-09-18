@@ -3,5 +3,14 @@
   "id": "qwen3.8-flash-next",
   "apiType": "OpenAICompletion",
   "apiKey": "REDACTED",
-  "maxContextLength": 262144
+  "maxContextLength": 262144,
+  "primaryModel": {
+    "id": "qwen3.8-flash-next",
+    
+    "temperature": 0.8
+  },
+  "fasterModel": {
+    "id": "qwen3.8-flash-next",
+    "temperature": 0.3
+  }
 }
