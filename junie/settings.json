@@ -1,0 +1,12 @@
+{
+    "sessionCount": "323",
+    "onboardingDefaultModelChosen": "true",
+    "stepsLimit": "false",
+    "effortPerModel": "{\"custom:supergemma4\":\"medium\",\"gpt-5.3-codex\":\"low\",\"custom:qwable\":\"high\",\"custom:coder-plan-execute\":\"medium\",\"custom:devstral-agentic\":\"medium\",\"custom:thinker-fast-exec\":\"medium\",\"custom:qwable-large\":\"medium\",\"custom:qwable-small\":\"medium\",\"custom:gml-5.2\":\"high\",\"gpt-5.5\":\"high\",\"custom:deepseek-v4-pro\":\"high\",\"custom:kimi-k2.7-code\":\"high\",\"claude-opus-4-8\":\"high\",\"claude-fable-5\":\"low\",\"custom:luna\":\"high\",\"gpt-5.6-luna\":\"high\",\"custom:minimax\":\"low\",\"custom:deepseek-v4-pro-smoca\":\"medium\",\"gpt-5.6-terra\":\"xhigh\",\"custom:qwen38\":\"high\",\"gpt-5.6-sol\":\"xhigh\",\"custom:ministral\":\"high\",\"custom:spark_qwen\":\"high\",\"gemini-3.8-flash\":\"medium\",\"custom:qwen_dense\":\"high\",\"custom:qwen-external\":\"high\",\"custom:qwen_external\":\"high\",\"custom:gml\":\"high\",\"custom:kimi\":\"high\",\"custom:deepseek\":\"high\"}",
+    "modelForLaunch": "custom:deepseek",
+    "shareAnonymousStatistics": "false",
+    "subagentsMode": "Auto",
+    "braveMode": "ON",
+    "diffViewMode": "Split",
+    "toolbarVisibility": "{\"workingDirectory\":true,\"gitBranch\":true,\"braveMode\":true,\"model\":true,\"effort\":true,\"activeEditor\":true,\"contextWindow\":true,\"sessionCredits\":false}"
+}
