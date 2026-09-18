@@ -4,7 +4,7 @@ set -euo pipefail
 # work-finder
 #
 # Usage:
-#   work-finder [-d YYYY-MM-DD] [-a AUTHOR_REGEX] ROOT [ROOT ...]
+#   work-finder [-d YYYY-MM-DD] [-a AUTHOR_REGEX] [-G] [-L] [-T] [-S TIME_WINDOWS] ROOT [ROOT ...]
 #   eval "$(/path/to/work-finder --shell-integration)"
 #
 # Env:
@@ -13,23 +13,29 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  work-finder [-d YYYY-MM-DD] [-a AUTHOR_REGEX] [-G] ROOT [ROOT ...]
+  work-finder [-d YYYY-MM-DD] [-a AUTHOR_REGEX] [-G] [-L] [-T] [-S TIME_WINDOWS] ROOT [ROOT ...]
   work-finder --shell-integration
 
 Options:
   -d YYYY-MM-DD   Day to inspect. Defaults to today.
   -a AUTHOR_REGEX Regex matched against git author name/email.
   -G              Skip non-git file scanning.
+  -L              List matching commits and repositories.
+  -T              Show commit tables and elapsed time for changed branches.
+  -S TIME_WINDOWS  Show a timeline and branch-time summary using comma-separated
+                   HH:MM-HH:MM windows (for example, 08:00-12:00,13:30-18:00).
   -h              Show this help.
+
+At least one of -L, -T, or -S is required. They can be combined.
 
 Environment:
   WORK_FINDER_JOBS   Number of parallel jobs (default: CPU count)
 
 Examples:
-  work-finder ~/code ~/scratch
-  work-finder -d 2026-03-29 ~/code ~/notes
-  work-finder -a "me@example.com|My Name" ~/work ~/lab
-  work-finder -G ~/work
+  work-finder -L ~/code ~/scratch
+  work-finder -L -d 2026-03-29 ~/code ~/notes
+  work-finder -T -a "me@example.com|My Name" ~/work ~/lab
+  work-finder -S '08:00-12:00,13:30-18:00' -G ~/work
 EOF
 }
 
@@ -55,6 +61,9 @@ _arguments -s \
   '-d[Day to inspect]:date (YYYY-MM-DD):' \
   '-a[Author regex]:author regex:' \
   '-G[Skip non-git file scanning]' \
+  '-L[List matching commits and repositories]' \
+  '-T[Show changed-branch commit tables]' \
+  '-S[Show timeline and branch-time summary]:work windows (HH:MM-HH:MM,...):' \
   '*:root directory:_files -/'
 }
 
@@ -92,6 +101,54 @@ to_epoch() {
   date -j -f "%Y-%m-%d %H:%M:%S" "$input" +%s
 }
 
+format_epoch_time() {
+  local epoch="$1"
+
+  if date -d "@$epoch" +%H:%M >/dev/null 2>&1; then
+    date -d "@$epoch" +%H:%M
+    return 0
+  fi
+
+  date -r "$epoch" +%H:%M
+}
+
+parse_time_windows() {
+  local input="${1//[[:space:]]/}"
+  local window start_time end_time start_epoch end_epoch previous_end=""
+  local -a windows=()
+
+  if [[ -z "$input" || "$input" == ,* || "$input" == *, || "$input" == *,,* ]]; then
+    echo "Invalid time windows: $1" >&2
+    return 1
+  fi
+
+  IFS=',' read -r -a windows <<< "$input"
+  for window in "${windows[@]}"; do
+    if [[ ! "$window" =~ ^(([01][0-9]|2[0-3]):[0-5][0-9])-(([01][0-9]|2[0-3]):[0-5][0-9])$ ]]; then
+      echo "Invalid time window: $window (expected HH:MM-HH:MM)" >&2
+      return 1
+    fi
+
+    start_time="${BASH_REMATCH[1]}"
+    end_time="${BASH_REMATCH[3]}"
+    start_epoch="$(to_epoch "$TARGET_DAY $start_time:00")"
+    end_epoch="$(to_epoch "$TARGET_DAY $end_time:00")"
+
+    if (( end_epoch <= start_epoch )); then
+      echo "Time window must end after it starts: $window" >&2
+      return 1
+    fi
+    if [[ -n "$previous_end" && "$start_epoch" -lt "$previous_end" ]]; then
+      echo "Time windows must not overlap: $window" >&2
+      return 1
+    fi
+
+    TIME_WINDOW_STARTS+=("$start_epoch")
+    TIME_WINDOW_ENDS+=("$end_epoch")
+    previous_end="$end_epoch"
+  done
+}
+
 stat_mtime() {
   local file="$1"
 
@@ -116,13 +173,25 @@ default_jobs() {
 TARGET_DAY="$(today_ymd)"
 AUTHOR_REGEX=""
 SKIP_NON_GIT=0
+SHOW_COMMIT_LIST=0
+SHOW_MERGED_BRANCH_TABLES=0
+SHOW_TIMELINE_SUMMARY=0
+TIME_WINDOWS=""
+TIME_WINDOW_STARTS=()
+TIME_WINDOW_ENDS=()
 JOBS="${WORK_FINDER_JOBS:-$(default_jobs)}"
 
-while getopts ":d:a:Gh" opt; do
+while getopts ":d:a:GLTS:h" opt; do
   case "$opt" in
     d) TARGET_DAY="$OPTARG" ;;
     a) AUTHOR_REGEX="$OPTARG" ;;
     G) SKIP_NON_GIT=1 ;;
+    L) SHOW_COMMIT_LIST=1 ;;
+    T) SHOW_MERGED_BRANCH_TABLES=1 ;;
+    S)
+      SHOW_TIMELINE_SUMMARY=1
+      TIME_WINDOWS="$OPTARG"
+      ;;
     h)
       usage
       exit 0
@@ -141,6 +210,12 @@ while getopts ":d:a:Gh" opt; do
 done
 shift $((OPTIND - 1))
 
+if [[ $SHOW_COMMIT_LIST -eq 0 && $SHOW_MERGED_BRANCH_TABLES -eq 0 && $SHOW_TIMELINE_SUMMARY -eq 0 ]]; then
+  echo "Select at least one report option: -L, -T, or -S TIME_WINDOWS." >&2
+  usage >&2
+  exit 1
+fi
+
 if [[ $# -lt 1 ]]; then
   usage >&2
   exit 1
@@ -157,6 +232,10 @@ DAY_START="$TARGET_DAY 00:00:00"
 DAY_END="$TARGET_DAY 23:59:59"
 DAY_START_EPOCH="$(to_epoch "$DAY_START")"
 DAY_END_EPOCH="$(to_epoch "$DAY_END")"
+
+if [[ $SHOW_TIMELINE_SUMMARY -eq 1 ]] && ! parse_time_windows "$TIME_WINDOWS"; then
+  exit 1
+fi
 
 if [[ -z "$AUTHOR_REGEX" ]]; then
   git_name="$(git config --global --get user.name || true)"
@@ -311,43 +390,407 @@ find_merge_for_commit() {
 
       if git merge-base --is-ancestor "$commit" "$p2" 2>/dev/null &&
          ! git merge-base --is-ancestor "$commit" "$p1" 2>/dev/null; then
-        local subj branch
-        subj="$(git log -1 --format='%s' "$merge")"
+        local subj branch merge_date
+        IFS=$'\t' read -r subj merge_date < <(
+          git log -1 --format=$'%s\t%ad' --date=iso-strict "$merge"
+        )
         branch="$(extract_branch_name_from_merge_subject "$subj")"
-        printf '%s\t%s\t%s\n' "$merge" "$branch" "$subj"
+        printf '%s\t%s\t%s\t%s\n' "$merge" "$branch" "$subj" "$merge_date"
         exit 0
       fi
     done < <(git rev-list --first-parent --merges "$main_ref")
   )
 }
 
+format_duration() {
+  local seconds="$1"
+  local hours minutes
+
+  (( seconds < 0 )) && seconds=0
+  hours=$((seconds / 3600))
+  minutes=$(((seconds % 3600) / 60))
+  printf '%02d:%02d' "$hours" "$minutes"
+}
+
+add_timeline_commit_record() {
+  local repo="$1"
+  local branch="$2"
+  local commit_epoch="$3"
+
+  if [[ $SHOW_TIMELINE_SUMMARY -eq 1 && -n "${timeline_records_file:-}" ]]; then
+    printf '%s\t%s\t%s\n' "$repo" "$branch" "$commit_epoch" >>"$timeline_records_file"
+  fi
+}
+
+find_branches_for_commit() {
+  local repo="$1"
+  local main_branch="$2"
+  local commit="$3"
+
+  (
+    cd "$repo" || exit 0
+
+    local main_ref local_branches
+    if [[ -n "$main_branch" ]]; then
+      main_ref="$(git rev-parse --verify --quiet "refs/heads/$main_branch" 2>/dev/null || true)"
+      if [[ -n "$main_ref" ]] && git merge-base --is-ancestor "$commit" "$main_ref" 2>/dev/null; then
+        printf '%s\n' "$main_branch"
+        exit 0
+      fi
+
+      main_ref="$(git rev-parse --verify --quiet "refs/remotes/origin/$main_branch" 2>/dev/null || true)"
+      if [[ -n "$main_ref" ]] && git merge-base --is-ancestor "$commit" "$main_ref" 2>/dev/null; then
+        printf 'origin/%s\n' "$main_branch"
+        exit 0
+      fi
+    fi
+
+    local_branches="$(git for-each-ref --format='%(refname:short)' --contains "$commit" refs/heads)"
+    if [[ -n "$local_branches" ]]; then
+      printf '%s\n' "$local_branches"
+      exit 0
+    fi
+
+    git for-each-ref --format='%(refname:short)' --contains "$commit" refs/remotes |
+      while IFS= read -r branch; do
+        [[ "$branch" == */HEAD ]] || printf '%s\n' "$branch"
+      done
+  )
+}
+
+add_branch_commit_record() {
+  local branch="$1"
+  local commit_epoch="$2"
+  local commit_date="$3"
+  local commit_short_sha="$4"
+  local subject="$5"
+  local branch_commit_record existing_record
+
+  branch_commit_record="$branch"$'\t'"$commit_epoch"$'\t'"$commit_date"$'\t'"$commit_short_sha"$'\t'"$subject"
+  for existing_record in "${branch_commit_records[@]}"; do
+    [[ "$existing_record" == "$branch_commit_record" ]] && return
+  done
+  branch_commit_records+=("$branch_commit_record")
+}
+
+report_branch_commit_table() {
+  local branch="$1"
+  local branch_commit_record record_branch commit_epoch commit_date commit_short_sha subject
+  local first_epoch="" last_epoch="" duration branch_label duration_label
+  local date_width=4 hash_width=4 msg_width=3 table_content_width column_content_width
+  local date_rule hash_rule msg_rule
+  local -a branch_commit_rows=()
+
+  while IFS=$'\t' read -r commit_epoch commit_date commit_short_sha subject; do
+    [[ -n "$commit_epoch" ]] || continue
+
+    branch_commit_rows+=("$commit_date"$'\t'"$commit_short_sha"$'\t'"$subject")
+    if (( ${#commit_date} > date_width )); then
+      date_width=${#commit_date}
+    fi
+    if (( ${#commit_short_sha} > hash_width )); then
+      hash_width=${#commit_short_sha}
+    fi
+    if (( ${#subject} > msg_width )); then
+      msg_width=${#subject}
+    fi
+
+    if [[ -z "$first_epoch" || "$commit_epoch" -lt "$first_epoch" ]]; then
+      first_epoch="$commit_epoch"
+    fi
+    if [[ -z "$last_epoch" || "$commit_epoch" -gt "$last_epoch" ]]; then
+      last_epoch="$commit_epoch"
+    fi
+  done < <(
+    for branch_commit_record in "${branch_commit_records[@]}"; do
+      IFS=$'\t' read -r record_branch commit_epoch commit_date commit_short_sha subject <<< "$branch_commit_record"
+      [[ "$record_branch" == "$branch" ]] || continue
+      printf '%s\t%s\t%s\t%s\n' "$commit_epoch" "$commit_date" "$commit_short_sha" "$subject"
+    done | LC_ALL=C sort -n
+  )
+
+  if [[ -n "$first_epoch" && -n "$last_epoch" ]]; then
+    duration=$((last_epoch - first_epoch))
+  else
+    duration=0
+  fi
+
+  branch_label="merged / branch: $branch"
+  duration_label="time spent: $(format_duration "$duration")"
+  column_content_width=$((date_width + hash_width + msg_width + 6))
+  table_content_width="$column_content_width"
+  if (( ${#branch_label} > table_content_width )); then
+    table_content_width=${#branch_label}
+  fi
+  if (( ${#duration_label} > table_content_width )); then
+    table_content_width=${#duration_label}
+  fi
+  msg_width=$((msg_width + table_content_width - column_content_width))
+
+  printf -v date_rule '%*s' "$((date_width + 2))" ''
+  date_rule="${date_rule// /-}"
+  printf -v hash_rule '%*s' "$((hash_width + 2))" ''
+  hash_rule="${hash_rule// /-}"
+  printf -v msg_rule '%*s' "$((msg_width + 2))" ''
+  msg_rule="${msg_rule// /-}"
+
+  printf '    +%s+%s+%s+\n' "$date_rule" "$hash_rule" "$msg_rule"
+  printf '    | %-*s |\n' "$table_content_width" "$branch_label"
+  printf '    +%s+%s+%s+\n' "$date_rule" "$hash_rule" "$msg_rule"
+  printf '    | %-*s | %-*s | %-*s |\n' "$date_width" 'date' "$hash_width" 'hash' "$msg_width" 'msg'
+  printf '    +%s+%s+%s+\n' "$date_rule" "$hash_rule" "$msg_rule"
+  for branch_commit_record in "${branch_commit_rows[@]}"; do
+    IFS=$'\t' read -r commit_date commit_short_sha subject <<< "$branch_commit_record"
+    printf '    | %-*s | %-*s | %-*s |\n' "$date_width" "$commit_date" "$hash_width" "$commit_short_sha" "$msg_width" "$subject"
+  done
+  printf '    +%s+%s+%s+\n' "$date_rule" "$hash_rule" "$msg_rule"
+  printf '    | %-*s |\n' "$table_content_width" "$duration_label"
+  printf '    +%s+%s+%s+\n' "$date_rule" "$hash_rule" "$msg_rule"
+}
+
+report_branch_commit_tables() {
+  local table_dir table_file table_border table_line_count branch idx
+  local max_table_line_count=0
+  local -a table_files=() table_line_counts=() table_widths=()
+
+  if ! table_dir="$(mktemp -d "${TMPDIR:-/tmp}/work-finder-tables.XXXXXX")"; then
+    return 1
+  fi
+
+  for branch in "$@"; do
+    table_file="$table_dir/${#table_files[@]}"
+    if ! report_branch_commit_table "$branch" >"$table_file"; then
+      rm -rf "$table_dir"
+      return 1
+    fi
+    table_files+=("$table_file")
+    table_line_count="$(wc -l <"$table_file")"
+    if (( table_line_count > max_table_line_count )); then
+      max_table_line_count="$table_line_count"
+    fi
+    table_line_counts+=("$table_line_count")
+    IFS= read -r table_border <"$table_file"
+    table_widths+=("${#table_border}")
+  done
+
+  for idx in "${!table_files[@]}"; do
+    while (( table_line_counts[idx] < max_table_line_count )); do
+      printf '%*s\n' "${table_widths[idx]}" '' >>"${table_files[idx]}"
+      table_line_counts[idx]=$((table_line_counts[idx] + 1))
+    done
+  done
+
+  echo
+  if ! paste -d ' ' "${table_files[@]}"; then
+    rm -rf "$table_dir"
+    return 1
+  fi
+  rm -rf "$table_dir"
+}
+
+add_timeline_summary_branch() {
+  local repo="$1"
+  local branch="$2"
+  local summary_record record_repo record_branch record_seconds
+
+  for summary_record in "${summary_branch_records[@]}"; do
+    IFS=$'\t' read -r record_repo record_branch record_seconds <<< "$summary_record"
+    [[ "$record_repo" == "$repo" && "$record_branch" == "$branch" ]] && return
+  done
+
+  summary_branch_records+=("$repo"$'\t'"$branch"$'\t'0)
+  for record_repo in "${summary_repos[@]}"; do
+    [[ "$record_repo" == "$repo" ]] && return
+  done
+  summary_repos+=("$repo")
+}
+
+add_timeline_summary_duration() {
+  local repo="$1"
+  local branch="$2"
+  local seconds="$3"
+  local idx summary_record record_repo record_branch record_seconds
+
+  (( seconds > 0 )) || return
+  for idx in "${!summary_branch_records[@]}"; do
+    summary_record="${summary_branch_records[idx]}"
+    IFS=$'\t' read -r record_repo record_branch record_seconds <<< "$summary_record"
+    if [[ "$record_repo" == "$repo" && "$record_branch" == "$branch" ]]; then
+      summary_branch_records[idx]="$record_repo"$'\t'"$record_branch"$'\t'"$((record_seconds + seconds))"
+      return
+    fi
+  done
+}
+
+report_timeline_repo_summary() {
+  local repo="$1"
+  local summary_record record_repo branch seconds
+  local branch_width=6 duration_width=10 table_content_width
+  local repo_label="repo: $repo" total_label="total time on repo"
+  local branch_rule duration_rule repo_total=0
+
+  for summary_record in "${summary_branch_records[@]}"; do
+    IFS=$'\t' read -r record_repo branch seconds <<< "$summary_record"
+    [[ "$record_repo" == "$repo" ]] || continue
+    if (( ${#branch} > branch_width )); then
+      branch_width=${#branch}
+    fi
+    repo_total=$((repo_total + seconds))
+  done
+
+  if (( ${#total_label} > branch_width )); then
+    branch_width=${#total_label}
+  fi
+  table_content_width=$((branch_width + duration_width + 3))
+  if (( ${#repo_label} > table_content_width )); then
+    branch_width=$((branch_width + ${#repo_label} - table_content_width))
+    table_content_width=${#repo_label}
+  fi
+
+  printf -v branch_rule '%*s' "$((branch_width + 2))" ''
+  branch_rule="${branch_rule// /-}"
+  printf -v duration_rule '%*s' "$((duration_width + 2))" ''
+  duration_rule="${duration_rule// /-}"
+
+  echo
+  printf '  +%s+%s+\n' "$branch_rule" "$duration_rule"
+  printf '  | %-*s |\n' "$table_content_width" "$repo_label"
+  printf '  +%s+%s+\n' "$branch_rule" "$duration_rule"
+  printf '  | %-*s | %-*s |\n' "$branch_width" 'branch' "$duration_width" 'time total'
+  printf '  +%s+%s+\n' "$branch_rule" "$duration_rule"
+  for summary_record in "${summary_branch_records[@]}"; do
+    IFS=$'\t' read -r record_repo branch seconds <<< "$summary_record"
+    [[ "$record_repo" == "$repo" ]] || continue
+    printf '  | %-*s | %-*s |\n' "$branch_width" "$branch" "$duration_width" "$(format_duration "$seconds")"
+  done
+  printf '  +%s+%s+\n' "$branch_rule" "$duration_rule"
+  printf '  | %-*s | %-*s |\n' "$branch_width" "$total_label" "$duration_width" "$(format_duration "$repo_total")"
+  printf '  +%s+%s+\n' "$branch_rule" "$duration_rule"
+}
+
+report_timeline_summary() {
+  local record_file repo branch commit_epoch
+  local window_idx window_start window_end cursor
+  local range_start range_end seconds
+  local known_seconds=0 unknown_seconds=0
+  local -a activity_records=() summary_branch_records=() summary_repos=()
+
+  if [[ $# -gt 0 ]]; then
+    while IFS=$'\t' read -r repo branch commit_epoch; do
+      [[ -n "$repo" && -n "$branch" && -n "$commit_epoch" ]] || continue
+      activity_records+=("$repo"$'\t'"$branch"$'\t'"$commit_epoch")
+      add_timeline_summary_branch "$repo" "$branch"
+    done < <(LC_ALL=C sort -u -t $'\t' -k3,3n -k1,1 -k2,2 "$@")
+  fi
+
+  echo "Timeline:"
+  for ((window_idx = 0; window_idx < ${#TIME_WINDOW_STARTS[@]}; window_idx++)); do
+    window_start="${TIME_WINDOW_STARTS[window_idx]}"
+    window_end="${TIME_WINDOW_ENDS[window_idx]}"
+    cursor="$window_start"
+
+    for record_file in "${activity_records[@]}"; do
+      IFS=$'\t' read -r repo branch commit_epoch <<< "$record_file"
+      if (( commit_epoch < window_start || commit_epoch > window_end )); then
+        continue
+      fi
+
+      if (( commit_epoch > cursor )); then
+        range_start="$(format_epoch_time "$cursor")"
+        range_end="$(format_epoch_time "$commit_epoch")"
+        seconds=$((commit_epoch - cursor))
+        printf '  %s - %s  on %s in %s\n' "$range_start" "$range_end" "$repo" "$branch"
+        add_timeline_summary_duration "$repo" "$branch" "$seconds"
+        known_seconds=$((known_seconds + seconds))
+      fi
+      cursor="$commit_epoch"
+    done
+
+    if (( cursor < window_end )); then
+      range_start="$(format_epoch_time "$cursor")"
+      range_end="$(format_epoch_time "$window_end")"
+      seconds=$((window_end - cursor))
+      printf '  %s - %s  unknown\n' "$range_start" "$range_end"
+      unknown_seconds=$((unknown_seconds + seconds))
+    fi
+  done
+
+  echo
+  echo "Timeline summary:"
+  for repo in "${summary_repos[@]}"; do
+    report_timeline_repo_summary "$repo"
+  done
+  printf '\n  total tracked time: %s\n' "$(format_duration "$known_seconds")"
+  printf '  total unknown time: %s\n' "$(format_duration "$unknown_seconds")"
+}
+
 report_repo() {
   local repo="$1"
+  local timeline_records_file="${2:-}"
   local main_branch
   main_branch="$(get_default_branch "$repo")"
 
   local found_any=0
-  local merge_info merge_sha merge_branch merge_subject
+  local merge_info merge_sha merge_branch merge_subject merge_date merge_short_sha commit_short_sha
+  local merge_record existing_record record_branch record_sha record_date already_listed
+  local branch_commit_record table_branch table_record_branch table_already_listed
+  local -a merged_branch_records=()
+  local -a branch_commit_records=()
+  local -a table_branches=()
 
-  while IFS=$'\t' read -r commit author_name author_email cdate subject; do
+  while IFS=$'\t' read -r commit author_name author_email commit_epoch cdate subject; do
     [[ -n "$commit" ]] || continue
 
     if [[ $found_any -eq 0 ]]; then
-      echo "REPO: $repo"
-      [[ -n "$main_branch" ]] && echo "  default-branch: $main_branch"
+      if [[ $SHOW_COMMIT_LIST -eq 1 || $SHOW_MERGED_BRANCH_TABLES -eq 1 ]]; then
+        echo "REPO: $repo"
+        [[ -n "$main_branch" ]] && echo "  default-branch: $main_branch"
+      fi
       found_any=1
     fi
 
-    echo "  commit: $(git -C "$repo" rev-parse --short "$commit")  $subject"
-    echo "    author: $author_name <$author_email>"
-    echo "    date:   $cdate"
+    commit_short_sha="$(git -C "$repo" rev-parse --short "$commit")"
+    if [[ $SHOW_COMMIT_LIST -eq 1 ]]; then
+      echo "  commit: $commit_short_sha  $subject"
+      echo "    author: $author_name <$author_email>"
+      echo "    date:   $cdate"
+    fi
 
+    merge_info=""
     if [[ -n "$main_branch" ]]; then
       merge_info="$(find_merge_for_commit "$repo" "$main_branch" "$commit" || true)"
       if [[ -n "$merge_info" ]]; then
-        IFS=$'\t' read -r merge_sha merge_branch merge_subject <<< "$merge_info"
-        echo "    merged-via: $(git -C "$repo" rev-parse --short "$merge_sha")  $merge_subject"
-        echo "    merged-branch: $merge_branch"
+        IFS=$'\t' read -r merge_sha merge_branch merge_subject merge_date <<< "$merge_info"
+        merge_short_sha="$(git -C "$repo" rev-parse --short "$merge_sha")"
+        if [[ $SHOW_COMMIT_LIST -eq 1 ]]; then
+          echo "    merged-via: $merge_short_sha  $merge_subject"
+          echo "    merged-branch: $merge_branch"
+        fi
+
+        merge_record="$merge_branch"$'\t'"$merge_short_sha"$'\t'"$merge_date"
+        already_listed=0
+        for existing_record in "${merged_branch_records[@]}"; do
+          if [[ "$existing_record" == "$merge_record" ]]; then
+            already_listed=1
+            break
+          fi
+        done
+        if [[ $already_listed -eq 0 ]]; then
+          merged_branch_records+=("$merge_record")
+        fi
+      fi
+    fi
+
+    if [[ $SHOW_MERGED_BRANCH_TABLES -eq 1 || $SHOW_TIMELINE_SUMMARY -eq 1 ]]; then
+      if [[ -n "$merge_info" ]]; then
+        add_branch_commit_record "$merge_branch" "$commit_epoch" "$cdate" "$commit_short_sha" "$subject"
+        add_timeline_commit_record "$repo" "$merge_branch" "$commit_epoch"
+      else
+        while IFS= read -r table_branch; do
+          [[ -n "$table_branch" ]] || continue
+          add_branch_commit_record "$table_branch" "$commit_epoch" "$cdate" "$commit_short_sha" "$subject"
+          add_timeline_commit_record "$repo" "$table_branch" "$commit_epoch"
+        done < <(find_branches_for_commit "$repo" "$main_branch" "$commit")
       fi
     fi
   done < <(
@@ -355,19 +798,47 @@ report_repo() {
       --since="$DAY_START" \
       --until="$DAY_END" \
       --author="$AUTHOR_REGEX" \
-      --format=$'%H\t%an\t%ae\t%ad\t%s' \
+      --format=$'%H\t%an\t%ae\t%at\t%ad\t%s' \
       --date=iso-strict 2>/dev/null || true
   )
 
   if [[ $found_any -eq 1 ]]; then
-    echo
+    if [[ $SHOW_COMMIT_LIST -eq 1 && ${#merged_branch_records[@]} -gt 0 ]]; then
+      echo "  merged branches:"
+      for merge_record in "${merged_branch_records[@]}"; do
+        IFS=$'\t' read -r record_branch record_sha record_date <<< "$merge_record"
+        echo "    -> $record_branch merged in $record_sha at $record_date"
+      done
+    fi
+
+    if [[ $SHOW_MERGED_BRANCH_TABLES -eq 1 && ${#branch_commit_records[@]} -gt 0 ]]; then
+      echo "  branch commit tables:"
+      for branch_commit_record in "${branch_commit_records[@]}"; do
+        IFS=$'\t' read -r table_record_branch _ <<< "$branch_commit_record"
+        table_already_listed=0
+        for table_branch in "${table_branches[@]:-}"; do
+          if [[ "$table_branch" == "$table_record_branch" ]]; then
+            table_already_listed=1
+            break
+          fi
+        done
+        if [[ $table_already_listed -eq 0 ]]; then
+          table_branches+=("$table_record_branch")
+        fi
+      done
+      report_branch_commit_tables "${table_branches[@]}"
+    fi
+    if [[ $SHOW_COMMIT_LIST -eq 1 || $SHOW_MERGED_BRANCH_TABLES -eq 1 ]]; then
+      echo
+    fi
   fi
 }
 
 report_repo_to_file() {
   local repo="$1"
   local outfile="$2"
-  report_repo "$repo" >"$outfile"
+  local timeline_file="$3"
+  report_repo "$repo" "$timeline_file" >"$outfile"
 }
 
 is_inside_any_repo() {
@@ -455,7 +926,8 @@ run_repo_reports_parallel() {
 
   local active_pids=()
   local files=()
-  local repo outfile pid idx=0 total="$#" done=0
+  local timeline_files=()
+  local repo outfile timeline_file pid idx=0 total="$#" done=0
 
   progress_init "$total"
 
@@ -468,10 +940,13 @@ run_repo_reports_parallel() {
     done
 
     outfile="$tmpdir/repo.$idx.out"
-    report_repo_to_file "$repo" "$outfile" &
+    timeline_file="$tmpdir/repo.$idx.timeline"
+    : >"$timeline_file"
+    report_repo_to_file "$repo" "$outfile" "$timeline_file" &
     pid="$!"
     active_pids+=("$pid")
     files+=("$outfile")
+    timeline_files+=("$timeline_file")
     idx=$((idx + 1))
   done
 
@@ -486,6 +961,10 @@ run_repo_reports_parallel() {
   for file in "${files[@]}"; do
     cat "$file"
   done
+
+  if [[ $SHOW_TIMELINE_SUMMARY -eq 1 ]]; then
+    report_timeline_summary "${timeline_files[@]}"
+  fi
 }
 
 run_non_git_parallel() {
@@ -573,24 +1052,28 @@ spinner "$!" "Discovering repos..."
 load_repos_from_file "$repo_list_file"
 echo "Found repos: ${#REPOS[@]}"
 
-if [[ "$SKIP_NON_GIT" -eq 0 ]]; then
+if [[ "$SKIP_NON_GIT" -eq 0 && "$SHOW_COMMIT_LIST" -eq 1 ]]; then
   file_estimate=0
   for root in "${ROOTS[@]}"; do
     c="$(count_files_under_root "$root")"
     file_estimate=$((file_estimate + c))
   done
   echo "Estimated files to inspect: $file_estimate"
-else
+elif [[ "$SHOW_COMMIT_LIST" -eq 1 ]]; then
   echo "Estimated files to inspect: skipped (-G)"
+else
+  echo "Estimated files to inspect: skipped (not listing files)"
 fi
 echo
 
 if [[ "${#REPOS[@]}" -gt 0 ]]; then
   echo "Scanning git repos..."
   run_repo_reports_parallel "$tmpdir" "${REPOS[@]}"
+elif [[ $SHOW_TIMELINE_SUMMARY -eq 1 ]]; then
+  report_timeline_summary
 fi
 
-if [[ "$SKIP_NON_GIT" -eq 0 ]]; then
+if [[ "$SKIP_NON_GIT" -eq 0 && "$SHOW_COMMIT_LIST" -eq 1 ]]; then
   echo "Scanning non-git files..."
   run_non_git_parallel "$tmpdir" "${ROOTS[@]}"
 fi

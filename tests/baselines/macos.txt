@@ -1,0 +1,62 @@
+# Baseline: macos
+# recorded: 2026-07-02T14:40:29Z
+# host: Darwin 25.3.0 arm64
+
+podman build -t setup-test/macos -f tests/containers/Containerfile.macos-mock .
+STEP 1/11: FROM fedora:40
+STEP 2/11: RUN dnf -y install --setopt=install_weak_deps=False         bats git sudo wget curl tar unzip which findutils procps-ng         zsh vim neovim openssh &&     dnf -y clean all
+--> Using cache 8a2e3aed48b3b8ade66be6448c2dc0d7a5205848aa2e80d41b29685cc4005bd1
+--> 8a2e3aed48b3
+STEP 3/11: RUN useradd -m -G wheel tester &&     echo "tester ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/tester &&     chmod 0440 /etc/sudoers.d/tester
+--> Using cache 9137e638a22e0e7bd5bf237f5368af59a410afc3ba0111f7d2897ca35681efb9
+--> 9137e638a22e
+STEP 4/11: RUN printf '%s\n'     '#!/usr/bin/env bash'     'if [[ "${1:-}" == "-s" ]]; then echo Darwin; exit 0; fi'     'if [[ -z "${1:-}" ]]; then echo Darwin; exit 0; fi'     'exec /usr/bin/uname "$@"'     > /usr/local/bin/uname && chmod +x /usr/local/bin/uname
+--> Using cache 1209d4bbba6d237f2b55a9985aac8c080ad0eb7179514aa759a0de5cb02cb299
+--> 1209d4bbba6d
+STEP 5/11: RUN printf '%s\n'     '#!/usr/bin/env bash'     'case "${1:-}" in'     '  bundle)  echo "mock brew bundle: $*"; exit 0 ;;'     '  shellenv) echo "export PATH=/opt/homebrew/bin:$PATH"; exit 0 ;;'     '  --version) echo "Homebrew 4.0.0 (mock)"; exit 0 ;;'     '  *) echo "mock brew: $*"; exit 0 ;;'     'esac'     > /usr/local/bin/brew && chmod +x /usr/local/bin/brew
+--> Using cache 06a9a2bf67c80bfe7a3c09d0d06ce062b9ec948be3a26a80ad9a2150ebfae08f
+--> 06a9a2bf67c8
+STEP 6/11: RUN printf '%s\n'     '#!/usr/bin/env bash'     'echo "mock ssh-agent (pid $$)"; exit 0'     > /usr/local/bin/ssh-agent && chmod +x /usr/local/bin/ssh-agent
+--> Using cache 94e01c8c51a94575d89dc9135fa206060bc790c887c38f253e9176a5227d3961
+--> 94e01c8c51a9
+STEP 7/11: RUN printf '%s\n'     '#!/usr/bin/env bash'     'echo "mock ssh-add: $*"; exit 0'     > /usr/local/bin/ssh-add && chmod +x /usr/local/bin/ssh-add
+--> Using cache 4fb55de66006fa0bb7e1c68a7a6e48e4bada89f0cf13bf65019ca68979915dcb
+--> 4fb55de66006
+STEP 8/11: WORKDIR /workspace
+--> Using cache 04815b3729531564f4c2d1d3110158fea804b204c575a8fcf6a00cccc55a4975
+--> 04815b372953
+STEP 9/11: USER tester
+--> Using cache 1ac09303ca92fffd57ceb74d7afe035a58dd5ac2c93e57fd95544f436135f7af
+--> 1ac09303ca92
+STEP 10/11: ENV HOME=/home/tester
+--> Using cache fd56e208490aa47773879c1933928f1378da81a61021ae10bb5dfa58539200ab
+--> fd56e208490a
+STEP 11/11: ENV TEST_OS=macos
+--> Using cache 6712425ac8adad03046c1c18d7aa5d3bb075239aeaac0c9c3e9f6b284373b3ee
+COMMIT setup-test/macos
+--> 6712425ac8ad
+Successfully tagged localhost/setup-test/macos:latest
+6712425ac8adad03046c1c18d7aa5d3bb075239aeaac0c9c3e9f6b284373b3ee
+podman run --rm -v /Users/simeon.stix/config:/workspace:Z -e HOME=/home/tester -e TEST_OS=macos --user tester -w /workspace setup-test/macos bats --formatter tap tests/bats/smoke.bats tests/bats/idempotency.bats tests/bats/assertions-macos.bats
+1..13
+ok 1 setup.sh exists and is executable
+not ok 2 platform script for TEST_OS exists and is executable
+# (from function `assert' in file tests/bats/helpers/assertions.bash, line 40,
+#  in test file tests/bats/smoke.bats, line 16)
+#   `assert [ -x "$script" ]' failed
+ok 3 setup.sh creates the core dotfile symlinks
+ok 4 setup.sh links ghostty config when present
+ok 5 setup.sh links ssh config
+ok 6 repeated setup run does not create new symlink backups
+ok 7 repeated setup run leaves symlinks stable
+ok 8 uname -s reports Darwin (mocked)
+not ok 9 setup.macos.sh exists and is executable
+# (from function `assert' in file tests/bats/helpers/assertions.bash, line 40,
+#  in test file tests/bats/assertions-macos.bats, line 20)
+#   `assert [ -x "$REPO_DIR/setup.macos.sh" ]' failed
+ok 10 Brewfile manifest exists
+ok 11 mock brew is on PATH
+ok 12 no Linux OS-specific platform script runs for macos
+ok 13 setup.sh creates the core dotfile symlinks under macos mock
+make[1]: *** [test-macos] Error 1
+# exit=2

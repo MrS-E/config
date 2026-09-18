@@ -1,0 +1,11 @@
+{
+  "baseUrl": "https://chat.stix.foo/api/chat/completions",
+  "id": "Qwen3.8-27B-3bit-MLX",
+  "apiType": "OpenAICompletion",
+  "apiKey": "REDACTED",
+  "temperature": 0.6,
+  "fasterModel": {
+    "id": "Qwen3.8-27B-3bit-MLX",
+    "temperature": 0.3
+  }
+}

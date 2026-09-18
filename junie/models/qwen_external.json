@@ -1,0 +1,14 @@
+{
+  "baseUrl": "https://openrouter.ai/api/v1/responses",
+  "id": "qwen/qwen3.8-flash",
+  "apiType": "OpenAIResponses",
+  "apiKey": "REDACTED",
+  "temperature": 0.8,
+  "primaryModel": {
+    "id": "qwen/qwen3.8-flash"
+  },
+  "fasterModel": {
+    "id": "qwen/qwen3.8-flash",
+    "temperature": 0.3
+  }
+}
