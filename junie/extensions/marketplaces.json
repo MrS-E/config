@@ -1,0 +1,12 @@
+{
+    "github-JetBrains-junie-extensions": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/JetBrains/junie-extensions"
+        },
+        "installLocation": "/Users/simeon.stix/.junie/extensions/marketplaces/JetBrains/junie-extensions",
+        "lastUpdated": "2026-09-11T06:47:39.288459Z",
+        "builtIn": true,
+        "repoUrl": "https://github.com/JetBrains/junie-extensions"
+    }
+}
