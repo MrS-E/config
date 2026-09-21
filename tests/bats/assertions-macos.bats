@@ -33,6 +33,26 @@ setup() {
   assert_success
 }
 
+@test "Kitty permissions step opens both privacy panes" {
+  run "$REPO_DIR/setup.sh" --only macos/08-kitty-permissions.sh
+  assert_success
+  assert_output_partial "Privacy_AllFiles"
+  assert_output_partial "Privacy_LocalNetwork"
+  assert_output_partial "In Full Disk Access, add /Applications/kitty.app"
+}
+
+@test "Kitty permissions step rejects non-macOS execution" {
+  run env PATH="/usr/bin:/bin" "$REPO_DIR/setup/macos/08-kitty-permissions.sh" presteps
+  assert_failure
+  assert_output_partial "this step requires macOS"
+}
+
+@test "Kitty permissions step rejects an invalid command" {
+  run "$REPO_DIR/setup/macos/08-kitty-permissions.sh"
+  assert_failure
+  assert_output_partial "usage:"
+}
+
 @test "setup.sh detects macos and discovers macos steps" {
   run "$REPO_DIR/setup.sh" --list
   assert_success

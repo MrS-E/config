@@ -111,8 +111,8 @@ rewrites provider paths on commit/checkout.
 2. **`setup/general/02-git-filters.sh`** — run once per clone (also called by `setup.sh`).
    It registers the filter with git:
    ```
-   git config filter.pkcs11-provider.clean  "$REPO_DIR/ssh/pkcs11-filter.sh clean"
-   git config filter.pkcs11-provider.smudge "$REPO_DIR/ssh/pkcs11-filter.sh smudge"
+   git config filter.pkcs11-provider.clean  "ssh/pkcs11-filter.sh clean"
+   git config filter.pkcs11-provider.smudge "ssh/pkcs11-filter.sh smudge"
    git config filter.pkcs11-provider.required true
    ```
    `required true` means git will fail rather than silently skip the filter.

@@ -1,3 +1,4 @@
+tap "can1357/tap"
 tap "finestructure/tap"
 tap "grishka/grishka"
 tap "homebrew-ffmpeg/ffmpeg", trusted: true
@@ -90,12 +91,12 @@ brew "pygobject3"
 brew "gstreamer"
 # C/C++ and Java libraries for Unicode and globalization
 brew "icu4c@76"
+# C/C++ and Java libraries for Unicode and globalization
+brew "icu4c@77"
 # Tools and libraries to manipulate images in select formats
 brew "imagemagick"
 # Cross-platform Java Version Manager
 brew "jabba"
-# Interpreted, interactive, object-oriented programming language
-brew "python@3.13"
 # Sane PBXProj files
 brew "kin"
 # Anti-bikeshedding Kotlin linter with built-in formatter
@@ -112,6 +113,8 @@ brew "libslirp"
 brew "ltex-ls-plus"
 # Utility for directing compilation
 brew "make"
+# Command-line utility to communicate with ModBus slave (RTU or TCP)
+brew "mbpoll"
 # Simple tool to make locally trusted development certificates
 brew "mkcert"
 # Message broker implementing the MQTT protocol
@@ -154,6 +157,8 @@ brew "podman-compose"
 brew "pulseaudio"
 # Python version management
 brew "pyenv"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.13"
 # Generic machine emulator and virtualizer
 brew "qemu"
 # Search tool like grep and The Silver Searcher
@@ -202,8 +207,6 @@ brew "zsh-syntax-highlighting"
 brew "homebrew-ffmpeg/ffmpeg/ffmpeg", args: ["with-webp", "with-xvid"]
 # Android SDK component
 cask "android-platform-tools"
-# Network scanner
-cask "angry-ip-scanner"
 # Electronics prototyping platform
 cask "arduino-ide"
 # Utility improving 3rd party mouse performance and functionalities
@@ -228,18 +231,12 @@ cask "imhex"
 cask "jetbrains-toolbox"
 # GPU-based terminal emulator
 cask "kitty"
-# CAD application
-cask "librecad"
-# Privacy-first, open-source platform for knowledge sharing and management
-cask "logseq"
 # Connect to your Android devices
 cask "macdroid"
 # Full TeX Live distribution with GUI applications
 cask "mactex"
 # Mesh processing system
 cask "meshlab"
-# Meet, chat, call, and collaborate in just one place
-cask "microsoft-teams"
 cask "mqtt-explorer"
 # Desktop sync client for Nextcloud software products
 cask "nextcloud-vfs"
@@ -253,6 +250,8 @@ cask "openscad"
 cask "postman"
 # Client for Proton Drive
 cask "proton-drive"
+# Bridges Proton Mail to email clients supporting IMAP and SMTP protocols
+cask "proton-mail-bridge"
 # VPN client focusing on security
 cask "protonvpn"
 # HTTP debugging proxy
@@ -326,3 +325,4 @@ vscode "timonwong.shellcheck"
 vscode "torn4dom4n.latex-support"
 vscode "waderyan.gitblame"
 vscode "yzhang.markdown-all-in-one"
+npm "typescript"
