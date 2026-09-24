@@ -2,7 +2,7 @@
 name: debugger
 description: "Root-cause analyst. Investigates crashes, hangs, test failures and wrong behaviour by gathering logs, stack traces and state, narrows the cause to a specific line, and proposes the smallest correct fix. Read-only: does not edit files. Use when something fails and the reason is not obvious."
 tools: ["Read", "Grep", "Glob", "Bash"]
-model: "custom:deepseek"
+model: "custom:glm"
 reasoningLevel: "high"
 maxTurns: 50
 ---

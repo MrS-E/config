@@ -2,7 +2,7 @@
 name: performance
 description: "Performance engineer. Profiles and analyses hot paths, memory use, allocations, I/O and build time, identifies measurable bottlenecks, and proposes targeted optimisations with the expected gain. Read-only: measures and recommends, does not edit files. Use when something is slow, memory-heavy, or janky."
 tools: ["Read", "Grep", "Glob", "Bash"]
-model: "custom:deepseek"
+model: "custom:glm-flash"
 reasoningLevel: "high"
 maxTurns: 50
 ---
