@@ -16,21 +16,17 @@ presteps() {
 
 help() {
   cat <<'EOF'
-Install version managers (Jabba, Pyenv) inside the cli-dev toolbox.
-Idempotent: skips when each manager is already installed.
+Install Jabba inside the cli-dev toolbox.
+Idempotent: skips when Jabba is already installed.
 EOF
 }
 
 run() {
-  log "Installing version managers in cli-dev toolbox..."
+  log "Installing Jabba in cli-dev toolbox..."
 
   tb_run cli-dev '
     if [ ! -d "$HOME/.jabba" ]; then
       curl -fsSL https://github.com/shyiko/jabba/raw/master/install.sh | bash
-    fi
-
-    if [ ! -d "$HOME/.pyenv" ]; then
-      curl -fsSL https://pyenv.run | bash
     fi
   '
 }
