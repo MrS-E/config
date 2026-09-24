@@ -131,8 +131,6 @@ brew "nmap"
 brew "node"
 # Libraries for security-enabled client and server applications
 brew "nss"
-# Manage multiple Node.js versions
-brew "nvm"
 # Development kit for the Java programming language
 brew "openjdk@17"
 # Development kit for the Java programming language

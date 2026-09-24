@@ -335,23 +335,6 @@ export PATH="$PATH:/usr/local/bin"
 export PATH="$HOME/.local/bin:$PATH"
 
 ##########
-# NVM
-##########
-if [[ -s /usr/share/nvm/init-nvm.sh ]]; then
-  export NVM_DIR="$HOME/.nvm"
-  source /usr/share/nvm/init-nvm.sh
-  [[ -s /usr/share/nvm/bash_completion ]] && source /usr/share/nvm/bash_completion
-elif command -v brew >/dev/null 2>&1 && [[ -d "$(brew --prefix 2>/dev/null)/opt/nvm" ]]; then
-  export NVM_DIR="$HOME/.nvm"
-  [[ -s "$(brew --prefix)/opt/nvm/nvm.sh" ]] && source "$(brew --prefix)/opt/nvm/nvm.sh"
-  [[ -s "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm" ]] && source "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm"
-elif [[ -s "$HOME/.nvm/nvm.sh" ]]; then
-  export NVM_DIR="$HOME/.nvm"
-  source "$NVM_DIR/nvm.sh"
-  [[ -s "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"
-fi
-
-##########
 # JABBA
 ##########
 if [[ -s "$HOME/.jabba/jabba.sh" ]]; then
