@@ -38,7 +38,7 @@ Summary of the recorded baseline across all four targets:
 - `chsh`, `systemctl enable --now`, Tailscale, CUPS, firewall, ClamAV are
   limited inside unprivileged containers.
 - External network installers (JetBrains Toolbox, Proton Bridge, Bun, Junie,
-  Joplin, Dracula vim theme) are not exercised in the baseline.
+  Joplin, Nix, nix-darwin, Dracula vim theme) are not exercised in the baseline.
 - `manjarolinux/base` is "Manjaro ARM" and lacks `/etc/manjaro-release`; the
   container creates it so `setup.sh` detects Manjaro.
 - Fedora Atomic uses mocked `rpm-ostree`/`toolbox` (no rpm-ostree-capable

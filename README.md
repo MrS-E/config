@@ -71,7 +71,7 @@ config/
 | `setup.sh` | Orchestration-only runner. Detects OS, discovers numbered step scripts under `setup/general/` and `setup/<os>/`, applies selection filters (`--all`, `--only`, `--exclude`, `--interactive`), and runs each step as a separate process via `presteps` then `run`. No setup logic lives here. |
 | `setup/general/` | OS-agnostic steps that run first on every platform: symlink dotfiles, register git filters, create shared editor directories. `common.bash` provides platform-neutral primitives (logging, symlink helpers, git clone guards, manifest parsing). |
 | `setup/<os>/` | Platform-specific numbered steps with companion manifests and a `common.bash` helper library. Steps are idempotent — safe to run repeatedly. |
-| `zshrc` | ZSH config: OS/hardware detection, history settings, aliases, platform-aware clip/clippaste helpers, completion system, Starship prompt with custom fallback, version managers (JABBA, bun), ZSH plugins, custom script shell-integration. |
+| `zshrc` | ZSH config: OS/hardware detection, history settings, aliases, platform-aware clip/clippaste helpers, completion system, Starship prompt with custom fallback, version managers (bun), ZSH plugins, custom script shell-integration. |
 | `gitconfig` | Git config: GPG SSH signing, codium/vscode as difftool/mergetool, LFS, pull rebase, credential cache. |
 | `vimrc` | Vim config: persistent undo, custom theme, indentation, whitespace display, statusline. |
 | `vim/` | Vim custom color scheme (`cyberpunk_scarlet_protocol_adjusted.vim`) and persistent undo directory. |
@@ -251,6 +251,38 @@ OS-agnostic steps that run first on every platform:
 | `05-vim-theme.sh` | Clone Dracula vim theme |
 | `06-junie.sh` | Install Junie CLI |
 | `07-waveforms.sh` | Download and install Digilent WaveForms from the official `.dmg` (not in Brewfile; falls back to the browser if Cloudflare blocks `curl`) |
+| `08-kitty-permissions.sh` | Open macOS Privacy & Security settings for Kitty permissions |
+| `09-nix.sh` | Install Nix using the official installer and enable `nix-command` + flakes |
+| `10-nix-darwin.sh` | Bootstrap nix-darwin in `~/nix-darwin-config` for declarative macOS settings and launchd daemons |
+
+`nix-darwin` is the macOS system manager for launchd daemons.
+`10-nix-darwin.sh` initializes the configuration with the nix-darwin flake
+template, sets `nixpkgs.hostPlatform` to the detected Darwin platform (including
+`aarch64-darwin` on Apple Silicon), renames the generated `simple`
+configuration to the local hostname, enables
+`nix.settings.experimental-features = "nix-command flakes"`, and runs the
+root activation. Tailscale and other optional services are not enabled by this
+step; add them to the flake when needed. The step passes the required
+experimental-feature flags to both user and root Nix commands, so it also works
+when `sudo` cannot read `~/.config/nix/nix.conf`.
+It does not overwrite an existing `flake.nix`; use
+`--exclude macos/10-nix-darwin.sh` when the optional bootstrap is not wanted.
+Before activation, it resolves `flake.lock` as the regular user and passes
+`--no-write-lock-file` to the root activation, preventing `sudo` from leaving a
+root-owned lock file in the home directory. If a previous failed bootstrap did
+leave that lock file root-owned, the step repairs ownership of that one file.
+Known conflicting files at `/etc/nix/nix.conf`, `/etc/bashrc`, and `/etc/zshrc`
+are moved to matching `.before-nix-darwin` backups before nix-darwin takes
+ownership; inspect those backups before deleting them. After activation,
+declare additional launchd daemons in the flake and apply later changes with
+`sudo darwin-rebuild switch --flake ~/nix-darwin-config`. If the pinned tool
+needs to be bootstrapped directly, use
+`sudo nix run nix-darwin/master#darwin-rebuild -- switch`.
+Open a new shell after activation; `zshrc` adds `/run/current-system/sw/bin`
+when it exists so `darwin-rebuild` is available without an absolute path.
+From the nix-darwin flake directory, the zsh alias `nix-system-reload` runs
+`sudo darwin-rebuild switch --flake .` to apply changes and reload managed
+daemons.
 
 ### Fedora Steps (`setup/fedora/`)
 
@@ -286,7 +318,6 @@ OS-agnostic steps that run first on every platform:
 | `09-toolbox-packages.sh` | Install packages in each toolbox |
 | `10-toolbox-latex.sh` | Install LTEX LS in latex toolbox |
 | `11-toolbox-mobile.sh` | Install ktlint + SwiftLint in mobile toolbox |
-| `12-toolbox-cli-dev.sh` | Install Jabba in cli-dev toolbox |
 | `99-reboot-notice.sh` | Print reboot reminder |
 
 ### Manjaro Steps (`setup/manjaro/`)
@@ -303,10 +334,9 @@ OS-agnostic steps that run first on every platform:
 | `08-firewall.sh` | Enable nftables + ufw |
 | `09-clamav.sh` | Enable ClamAV freshclam |
 | `10-jetbrains-toolbox.sh` | Download JetBrains Toolbox |
-| `11-jabba.sh` | Install Jabba (Java version manager) |
-| `12-joplin.sh` | Install Joplin note-taking app |
-| `13-cisco-note.sh` | Cisco AnyConnect VPN note |
-| `14-celeste-note.sh` | Celeste cloud sync note |
+| `11-joplin.sh` | Install Joplin note-taking app |
+| `12-cisco-note.sh` | Cisco AnyConnect VPN note |
+| `13-celeste-note.sh` | Celeste cloud sync note |
 
 ### Package Manifests
 
@@ -387,7 +417,6 @@ All version managers are loaded lazily (only when their commands are invoked):
 
 | Manager | Tool | Lazy-load Command |
 |---|---|---|
-| **JABBA** | Java/JDK | `jabba`, `java`, `javac` |
 | **bun** | JS runtime | `bun`, `bunx` |
 
 ### ZSH Plugins

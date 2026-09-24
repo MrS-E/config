@@ -31,6 +31,10 @@ case "$(uname -s)" in
     esac
 
     export MAC_RAM_GB="$(( $(sysctl -n hw.memsize) / 1024 / 1024 / 1024 ))"
+
+    if [[ -d /run/current-system/sw/bin ]] && [[ ":$PATH:" != *":/run/current-system/sw/bin:"* ]]; then
+      export PATH="/run/current-system/sw/bin:$PATH"
+    fi
     ;;
   Linux)
     export OS="linux"
@@ -128,6 +132,11 @@ o() {
     return 1
   fi
 }
+
+# nix-darwin (macOS system manager for launchd daemons)
+if [[ "$OS" = "macos" ]]; then
+  alias nix-system-reload='sudo darwin-rebuild switch --flake .'
+fi
 
 # Grep
 alias egrep='egrep --color=auto'
