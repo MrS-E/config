@@ -356,17 +356,6 @@ if command -v pyenv >/dev/null 2>&1; then
 fi
 
 ##########
-# RBENV
-##########
-if [[ -d "$HOME/.rbenv/bin" ]]; then
-  export PATH="$HOME/.rbenv/bin:$PATH"
-fi
-
-if command -v rbenv >/dev/null 2>&1; then
-  eval "$(rbenv init - zsh)"
-fi
-
-##########
 # Zephyr-SDK
 ##########
 # export ZEPHYR_SDK_INSTALL_DIR="$HOME/zephyr-sdk-0.17.1"
