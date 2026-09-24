@@ -1,0 +1,23 @@
+# Real Manjaro container for the setup test harness.
+# Provides bats-core, git, sudo, and the base tools setup.sh expects.
+FROM manjarolinux/base
+
+RUN pacman -Syu --noconfirm --needed \
+        bats git sudo wget curl tar unzip which findutils procps-ng \
+        zsh vim neovim flatpak openssh fzf base-devel && \
+    pacman -Scc --noconfirm
+
+# Non-root test user with passwordless sudo (setup scripts require non-root).
+RUN useradd -m -G wheel tester && \
+    echo "tester ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/tester && \
+    chmod 0440 /etc/sudoers.d/tester
+
+# The manjarolinux/base image is "Manjaro ARM" and ships /etc/arch-release but
+# NOT /etc/manjaro-release. setup.sh detects Manjaro via /etc/manjaro-release,
+# so create it to match a real Manjaro host.
+RUN echo "Manjaro Linux" > /etc/manjaro-release
+
+WORKDIR /workspace
+USER tester
+ENV HOME=/home/tester
+ENV TEST_OS=manjaro

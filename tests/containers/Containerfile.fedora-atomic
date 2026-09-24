@@ -1,0 +1,56 @@
+# Fedora Atomic test container (DOCUMENTED FALLBACK).
+#
+# There is no practical rpm-ostree-capable Podman image: real rpm-ostree
+# cannot operate inside an ordinary container. This image therefore provides a
+# MOCK `rpm-ostree` and MOCK `toolbox` so setup.atomic-fedora.sh can be
+# exercised for dispatch/contract/idempotency behavior. Flatpak remains real
+# where feasible. See tests/README.md "Strategy & known limitations".
+FROM fedora:40
+
+RUN dnf -y install --setopt=install_weak_deps=False \
+        bats git sudo wget curl tar unzip which findutils procps-ng \
+        zsh vim neovim flatpak openssh && \
+    dnf -y clean all
+
+RUN useradd -m -G wheel tester && \
+    echo "tester ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/tester && \
+    chmod 0440 /etc/sudoers.d/tester
+
+# --- Mock rpm-ostree (no real layering happens in containers) ---------------
+RUN printf '%s\n' \
+    '#!/usr/bin/env bash' \
+    '# Mocked rpm-ostree for Fedora Atomic tests (container fallback).' \
+    'case "${1:-}" in' \
+    '  upgrade) echo "mock rpm-ostree upgrade"; exit 0 ;;' \
+    '  install) echo "mock rpm-ostree layering: $*"; exit 0 ;;' \
+    '  status)  echo "mock rpm-ostree status"; exit 0 ;;' \
+    '  *)       echo "mock rpm-ostree $*"; exit 0 ;;' \
+    'esac' \
+    > /usr/local/bin/rpm-ostree && chmod +x /usr/local/bin/rpm-ostree
+
+# --- Mock toolbox -----------------------------------------------------------
+# Supports the `toolbox run --container NAME bash -lc CMD` shape used by the
+# setup script; it executes the command directly in the container.
+RUN printf '%s\n' \
+    '#!/usr/bin/env bash' \
+    '# Mocked toolbox for Fedora Atomic tests.' \
+    'case "${1:-}" in' \
+    '  create) echo "mock toolbox create: $*"; exit 0 ;;' \
+    '  list)   echo "mock toolbox list"; exit 0 ;;' \
+    '  run)' \
+    '    shift' \
+    '    [[ "${1:-}" == "--container" ]] && { shift; shift; }' \
+    '    if [[ "${1:-}" == "bash" ]]; then' \
+    '      shift; [[ "${1:-}" == "-lc" ]] && shift' \
+    '      bash -lc "$1"' \
+    '      exit $?' \
+    '    fi' \
+    '    exit 0 ;;' \
+    '  *) echo "mock toolbox $*"; exit 0 ;;' \
+    'esac' \
+    > /usr/local/bin/toolbox && chmod +x /usr/local/bin/toolbox
+
+WORKDIR /workspace
+USER tester
+ENV HOME=/home/tester
+ENV TEST_OS=fedora-atomic

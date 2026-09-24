@@ -1,0 +1,20 @@
+# Real Fedora container for the setup test harness.
+# Provides bats-core, git, sudo, and the base tools setup.sh expects.
+FROM fedora:40
+
+RUN dnf -y install --setopt=install_weak_deps=False \
+        bats git sudo wget curl tar unzip which findutils procps-ng \
+        zsh vim neovim flatpak openssh && \
+    dnf -y clean all
+
+# Non-root test user with passwordless sudo (setup scripts require non-root).
+RUN useradd -m -G wheel tester && \
+    echo "tester ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/tester && \
+    chmod 0440 /etc/sudoers.d/tester
+
+# /etc/fedora-release is present in the base image; rpm-ostree is absent,
+# which makes setup.sh classify this host as classic "fedora".
+WORKDIR /workspace
+USER tester
+ENV HOME=/home/tester
+ENV TEST_OS=fedora

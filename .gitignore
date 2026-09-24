@@ -33,7 +33,7 @@ Nextcloud/*
 # junie
 # =========================
 junie/*
-junie/settings.json
+!junie/settings.json
 !junie/config.json
 !junie/*.md
 !junie/versions
@@ -43,3 +43,12 @@ junie/settings.json
 !junie/commands
 !junie/agents
 !junie/vendor
+!junie/extensions
+junie/extensions/**/*
+!junie/extensions/*.json
+
+
+# =========================
+# Test harness artifacts
+# =========================
+tests/baselines/current/
