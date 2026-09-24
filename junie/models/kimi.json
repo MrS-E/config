@@ -1,0 +1,11 @@
+{
+  "baseUrl": "https://openrouter.ai/api/v1/responses",
+  "id": "moonshotai/kimi-k3",
+  "apiType": "OpenAIResponses",
+  "apiKey": "REDACTED",
+  "temperature": 0.7,
+  "fasterModel": {
+    "id": "moonshotai/kimi-k2.7-code",
+    "temperature": 0.4
+  }
+}

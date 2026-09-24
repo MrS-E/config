@@ -1,0 +1,4 @@
+Host github.com
+    IdentityFile ~/.ssh/homelab
+    PKCS11Provider @OPENSC@
+    IdentitiesOnly yes

@@ -1,0 +1,68 @@
+# Baseline: manjaro
+# recorded: 2026-07-02T14:43:03Z
+# host: Darwin 25.3.0 arm64
+
+podman build -t setup-test/manjaro -f tests/containers/Containerfile.manjaro .
+STEP 1/8: FROM manjarolinux/base
+STEP 2/8: RUN pacman -Syu --noconfirm --needed         bats git sudo wget curl tar unzip which findutils procps-ng         zsh vim neovim flatpak openssh &&     pacman -Scc --noconfirm
+--> Using cache 3129ad283f100bc16845c5606aaeebf788fa6dc81cfe88bfac1c9e3cf6540fc3
+--> 3129ad283f10
+STEP 3/8: RUN useradd -m -G wheel tester &&     echo "tester ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/tester &&     chmod 0440 /etc/sudoers.d/tester
+--> Using cache 47b29f7ef824123bc97bda92928b097807acb2b000d300b2a96e76a022331a16
+--> 47b29f7ef824
+STEP 4/8: RUN echo "Manjaro Linux" > /etc/manjaro-release
+--> Using cache 3c475020abf896af3685673419f70ef5ea2f47470e6595d461bc6862331dfd29
+--> 3c475020abf8
+STEP 5/8: WORKDIR /workspace
+--> Using cache dfe682b8baf9eeb86267b7938fd51beb08e36ff1a430e79a66c238c8155eda9b
+--> dfe682b8baf9
+STEP 6/8: USER tester
+--> Using cache 6dd2da0a9382483af2dee89475ae59496faa93ee1c40a9552bd4e58de348fcc9
+--> 6dd2da0a9382
+STEP 7/8: ENV HOME=/home/tester
+--> Using cache 24af190c8c3ece767923ec6e423005f59687686a2cdb883ff3a7f8344dd64270
+--> 24af190c8c3e
+STEP 8/8: ENV TEST_OS=manjaro
+--> Using cache 36449947415541bed5ae5ecb1f55eb9080589e2ef99885d2deed1115249cbda7
+COMMIT setup-test/manjaro
+--> 364499474155
+Successfully tagged localhost/setup-test/manjaro:latest
+36449947415541bed5ae5ecb1f55eb9080589e2ef99885d2deed1115249cbda7
+podman run --rm -v /Users/simeon.stix/config:/workspace:Z -e HOME=/home/tester -e TEST_OS=manjaro --user tester -w /workspace setup-test/manjaro bats --formatter tap tests/bats/smoke.bats tests/bats/idempotency.bats tests/bats/assertions-manjaro.bats
+1..13
+ok 1 setup.sh exists and is executable
+not ok 2 platform script for TEST_OS exists and is executable
+# (from function `assert' in file tests/bats/helpers/assertions.bash, line 40,
+#  in test file tests/bats/smoke.bats, line 16)
+#   `assert [ -x "$script" ]' failed
+ok 3 setup.sh creates the core dotfile symlinks
+ok 4 setup.sh links ghostty config when present
+ok 5 setup.sh links ssh config
+ok 6 repeated setup run does not create new symlink backups
+ok 7 repeated setup run leaves symlinks stable
+ok 8 manjaro-release marker is present
+ok 9 manjaro package manifests exist
+# missing pacman package: fzf
+not ok 10 pacman packages from manifest are installed
+# (from function `_fail' in file tests/bats/helpers/assertions.bash, line 9,
+#  from function `assert_manifest_packages_installed_pacman' in file tests/bats/helpers/assertions.bash, line 103,
+#  in test file tests/bats/assertions-manjaro.bats, line 23)
+#   `assert_manifest_packages_installed_pacman "$REPO_DIR/packages/manjaro/pacman.txt"' failed
+# expected success, got status 1
+not ok 11 yay is available
+# (from function `_fail' in file tests/bats/helpers/assertions.bash, line 9,
+#  from function `assert_success' in file tests/bats/helpers/assertions.bash, line 14,
+#  in test file tests/bats/assertions-manjaro.bats, line 28)
+#   `assert_success' failed
+# not a directory: /home/tester/.zsh/zsh-autosuggestions
+not ok 12 zsh plugin directories exist
+# (from function `_fail' in file tests/bats/helpers/assertions.bash, line 9,
+#  from function `assert_dir_exists' in file tests/bats/helpers/assertions.bash, line 75,
+#  in test file tests/bats/assertions-manjaro.bats, line 32)
+#   `assert_dir_exists "$HOME/.zsh/zsh-autosuggestions"' failed
+not ok 13 external setup scripts are present and executable
+# (from function `assert' in file tests/bats/helpers/assertions.bash, line 40,
+#  in test file tests/bats/assertions-manjaro.bats, line 39)
+#   `assert [ -x "$dir/10-jetbrains-toolbox.sh" ]' failed
+make: *** [test-manjaro] Error 1
+# exit=2

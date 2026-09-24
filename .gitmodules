@@ -1,0 +1,6 @@
+[submodule "junie/vendor/obsidian-plugin-skill"]
+	path = junie/vendor/obsidian-plugin-skill
+	url = https://github.com/gapmiss/obsidian-plugin-skill.git
+[submodule "junie/vendor/raycast-extension-skill"]
+	path = junie/vendor/raycast-extension-skill
+	url = https://github.com/adriangrantdotorg/Raycast-Skill.git

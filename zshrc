@@ -5,6 +5,13 @@ export EDITOR=vim
 export VISUAL=vim
 export XDG_CONFIG_HOME="$HOME/.config"
 
+if [[ -d "$HOME/Library/Android/sdk" ]]; then
+  export ANDROID_HOME="$HOME/Library/Android/sdk"
+  export ANDROID_SDK_ROOT="$ANDROID_HOME"
+  export PATH="$ANDROID_HOME/platform-tools:$PATH"
+  export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+fi
+
 # Path of this config file / directory (works when sourced by zsh)
 ZSHRC_PATH="${${(%):-%N}:A}"
 CONFIG_DIR="${ZSHRC_PATH:h}"
@@ -276,23 +283,29 @@ fi
 ##########
 # Prompt
 ##########
-precmd_functions=(render_prompt)
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+else
+  precmd_functions=(render_prompt)
 
-function render_prompt {
-  PROMPT=""
-  PROMPT+="%(1j.%B%%%b .)"
-  PROMPT+="%~ "
-  PROMPT+="%(?.%F{green}.%F{red})%B$%b%f "
-  RPROMPT="%(?..%F{red}[%?]%f)"
-}
+  function render_prompt {
+    PROMPT=""
+    PROMPT+="%(1j.%B%%%b .)"
+    PROMPT+="%~ "
+    PROMPT+="%(?.%F{green}.%F{red})%B$%b%f "
+    RPROMPT="%(?..%F{red}[%?]%f)"
+  }
+fi
 
 ##########
 # Homebrew
 ##########
 if ! command -v brew >/dev/null 2>&1; then
-  [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+  [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)" 
   [[ -x /usr/local/bin/brew ]] && eval "$(/usr/local/bin/brew shellenv)"
 fi
+[[ -x /opt/homebrew/bin/brew ]] && export PATH="/opt/homebrew/sbin:/opt/homebrew/bin:$PATH"
+# TODO add brew paths for intel mac
 
 ##########
 # FZF
@@ -734,7 +747,8 @@ code() {
               ."markdown-preview-enhanced.plantumlJarPath",
               ."idf.pythonInstallPath",
               ."idf.espIdfPath",
-              ."idf.toolsPath"
+              ."idf.toolsPath",
+              ."idf.gitPath"
             )
           '
 
@@ -743,7 +757,8 @@ code() {
               "markdown-preview-enhanced.plantumlJarPath": ."markdown-preview-enhanced.plantumlJarPath",
               "idf.pythonInstallPath": ."idf.pythonInstallPath",
               "idf.espIdfPath": ."idf.espIdfPath",
-              "idf.toolsPath": ."idf.toolsPath"
+              "idf.toolsPath": ."idf.toolsPath",
+              "idf.gitPath": ."idf.gitPath"
             }
             | with_entries(select(.value != null))
           '
