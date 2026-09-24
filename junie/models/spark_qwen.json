@@ -6,8 +6,8 @@
   "maxContextLength": 262144,
   "primaryModel": {
     "id": "qwen3.8-flash-next",
-    
-    "temperature": 0.8
+
+    "temperature": 0.6
   },
   "fasterModel": {
     "id": "qwen3.8-flash-next",
