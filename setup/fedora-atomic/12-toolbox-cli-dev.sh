@@ -16,7 +16,7 @@ presteps() {
 
 help() {
   cat <<'EOF'
-Install version managers (Jabba, Pyenv, NVM) inside the cli-dev toolbox.
+Install version managers (Jabba, Pyenv) inside the cli-dev toolbox.
 Idempotent: skips when each manager is already installed.
 EOF
 }
@@ -31,10 +31,6 @@ run() {
 
     if [ ! -d "$HOME/.pyenv" ]; then
       curl -fsSL https://pyenv.run | bash
-    fi
-
-    if [ ! -d "$HOME/.nvm" ]; then
-      curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
     fi
   '
 }
