@@ -60,7 +60,7 @@ hidden) by the baseline:
   ClamAV are limited inside unprivileged containers and may fail in the
   baseline. These are annotated, not blocking.
 - **External network installers** (JetBrains Toolbox, Proton Bridge, Bun,
-  Junie, Joplin, Jabba, Dracula vim theme) are slow/flaky and may fail; the
+  Junie, Joplin, Dracula vim theme) are slow/flaky and may fail; the
   baseline records their pass/fail/skip status.
 
 The baseline is intentionally **non-blocking**: current scripts are not yet

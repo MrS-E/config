@@ -335,15 +335,6 @@ export PATH="$PATH:/usr/local/bin"
 export PATH="$HOME/.local/bin:$PATH"
 
 ##########
-# JABBA
-##########
-if [[ -s "$HOME/.jabba/jabba.sh" ]]; then
-  export JABBA_INDEX="https://github.com/typelevel/jdk-index/raw/main/index.json"
-  export JABBA_HOME="$HOME/.jabba"
-  source "$JABBA_HOME/jabba.sh"
-fi
-
-##########
 # Zephyr-SDK
 ##########
 # export ZEPHYR_SDK_INSTALL_DIR="$HOME/zephyr-sdk-0.17.1"

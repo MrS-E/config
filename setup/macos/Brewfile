@@ -95,8 +95,6 @@ brew "icu4c@76"
 brew "icu4c@77"
 # Tools and libraries to manipulate images in select formats
 brew "imagemagick"
-# Cross-platform Java Version Manager
-brew "jabba"
 # Sane PBXProj files
 brew "kin"
 # Anti-bikeshedding Kotlin linter with built-in formatter
