@@ -30,7 +30,6 @@ git-lfs
 jdk-openjdk
 ktlint
 lazygit
-pyenv
 plantuml
 pandoc
 podman

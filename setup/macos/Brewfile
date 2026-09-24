@@ -153,8 +153,6 @@ brew "podman"
 brew "podman-compose"
 # Sound system for POSIX OSes
 brew "pulseaudio"
-# Python version management
-brew "pyenv"
 # Interpreted, interactive, object-oriented programming language
 brew "python@3.13"
 # Generic machine emulator and virtualizer

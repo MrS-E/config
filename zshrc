@@ -344,18 +344,6 @@ if [[ -s "$HOME/.jabba/jabba.sh" ]]; then
 fi
 
 ##########
-# PYENV
-##########
-if [[ -d "$HOME/.pyenv/bin" ]]; then
-  export PATH="$HOME/.pyenv/bin:$PATH"
-fi
-
-if command -v pyenv >/dev/null 2>&1; then
-  eval "$(pyenv init -)"
-  eval "$(pyenv init --path)"
-fi
-
-##########
 # Zephyr-SDK
 ##########
 # export ZEPHYR_SDK_INSTALL_DIR="$HOME/zephyr-sdk-0.17.1"

@@ -71,7 +71,7 @@ config/
 | `setup.sh` | Orchestration-only runner. Detects OS, discovers numbered step scripts under `setup/general/` and `setup/<os>/`, applies selection filters (`--all`, `--only`, `--exclude`, `--interactive`), and runs each step as a separate process via `presteps` then `run`. No setup logic lives here. |
 | `setup/general/` | OS-agnostic steps that run first on every platform: symlink dotfiles, register git filters, create shared editor directories. `common.bash` provides platform-neutral primitives (logging, symlink helpers, git clone guards, manifest parsing). |
 | `setup/<os>/` | Platform-specific numbered steps with companion manifests and a `common.bash` helper library. Steps are idempotent — safe to run repeatedly. |
-| `zshrc` | ZSH config: OS/hardware detection, history settings, aliases, platform-aware clip/clippaste helpers, completion system, Starship prompt with custom fallback, version managers (JABBA, PYENV, bun), ZSH plugins, custom script shell-integration. |
+| `zshrc` | ZSH config: OS/hardware detection, history settings, aliases, platform-aware clip/clippaste helpers, completion system, Starship prompt with custom fallback, version managers (JABBA, bun), ZSH plugins, custom script shell-integration. |
 | `gitconfig` | Git config: GPG SSH signing, codium/vscode as difftool/mergetool, LFS, pull rebase, credential cache. |
 | `vimrc` | Vim config: persistent undo, custom theme, indentation, whitespace display, statusline. |
 | `vim/` | Vim custom color scheme (`cyberpunk_scarlet_protocol_adjusted.vim`) and persistent undo directory. |
@@ -286,7 +286,7 @@ OS-agnostic steps that run first on every platform:
 | `09-toolbox-packages.sh` | Install packages in each toolbox |
 | `10-toolbox-latex.sh` | Install LTEX LS in latex toolbox |
 | `11-toolbox-mobile.sh` | Install ktlint + SwiftLint in mobile toolbox |
-| `12-toolbox-cli-dev.sh` | Install Jabba, Pyenv in cli-dev toolbox |
+| `12-toolbox-cli-dev.sh` | Install Jabba in cli-dev toolbox |
 | `99-reboot-notice.sh` | Print reboot reminder |
 
 ### Manjaro Steps (`setup/manjaro/`)
@@ -388,7 +388,6 @@ All version managers are loaded lazily (only when their commands are invoked):
 | Manager | Tool | Lazy-load Command |
 |---|---|---|
 | **JABBA** | Java/JDK | `jabba`, `java`, `javac` |
-| **PYENV** | Python | `pyenv`, `python`, `pip` |
 | **bun** | JS runtime | `bun`, `bunx` |
 
 ### ZSH Plugins
