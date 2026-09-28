@@ -32,6 +32,7 @@ setup() {
   assert_success
   assert_output_partial "pkcs11provider /usr/lib64/libykcs11.so.2"
   assert_output_partial "identityfile ~/.ssh/yubikey-9d.pub"
+  assert_output_partial "identityfile ~/.ssh/yubikey-9a.pub"
 }
 
 @test "SSH host config selects the YubiKey PKCS#11 provider" {
@@ -40,6 +41,7 @@ setup() {
   assert_success
   assert_output_partial "pkcs11provider /usr/lib64/libykcs11.so.2"
   assert_output_partial "identityfile ~/.ssh/yubikey-9d.pub"
+  assert_output_partial "identityfile ~/.ssh/yubikey-9a.pub"
   assert_output_partial "identitiesonly yes"
 }
 
