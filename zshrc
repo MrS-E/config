@@ -2,7 +2,7 @@
 # ENV
 ##########
 export EDITOR=vim
-export VISUAL=3
+export VISUAL=vim
 export XDG_CONFIG_HOME="$HOME/.config"
 
 # Path of this config file / directory (works when sourced by zsh)
@@ -152,6 +152,8 @@ alias swic='git switch -c'
 alias gittree='git log --graph --decorate --oneline'
 alias lazy='lazygit'
 
+# Clang
+alias clang-format-git='git ls-files -z -- "*.c" "*.h" | xargs -0 clang-format -i'
 # Rails 
 alias rg:mo='rails generate model'
 alias rg:mi='rails generate migration'

@@ -1,1 +1,2 @@
 junie/models/*.json filter=scrub-apikey
+ssh/config.d/* filter=pkcs11-provider
