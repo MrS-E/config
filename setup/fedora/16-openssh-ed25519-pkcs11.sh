@@ -65,14 +65,6 @@ supports_ed25519_pkcs11() {
   [[ -n "$version" ]] && [[ "$(printf '%s\n%s\n' "$OPENSSH_MIN_VERSION" "$version" | sort -V | head -1)" == "$OPENSSH_MIN_VERSION" ]]
 }
 
-client_tools_exist() {
-  local binary
-  for binary in "${CLIENT_BINARIES[@]}"; do
-    [[ -e "$OPENSSH_PREFIX/bin/$binary" || -L "$OPENSSH_PREFIX/bin/$binary" ]] && return 0
-  done
-  [[ -e "$OPENSSH_PREFIX/libexec/ssh-pkcs11-helper" || -L "$OPENSSH_PREFIX/libexec/ssh-pkcs11-helper" ]]
-}
-
 client_tools_ready() {
   local binary
   for binary in "${CLIENT_BINARIES[@]}"; do
@@ -134,10 +126,6 @@ run() {
     log "OpenSSH with Ed25519 PKCS#11 support already installed ($($OPENSSH_BIN -V 2>&1))."
     export_yubikey_public_keys
     return 0
-  fi
-
-  if client_tools_exist; then
-    die "refusing to overwrite incomplete or incompatible user-local OpenSSH tools in $OPENSSH_PREFIX"
   fi
 
   BUILD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/openssh-$OPENSSH_VERSION.XXXXXX")"

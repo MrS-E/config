@@ -156,8 +156,6 @@ _load_linux_yubikey_keys_now() {
   [[ -n "$ssh_add" ]] || ssh_add="$(command -v ssh-add 2>/dev/null)"
   [[ -n "$ssh_agent" ]] || ssh_agent="$(command -v ssh-agent 2>/dev/null)"
   [[ -n "$openssl_cmd" ]] || openssl_cmd="$(command -v openssl 2>/dev/null)"
-  [[ -x "$HOME/.local/bin/ssh-add" ]] && ssh_add="$HOME/.local/bin/ssh-add"
-  [[ -x "$HOME/.local/bin/ssh-agent" ]] && ssh_agent="$HOME/.local/bin/ssh-agent"
   [[ -x "$piv_tool" && -x "$ssh_add" && -x "$ssh_agent" && -x "$openssl_cmd" ]] || return 0
 
   local -A provider_by_type selected_providers
