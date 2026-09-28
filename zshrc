@@ -140,7 +140,7 @@ alias fzfile='rg --no-heading --line-number "" | fzf'
 
 # SSH
 alias sshproxy='ssh -D 8080 -C -N'
-alias sshdisconnect='rm -f /tmp/ssh*'
+alias sshdisconnect='rm -rf /tmp/ssh*'
 
 # OpenSC hosts use their per-host PKCS#11Provider directly; importing both
 # providers into one agent is rejected by some agents.
