@@ -1,4 +1,4 @@
 # PKCS#11 provider paths for Fedora/Linux.
 # Consumed by pkcs11-filter.sh (smudge) to resolve @YKCS11@ / @OPENSC@ tokens.
-YKCS11=/usr/lib64/libykcs11.so.2
+YKCS11=/usr/lib64/pkcs11/opensc-pkcs11.so
 OPENSC=/usr/lib64/pkcs11/opensc-pkcs11.so

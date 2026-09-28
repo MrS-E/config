@@ -459,20 +459,6 @@ source <(path/to/work-finder --shell-integration)
 - `UseKeychain yes` (macOS) — store passphrases in keychain
 - `IdentitiesOnly yes` — only use explicitly listed keys
 
-On Fedora, `zshrc` lazy-loads the YubiKey provider the first time `ssh` is
-used. Run `yubikey-load` to load it explicitly instead. The command checks PIV
-slots `9a`, `9c`, and `9d` with `yubico-piv-tool`, and loads
-`libykcs11.so.2` when one of those certificates contains an Ed25519 key. It
-does not rely on hardcoded key fingerprints. The Fedora-specific OpenSSH build
-in `~/.local/bin/ssh-add` loads the Ed25519 key into the agent, while the stable
-system `ssh` client uses that agent key for YubiKey hosts instead of trying to
-load the unsupported key directly. The loader first reuses an existing agent
-that contains the configured Ed25519 public key, including agents left by an
-earlier shell, and otherwise starts a user OpenSSH agent. OpenSC hosts use their
-configured `PKCS11Provider` directly because importing both providers into one
-agent is rejected by some agents. Each lazy-load attempt is made once; run
-`yubikey-load` again after inserting the key or correcting the agent.
-
 ### Host Groups (config.d/)
 
 | File | Contains |
@@ -490,6 +476,20 @@ Two PKCS#11 modules are used depending on the host:
 - **`opensc-pkcs11.so`**: OpenSC PKCS#11 module (used for infra/SMOCA hosts, slot 9a)
 
 Provider paths are unified across macOS and Linux via the PKCS#11 git filter (see above).
+
+#### Fedora Ed25519 YubiKey limitation
+
+Ed25519 keys stored on a YubiKey are currently **not supported by the Fedora
+setup**. Fedora's system `ssh` client cannot use `libykcs11.so.2` for these
+keys. A separately fetched/user-local OpenSSH client was tested as a workaround,
+but caused severe problems, including hangs and major slowdowns while
+establishing SSH connections, so it must not be used as the default client.
+
+The last state in which Ed25519 YubiKey keys were usable was commit
+`70af199e` (`fix ssh yubikey import`), but that state still had the SSH hangs
+and slowdowns described above. Fedora currently supports the OpenSC-backed
+YubiKey hosts, but not Ed25519 YubiKey authentication through the standard
+setup.
 
 ## Vim Configuration
 
