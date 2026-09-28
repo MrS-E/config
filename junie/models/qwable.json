@@ -1,5 +1,5 @@
 {
-  "baseUrl": "http://100.124.60.67:8000/v1/chat/completions",
+  "baseUrl": "https://chat.stix.foo/api/chat/completions",
   "id": "Qwythos-9B-Claude-Mythos-5-1M-MLX-oQ8-mtp",
   "apiType": "OpenAICompletion",
   "apiKey": "REDACTED",

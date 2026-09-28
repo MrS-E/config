@@ -1,0 +1,15 @@
+{
+  "baseUrl": "https://openrouter.ai/api/v1/chat/completions",
+  "id": "tencent/hy4-preview",
+  "apiType": "OpenAICompletion",
+  "apiKey": "REDACTED",
+  "temperature": 0.9,
+  "primaryModel": {
+    "id": "tencent/hy4-preview",
+    "temperature": 1
+  },
+  "fasterModel": {
+    "id": "tencent/hy4-preview",
+    "temperature": 0.4
+  }
+}

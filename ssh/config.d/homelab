@@ -1,18 +1,21 @@
-Host tailscale-minix minix macminim4 tailscale-macminim4 debianmini k3smaster tailscale-k3smaster k3sslave1
+Host minix tailscale-minix macminim4 tailscale-macminim4 storage debianmini system
     Port 22
     PKCS11Provider @YKCS11@
     IdentityFile ~/.ssh/yubikey-9d.pub
     IdentitiesOnly yes
 
-Host macminim4 tailscale-macminim4
+Host macminim4 tailscale-macminim4 storage
     User sstix
 
-Host minix tailscale-minix  k3smaster tailscale-k3smaster k3sslave1
+Host minix tailscale-minix
     User cloud
 
 ################
 # LOCAL
 ################
+
+Host storage
+    HostName 10.10.0.47
 
 Host macminim4
     HostName macm424g.local
@@ -21,15 +24,13 @@ Host debianmini
     HostName debianmini.local
     User debianmini
 
-Host k3smaster
-    HostName k3smaster.local
-
-Host k3sslave1
-    HostName k3sslave1.local
-
 Host minix
     #HostName minixz150.local
     HostName 10.10.0.55
+
+Host system
+    HostName 10.10.0.60
+    User hassio
 
 ################
 # TAILSCALE
@@ -37,9 +38,6 @@ Host minix
 
 Host tailscale-macminim4
     HostName mac-m4-24gb.tail0091f3.ts.net
-
-Host tailscale-k3smaster
-    HostName k3smaster.tail0091f3.ts.net
 
 Host tailscale-minix
     HostName minixz150.tail0091f3.ts.net
