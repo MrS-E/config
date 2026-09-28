@@ -17,7 +17,8 @@ OPENSSH_BIN="$OPENSSH_PREFIX/bin/ssh"
 SSH_KEYGEN_BIN="$OPENSSH_PREFIX/bin/ssh-keygen"
 OPENSSH_CONFIG="$OPENSSH_PREFIX/etc/ssh_config"
 YUBIKEY_PROVIDER="/usr/lib64/libykcs11.so.2"
-YUBIKEY_PUBLIC_KEY="$HOME/.ssh/yubikey-9d.pub"
+YUBIKEY_RSA_PUBLIC_KEY="$HOME/.ssh/yubikey-9a.pub"
+YUBIKEY_ED25519_PUBLIC_KEY="$HOME/.ssh/yubikey-9d.pub"
 CLIENT_BINARIES=(ssh scp ssh-add ssh-agent ssh-keygen ssh-keyscan sftp)
 BUILD_DIR=""
 
@@ -38,6 +39,9 @@ presteps() {
   require_command tar
   require_command sort
   require_command install
+  require_command openssl
+  require_command python3
+  require_command yubico-piv-tool
   [[ -r /usr/include/openssl/ssl.h ]] || die "OpenSSL headers are required"
   [[ -r /usr/include/zlib.h ]] || die "zlib headers are required"
   [[ -r "$YUBIKEY_PROVIDER" ]] || die "YubiKey PKCS#11 provider not found: $YUBIKEY_PROVIDER"
@@ -47,7 +51,7 @@ help() {
   cat <<'EOF'
 Build OpenSSH 10.1p1 in ~/.local for Ed25519 keys hosted by a PKCS#11 token.
 The system OpenSSH 10.0p1 client cannot read the Ed25519 key in YubiKey PIV slot 9d.
-Idempotent: skips an existing compatible ~/.local/bin/ssh and exports the 9d public key when the YubiKey is connected.
+Idempotent: skips an existing compatible ~/.local/bin/ssh and exports the 9a/9d public keys when the YubiKey is connected.
 EOF
 }
 
@@ -89,35 +93,46 @@ install_client_tools() {
   [[ -e "$OPENSSH_CONFIG" ]] || install -m 0644 ssh_config "$OPENSSH_CONFIG"
 }
 
-export_yubikey_public_key() {
-  local keys key_count key_file
+export_certificate_public_key() {
+  local slot output algorithm cert pem der key_file key
+  slot="$1"
+  output="$2"
+  algorithm="$3"
+  cert="$(mktemp)"
+  pem="$(mktemp)"
+  der="$(mktemp)"
+  trap 'rm -f "${cert:-}" "${pem:-}" "${der:-}" "${key_file:-}"' RETURN
 
-  if ! keys="$("$SSH_KEYGEN_BIN" -D "$YUBIKEY_PROVIDER" 2>/dev/null)"; then
-    log "YubiKey unavailable; insert it and rerun this step to export $YUBIKEY_PUBLIC_KEY."
+  if ! yubico-piv-tool -a read-certificate -s "$slot" > "$cert" 2>/dev/null; then
+    log "YubiKey unavailable; insert it and rerun this step to export $output."
     return 0
   fi
+  openssl x509 -in "$cert" -pubkey -noout > "$pem"
+  openssl pkey -pubin -in "$pem" -outform DER -out "$der"
 
-  keys="$(printf '%s\n' "$keys" | awk '$1 == "ssh-ed25519"')"
-  key_count="$(printf '%s\n' "$keys" | awk 'NF { count++ } END { print count + 0 }')"
-
-  if [[ "$key_count" -eq 0 ]]; then
-    log "No Ed25519 key found through the YubiKey PKCS#11 provider."
-    return 0
+  if [[ "$algorithm" == rsa ]]; then
+    key="$($SSH_KEYGEN_BIN -i -m PKCS8 -f "$pem")"
+  else
+    key="$(python3 -c 'import base64,struct,sys; d=open(sys.argv[1], "rb").read(); p=bytes.fromhex("302a300506032b6570032100"); assert d.startswith(p) and len(d) == len(p) + 32, "unexpected Ed25519 SubjectPublicKeyInfo"; k=struct.pack(">I", 11) + b"ssh-ed25519" + struct.pack(">I", 32) + d[-32:]; print("ssh-ed25519 " + base64.b64encode(k).decode())' "$der")"
   fi
-  [[ "$key_count" -eq 1 ]] || die "multiple Ed25519 keys found; refusing to guess which one is in PIV slot 9d"
 
-  ensure_dir "$(dirname "$YUBIKEY_PUBLIC_KEY")"
-  key_file="$(mktemp "${YUBIKEY_PUBLIC_KEY}.tmp.XXXXXX")"
+  ensure_dir "$(dirname "$output")"
+  key_file="$(mktemp "${output}.tmp.XXXXXX")"
   chmod 600 "$key_file"
-  printf '%s\n' "$keys" > "$key_file"
-  mv -f "$key_file" "$YUBIKEY_PUBLIC_KEY"
-  log "Exported YubiKey PIV slot 9d public key to $YUBIKEY_PUBLIC_KEY."
+  printf '%s\n' "$key" > "$key_file"
+  mv -f "$key_file" "$output"
+  log "Exported YubiKey PIV slot $slot public key to $output."
+}
+
+export_yubikey_public_keys() {
+  export_certificate_public_key 9a "$YUBIKEY_RSA_PUBLIC_KEY" rsa
+  export_certificate_public_key 9d "$YUBIKEY_ED25519_PUBLIC_KEY" ed25519
 }
 
 run() {
   if client_tools_ready; then
     log "OpenSSH with Ed25519 PKCS#11 support already installed ($($OPENSSH_BIN -V 2>&1))."
-    export_yubikey_public_key
+    export_yubikey_public_keys
     return 0
   fi
 
@@ -140,7 +155,7 @@ run() {
 
   supports_ed25519_pkcs11 "$OPENSSH_BIN" || die "installed OpenSSH does not support Ed25519 PKCS#11 keys"
   log "Installed $($OPENSSH_BIN -V 2>&1) at $OPENSSH_BIN."
-  export_yubikey_public_key
+  export_yubikey_public_keys
 }
 
 case "${1:-}" in

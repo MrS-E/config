@@ -78,6 +78,32 @@ setup() {
   assert_output "$home/.local/bin/ssh"
 }
 
+@test "Zsh lazily loads Fedora YubiKey providers before SSH" {
+  local zshrc="$REPO_DIR/zshrc"
+
+  run grep -F '_load_fedora_yubikey_keys' "$zshrc"
+  assert_success
+  run grep -F '/usr/lib64/libykcs11.so.2' "$zshrc"
+  assert_success
+  run grep -F '/usr/lib64/pkcs11/opensc-pkcs11.so' "$zshrc"
+  assert_success
+  run grep -F '*/gcr/*' "$zshrc"
+  assert_success
+}
+
+@test "Zsh provides an explicit YubiKey loader based on PIV slots" {
+  local zshrc="$REPO_DIR/zshrc"
+
+  run grep -F 'yubikey-load()' "$zshrc"
+  assert_success
+  run grep -F 'read-certificate -s 9d' "$zshrc"
+  assert_success
+  run grep -F 'read-certificate -s 9a' "$zshrc"
+  assert_success
+  run grep -F 'ed25519_fingerprint' "$zshrc"
+  assert_failure
+}
+
 @test "Fedora setup installs only OpenSSH client tools" {
   local step="$REPO_DIR/setup/fedora/16-openssh-ed25519-pkcs11.sh"
 
@@ -96,13 +122,13 @@ setup() {
   assert_output ""
 }
 
-@test "Fedora setup reads the PIV slot 9d public key through ssh-keygen" {
+@test "Fedora setup exports PIV public keys from certificates" {
   local step="$REPO_DIR/setup/fedora/16-openssh-ed25519-pkcs11.sh"
 
-  run grep -F '"$SSH_KEYGEN_BIN" -D "$YUBIKEY_PROVIDER"' "$step"
+  run grep -F 'yubico-piv-tool -a read-certificate -s "$slot"' "$step"
 
   assert_success
-  assert_output_partial '"$SSH_KEYGEN_BIN" -D "$YUBIKEY_PROVIDER"'
+  assert_output_partial 'yubico-piv-tool -a read-certificate -s "$slot"'
 }
 
 @test "git filter refreshes existing Fedora SSH configs" {
