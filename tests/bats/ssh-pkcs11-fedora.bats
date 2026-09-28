@@ -78,15 +78,27 @@ setup() {
   assert_output "$home/.local/bin/ssh"
 }
 
-@test "Zsh lazily loads Fedora YubiKey providers before SSH" {
+@test "Zsh lazily loads the Fedora YubiKey provider for Ed25519 PIV slots" {
   local zshrc="$REPO_DIR/zshrc"
 
   run grep -F '_load_fedora_yubikey_keys' "$zshrc"
   assert_success
   run grep -F '/usr/lib64/libykcs11.so.2' "$zshrc"
   assert_success
-  run grep -F '/usr/lib64/pkcs11/opensc-pkcs11.so' "$zshrc"
+  run grep -F 'for slot in 9a 9c 9d' "$zshrc"
   assert_success
+  run grep -F 'provider_by_type=(' "$zshrc"
+  assert_success
+  run grep -F 'ED25519 /usr/lib64/libykcs11.so.2' "$zshrc"
+  assert_success
+  run grep -F '"$openssl_cmd" pkey -pubin -text_pub -noout' "$zshrc"
+  assert_success
+  run grep -F 'key_type=' "$zshrc"
+  assert_success
+  run grep -F 'providers+=(/usr/lib64/pkcs11/opensc-pkcs11.so)' "$zshrc"
+  assert_failure
+  run grep -F '_FEDORA_YUBIKEY_9' "$zshrc"
+  assert_failure
   run grep -F '*/gcr/*' "$zshrc"
   assert_success
 }
@@ -96,9 +108,15 @@ setup() {
 
   run grep -F 'yubikey-load()' "$zshrc"
   assert_success
-  run grep -F 'read-certificate -s 9d' "$zshrc"
+  run grep -F 'read-certificate -s "$slot"' "$zshrc"
   assert_success
-  run grep -F 'read-certificate -s 9a' "$zshrc"
+  run grep -F 'for slot in 9a 9c 9d' "$zshrc"
+  assert_success
+  run grep -F 'provider_by_type' "$zshrc"
+  assert_success
+  run grep -F 'selected_providers' "$zshrc"
+  assert_success
+  run grep -F 'ssh_add" -s "$provider"' "$zshrc"
   assert_success
   run grep -F 'ed25519_fingerprint' "$zshrc"
   assert_failure

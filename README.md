@@ -459,13 +459,15 @@ source <(path/to/work-finder --shell-integration)
 - `UseKeychain yes` (macOS) — store passphrases in keychain
 - `IdentitiesOnly yes` — only use explicitly listed keys
 
-On Fedora, `zshrc` lazy-loads the YubiKey providers the first time `ssh` is
-used. Run `yubikey-load` to load them explicitly instead. The command checks
-slots `9d` and `9a` with `yubico-piv-tool`, then loads the matching
-`libykcs11.so.2` and `opensc-pkcs11.so` providers without relying on hardcoded
-key fingerprints. If the shell is connected to GNOME Keyring, it starts a user
-OpenSSH agent. Each lazy-load attempt is made once; run `yubikey-load` again
-after inserting the key or correcting the agent.
+On Fedora, `zshrc` lazy-loads the YubiKey provider the first time `ssh` is
+used. Run `yubikey-load` to load it explicitly instead. The command checks PIV
+slots `9a`, `9c`, and `9d` with `yubico-piv-tool`, and loads
+`libykcs11.so.2` when one of those certificates contains an Ed25519 key. It
+does not rely on hardcoded key fingerprints. If the shell is connected to
+GNOME Keyring, it starts a user OpenSSH agent. OpenSC hosts use their
+configured `PKCS11Provider` directly because importing both providers into one
+agent is rejected by some agents. Each lazy-load attempt is made once; run
+`yubikey-load` again after inserting the key or correcting the agent.
 
 ### Host Groups (config.d/)
 

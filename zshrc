@@ -142,64 +142,63 @@ alias fzfile='rg --no-heading --line-number "" | fzf'
 alias sshproxy='ssh -D 8080 -C -N'
 alias sshdisconnect='rm -f /tmp/ssh*'
 
-# Load YubiKey PIV providers only when SSH is first used. GNOME Keyring's SSH
-# agent can handle the RSA slot on some systems, but does not expose the
-# Ed25519 slot 9d; use a real OpenSSH agent for both providers on Fedora.
-_load_fedora_yubikey_keys_now() {
+# OpenSC hosts use their per-host PKCS#11Provider directly; importing both
+# providers into one agent is rejected by some agents.
+_load_linux_yubikey_keys_now() {
   [[ "$OS" = "linux" ]] || return 0
 
-  local piv_tool ssh_add ssh_agent
+  local piv_tool ssh_add ssh_agent openssl_cmd slot certificate key_type provider
   piv_tool="${commands[yubico-piv-tool]:-}"
   ssh_add="${commands[ssh-add]:-}"
   ssh_agent="${commands[ssh-agent]:-}"
+  openssl_cmd="${commands[openssl]:-}"
   [[ -n "$piv_tool" ]] || piv_tool="$(command -v yubico-piv-tool 2>/dev/null)"
   [[ -n "$ssh_add" ]] || ssh_add="$(command -v ssh-add 2>/dev/null)"
   [[ -n "$ssh_agent" ]] || ssh_agent="$(command -v ssh-agent 2>/dev/null)"
+  [[ -n "$openssl_cmd" ]] || openssl_cmd="$(command -v openssl 2>/dev/null)"
   [[ -x "$HOME/.local/bin/ssh-add" ]] && ssh_add="$HOME/.local/bin/ssh-add"
   [[ -x "$HOME/.local/bin/ssh-agent" ]] && ssh_agent="$HOME/.local/bin/ssh-agent"
-  [[ -x "$piv_tool" && -x "$ssh_add" && -x "$ssh_agent" ]] || return 0
+  [[ -x "$piv_tool" && -x "$ssh_add" && -x "$ssh_agent" && -x "$openssl_cmd" ]] || return 0
 
-  local -a providers=()
-  if "$piv_tool" -a read-certificate -s 9d >/dev/null 2>&1 &&
-     [[ -r /usr/lib64/libykcs11.so.2 ]]; then
-    providers+=(/usr/lib64/libykcs11.so.2)
-  fi
-  if "$piv_tool" -a read-certificate -s 9a >/dev/null 2>&1 &&
-     [[ -r /usr/lib64/pkcs11/opensc-pkcs11.so ]]; then
-    providers+=(/usr/lib64/pkcs11/opensc-pkcs11.so)
-  fi
-  ((${#providers} > 0)) || return 0
+  local -A provider_by_type selected_providers
+  provider_by_type=(
+    ED25519 /usr/lib64/libykcs11.so.2
+  )
+  selected_providers=()
+
+  for slot in 9a 9c 9d; do
+    certificate="$($piv_tool -a read-certificate -s "$slot" 2>/dev/null)" || continue
+    key_type="$(printf '%s\n' "$certificate" |
+      "$openssl_cmd" x509 -pubkey -noout 2>/dev/null |
+      "$openssl_cmd" pkey -pubin -text_pub -noout 2>/dev/null |
+      command sed -nE 's/^([[:alnum:]-]+) Public-Key:.*/\1/p')"
+    provider="${provider_by_type[$key_type]:-}"
+    [[ -n "$provider" && -r "$provider" ]] || continue
+    selected_providers[$provider]=1
+  done
+  ((${#selected_providers} > 0)) || return 0
 
   if [[ -z "${SSH_AUTH_SOCK:-}" || "${SSH_AUTH_SOCK:-}" == */gcr/* ]]; then
     eval "$($ssh_agent -s)" >/dev/null
   fi
 
-  local provider
-  for provider in "${providers[@]}"; do
-    if [[ "$provider" = /usr/lib64/libykcs11.so.2 ]]; then
-      [[ "${_FEDORA_YUBIKEY_9D_LOADED:-0}" = 1 ]] && continue
-      "$ssh_add" -s "$provider" || return 1
-      _FEDORA_YUBIKEY_9D_LOADED=1
-    else
-      [[ "${_FEDORA_YUBIKEY_9A_LOADED:-0}" = 1 ]] && continue
-      "$ssh_add" -s "$provider" || return 1
-      _FEDORA_YUBIKEY_9A_LOADED=1
-    fi
+  for provider in ${(k)selected_providers}; do
+    "$ssh_add" -s "$provider" || return 1
   done
 }
 
 yubikey-load() {
-  _load_fedora_yubikey_keys_now
+  _load_linux_yubikey_keys_now
 }
 
-_load_fedora_yubikey_keys() {
+_load_linux_yubikey_keys() {
   [[ "${_FEDORA_YUBIKEY_LOAD_ATTEMPTED:-0}" = 1 ]] && return 0
   _FEDORA_YUBIKEY_LOAD_ATTEMPTED=1
-  _load_fedora_yubikey_keys_now
+  _load_linux_yubikey_keys_now
 }
 
 ssh() {
-  _load_fedora_yubikey_keys
+  _load_linux_yubikey_keys
   command ssh "$@"
 }
 
