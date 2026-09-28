@@ -315,7 +315,7 @@ Each platform's manifests live alongside their step scripts in `setup/<os>/`.
 | Manifest | Format | Export command |
 |---|---|---|
 | `setup/macos/Brewfile` | Homebrew Bundle | `brew bundle dump --file=setup/macos/Brewfile --force` |
-| `setup/fedora/dnf.txt` | Explicitly installed packages, each preceded by a `# Description:` comment | `dnf repoquery --userinstalled --qf "%{name}\n" \| sort` |
+| `setup/fedora/dnf.txt` | Fedora package manifest | `scripts/filter-fedora-packages` |
 | `setup/fedora/copr.txt` | One COPR repo per line | (manual) |
 | `setup/fedora/flatpak.txt` | One app ID per line | `flatpak list --app --columns=application \| sort` |
 | `setup/fedora-atomic/rpm-ostree.txt` | One package per line | `rpm-ostree status --json \| jq -r '.deployments[0]["requested-packages"][]'` |
@@ -325,54 +325,7 @@ Each platform's manifests live alongside their step scripts in `setup/<os>/`.
 | `setup/manjaro/pacman.txt` | One package per line | `pacman -Qqen \| sort` |
 | `setup/manjaro/aur.txt` | One package per line | `pacman -Qqem \| sort` |
 
-The `# Description:` comments in `setup/fedora/dnf.txt` are generated from
-RPM/Fedora package metadata. Installed packages are queried with `rpm`, and
-packages not installed locally are looked up with `dnf repoquery`; the RPM
-`SUMMARY` field is written above each package name. The comments are ignored
-by the manifest loader, so they do not affect package installation.
-
-`--userinstalled` excludes dependency-only packages, but it cannot distinguish
-packages installed by the original Fedora image from packages added later. To
-make that distinction, capture a baseline on a fresh installation before
-adding your own packages:
-
-```bash
-dnf repoquery --installed --qf '%{name}\n' | sort > fedora-base.txt
-```
-
-After customizing the system, subtract that baseline from the explicitly
-installed package list:
-
-```bash
-dnf repoquery --userinstalled --qf '%{name}\n' | sort \
-  | comm -23 - fedora-base.txt > fedora-custom.txt
-```
-
-The result contains packages explicitly added after the baseline was captured.
-Keep `fedora-base.txt` for future comparisons. Since `setup/fedora/dnf.txt`
-also contains `# Description:` comments, regenerate those comments from RPM
-metadata after replacing the manifest, or filter the existing file while
-preserving the comment immediately above each retained package.
-
-The `scripts/filter-fedora-packages` utility automates this workflow. On
-Fedora, run `filter-fedora-packages baseline fedora-base.txt` on a fresh
-installation, then run `filter-fedora-packages filter fedora-base.txt` after
-customizing the system. To capture a new manifest of the current explicitly
-installed packages, including descriptions, run:
-
-```bash
-filter-fedora-packages capture fedora-custom.txt
-```
-
-The filter writes to standard output by default; pass a third argument to
-select another input manifest and a fourth argument to write a file. The
-utility requires both `rpm` and `dnf` and is ignored by the zsh startup
-integration on other systems.
-
-To add missing package descriptions without changing the package selection,
-use `filter-fedora-packages --add-descriptions setup/fedora/dnf.txt`. Existing
-comments are preserved; pass a second argument to write the described manifest
-to a separate file.
+Use `scripts/filter-fedora-packages` to manage the Fedora package manifest.
 
 ### Test Harness
 
