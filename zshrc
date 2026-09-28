@@ -176,8 +176,16 @@ _load_fedora_yubikey_keys_now() {
 
   local provider
   for provider in "${providers[@]}"; do
-    "$ssh_add" -s "$provider" || return 1
-  fi
+    if [[ "$provider" = /usr/lib64/libykcs11.so.2 ]]; then
+      [[ "${_FEDORA_YUBIKEY_9D_LOADED:-0}" = 1 ]] && continue
+      "$ssh_add" -s "$provider" || return 1
+      _FEDORA_YUBIKEY_9D_LOADED=1
+    else
+      [[ "${_FEDORA_YUBIKEY_9A_LOADED:-0}" = 1 ]] && continue
+      "$ssh_add" -s "$provider" || return 1
+      _FEDORA_YUBIKEY_9A_LOADED=1
+    fi
+  done
 }
 
 yubikey-load() {
