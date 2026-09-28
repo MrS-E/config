@@ -1,0 +1,170 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+DEFAULT_MANIFEST="$REPO_DIR/setup/fedora/dnf.txt"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  filter-fedora-packages baseline [FILE]
+  filter-fedora-packages filter BASELINE [MANIFEST] [OUTPUT]
+  filter-fedora-packages --add-descriptions MANIFEST [OUTPUT]
+
+Capture the installed Fedora package baseline or remove baseline packages from
+an explicitly-installed package manifest. The filter preserves each package's
+immediately preceding # Description: comment.
+
+Defaults:
+  baseline FILE       fedora-base.txt
+  filter MANIFEST     setup/fedora/dnf.txt
+  filter OUTPUT       stdout
+  descriptions OUTPUT stdout
+EOF
+}
+
+require_fedora_tools() {
+  [[ -f /etc/fedora-release ]] || {
+    printf 'error: this utility requires Fedora\n' >&2
+    return 1
+  }
+  command -v rpm >/dev/null 2>&1 || {
+    printf 'error: rpm not found\n' >&2
+    return 1
+  }
+  command -v dnf >/dev/null 2>&1 || {
+    printf 'error: dnf not found\n' >&2
+    return 1
+  }
+}
+
+capture_baseline() {
+  local output="${1:-fedora-base.txt}"
+  dnf repoquery --installed --qf '%{name}\n' | sort > "$output"
+  printf 'Wrote Fedora package baseline to %s\n' "$output" >&2
+}
+
+filter_manifest() {
+  local baseline="$1"
+  local manifest="${2:-$DEFAULT_MANIFEST}"
+  local output="${3:--}"
+  local destination
+
+  [[ -f "$baseline" ]] || { printf 'error: baseline not found: %s\n' "$baseline" >&2; return 1; }
+  [[ -f "$manifest" ]] || { printf 'error: manifest not found: %s\n' "$manifest" >&2; return 1; }
+
+  if [[ "$output" == - ]]; then
+    destination=/dev/stdout
+  else
+    destination="$output"
+  fi
+
+  awk '
+    NR == FNR { baseline[$1] = 1; next }
+    /^[[:space:]]*#/ { comment = $0; next }
+    /^[[:space:]]*$/ { next }
+    {
+      if (!($1 in baseline)) {
+        if (comment != "") print comment
+        print $0
+      }
+      comment = ""
+    }
+  ' "$baseline" "$manifest" > "$destination"
+
+  if [[ "$output" != - ]]; then
+    printf 'Wrote filtered Fedora package manifest to %s\n' "$output" >&2
+  fi
+}
+
+package_description() {
+  local package="$1"
+  local description
+
+  description="$(rpm -q --qf '%{SUMMARY}\n' "$package" 2>/dev/null | head -n 1 || true)"
+  if [[ -z "$description" ]]; then
+    description="$(dnf repoquery --qf '%{summary}\n' --latest-limit 1 "$package" 2>/dev/null | head -n 1 || true)"
+  fi
+  printf '%s' "$description"
+}
+
+add_descriptions() {
+  local manifest="$1"
+  local output="${2:--}"
+  local destination package description has_description=0 temporary=""
+
+  [[ -f "$manifest" ]] || { printf 'error: manifest not found: %s\n' "$manifest" >&2; return 1; }
+  if [[ "$output" == - ]]; then
+    destination=/dev/stdout
+  else
+    temporary="$(mktemp)"
+    destination="$temporary"
+  fi
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ "$line" =~ ^[[:space:]]*# ]]; then
+      [[ "$line" == *'# Description:'* ]] && has_description=1
+      printf '%s\n' "$line" >> "$destination"
+      continue
+    fi
+    if [[ -z "${line//[[:space:]]/}" ]]; then
+      printf '\n' >> "$destination"
+      continue
+    fi
+
+    package="${line%%[[:space:]]*}"
+    if (( ! has_description )); then
+      description="$(package_description "$package")"
+      if [[ -n "$description" ]]; then
+        printf '# Description: %s\n' "$description" >> "$destination"
+      else
+        printf 'warning: no description found for %s\n' "$package" >&2
+      fi
+    fi
+    printf '%s\n' "$line" >> "$destination"
+    has_description=0
+  done < "$manifest"
+
+  if [[ "$output" != - ]]; then
+    mv -f "$temporary" "$output"
+    printf 'Wrote described Fedora package manifest to %s\n' "$output" >&2
+  fi
+}
+
+if [[ "${1:-}" == "--shell-integration" ]] &&
+   ! [[ -f /etc/fedora-release && -x "$(command -v rpm 2>/dev/null)" && -x "$(command -v dnf 2>/dev/null)" ]]; then
+  exit 0
+fi
+
+if [[ "${1:-}" == "--shell-integration" ]]; then
+  exit 0
+fi
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+if [[ "${1:-}" == "--add-descriptions" ]]; then
+  [[ $# -ge 2 && $# -le 3 ]] || { usage >&2; exit 2; }
+  require_fedora_tools
+  add_descriptions "$2" "${3:--}"
+  exit 0
+fi
+
+require_fedora_tools
+
+case "${1:-}" in
+  baseline)
+    capture_baseline "${2:-fedora-base.txt}"
+    ;;
+  filter)
+    [[ $# -ge 2 && $# -le 4 ]] || { usage >&2; exit 2; }
+    filter_manifest "$2" "${3:-$DEFAULT_MANIFEST}" "${4:--}"
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac

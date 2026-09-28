@@ -354,6 +354,19 @@ also contains `# Description:` comments, regenerate those comments from RPM
 metadata after replacing the manifest, or filter the existing file while
 preserving the comment immediately above each retained package.
 
+The `scripts/filter-fedora-packages` utility automates this workflow. On
+Fedora, run `filter-fedora-packages baseline fedora-base.txt` on a fresh
+installation, then run `filter-fedora-packages filter fedora-base.txt` after
+customizing the system. It writes the filtered manifest to standard output;
+pass a third argument to select another input manifest and a fourth argument
+to write a file. The utility requires both `rpm` and `dnf` and is ignored by
+the zsh startup integration on other systems.
+
+To add missing package descriptions without changing the package selection,
+use `filter-fedora-packages --add-descriptions setup/fedora/dnf.txt`. Existing
+comments are preserved; pass a second argument to write the described manifest
+to a separate file.
+
 ### Test Harness
 
 A Podman + bats-core matrix validates the setup system. See `tests/README.md` for details.
