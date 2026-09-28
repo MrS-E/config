@@ -357,10 +357,17 @@ preserving the comment immediately above each retained package.
 The `scripts/filter-fedora-packages` utility automates this workflow. On
 Fedora, run `filter-fedora-packages baseline fedora-base.txt` on a fresh
 installation, then run `filter-fedora-packages filter fedora-base.txt` after
-customizing the system. It writes the filtered manifest to standard output;
-pass a third argument to select another input manifest and a fourth argument
-to write a file. The utility requires both `rpm` and `dnf` and is ignored by
-the zsh startup integration on other systems.
+customizing the system. To capture a new manifest of the current explicitly
+installed packages, including descriptions, run:
+
+```bash
+filter-fedora-packages capture fedora-custom.txt
+```
+
+The filter writes to standard output by default; pass a third argument to
+select another input manifest and a fourth argument to write a file. The
+utility requires both `rpm` and `dnf` and is ignored by the zsh startup
+integration on other systems.
 
 To add missing package descriptions without changing the package selection,
 use `filter-fedora-packages --add-descriptions setup/fedora/dnf.txt`. Existing

@@ -9,15 +9,17 @@ usage() {
   cat <<'EOF'
 Usage:
   filter-fedora-packages baseline [FILE]
+  filter-fedora-packages capture [FILE]
   filter-fedora-packages filter BASELINE [MANIFEST] [OUTPUT]
   filter-fedora-packages --add-descriptions MANIFEST [OUTPUT]
 
-Capture the installed Fedora package baseline or remove baseline packages from
-an explicitly-installed package manifest. The filter preserves each package's
-immediately preceding # Description: comment.
+Capture Fedora package manifests, remove baseline packages from an
+explicitly-installed package manifest, or add descriptions. The filter
+preserves each package's immediately preceding # Description: comment.
 
 Defaults:
   baseline FILE       fedora-base.txt
+  capture FILE        fedora-custom.txt
   filter MANIFEST     setup/fedora/dnf.txt
   filter OUTPUT       stdout
   descriptions OUTPUT stdout
@@ -43,6 +45,22 @@ capture_baseline() {
   local output="${1:-fedora-base.txt}"
   dnf repoquery --installed --qf '%{name}\n' | sort > "$output"
   printf 'Wrote Fedora package baseline to %s\n' "$output" >&2
+}
+
+capture_manifest() {
+  local output="${1:-fedora-custom.txt}"
+  local temporary
+
+  temporary="$(mktemp)"
+  if ! dnf repoquery --userinstalled --qf '%{name}\n' | sort > "$temporary"; then
+    rm -f "$temporary"
+    return 1
+  fi
+  if ! add_descriptions "$temporary" "$output"; then
+    rm -f "$temporary"
+    return 1
+  fi
+  rm -f "$temporary"
 }
 
 filter_manifest() {
@@ -158,6 +176,10 @@ require_fedora_tools
 case "${1:-}" in
   baseline)
     capture_baseline "${2:-fedora-base.txt}"
+    ;;
+  capture)
+    [[ $# -le 2 ]] || { usage >&2; exit 2; }
+    capture_manifest "${2:-fedora-custom.txt}"
     ;;
   filter)
     [[ $# -ge 2 && $# -le 4 ]] || { usage >&2; exit 2; }
