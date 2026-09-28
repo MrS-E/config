@@ -390,7 +390,7 @@ export PATH="$PATH:/usr/local/bin"
 # Jetbrains Junie
 ##########
 
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$PATH:$HOME/.local/bin"
 
 ##########
 # NVM
