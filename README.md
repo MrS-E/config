@@ -463,8 +463,12 @@ On Fedora, `zshrc` lazy-loads the YubiKey provider the first time `ssh` is
 used. Run `yubikey-load` to load it explicitly instead. The command checks PIV
 slots `9a`, `9c`, and `9d` with `yubico-piv-tool`, and loads
 `libykcs11.so.2` when one of those certificates contains an Ed25519 key. It
-does not rely on hardcoded key fingerprints. If the shell is connected to
-GNOME Keyring, it starts a user OpenSSH agent. OpenSC hosts use their
+does not rely on hardcoded key fingerprints. The Fedora-specific OpenSSH build
+in `~/.local/bin/ssh-add` loads the Ed25519 key into the agent, while the stable
+system `ssh` client uses that agent key for YubiKey hosts instead of trying to
+load the unsupported key directly. The loader first reuses an existing agent
+that contains the configured Ed25519 public key, including agents left by an
+earlier shell, and otherwise starts a user OpenSSH agent. OpenSC hosts use their
 configured `PKCS11Provider` directly because importing both providers into one
 agent is rejected by some agents. Each lazy-load attempt is made once; run
 `yubikey-load` again after inserting the key or correcting the agent.

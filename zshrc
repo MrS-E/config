@@ -144,12 +144,40 @@ alias sshdisconnect='rm -rf /tmp/ssh*'
 
 # OpenSC hosts use their per-host PKCS#11Provider directly; importing both
 # providers into one agent is rejected by some agents.
+_yubikey_agent_has_ed25519_key() {
+  local agent_socket="$1" public_key ssh_add
+  public_key="$(command awk 'NF >= 2 { print $2; exit }' "$HOME/.ssh/yubikey-9d.pub" 2>/dev/null)"
+  ssh_add="$HOME/.local/bin/ssh-add"
+  [[ -x "$ssh_add" ]] || ssh_add="${commands[ssh-add]:-}"
+  [[ -n "$public_key" && -S "$agent_socket" && -x "$ssh_add" ]] || return 1
+
+  SSH_AUTH_SOCK="$agent_socket" "$ssh_add" -L 2>/dev/null |
+    command awk -v public_key="$public_key" '$2 == public_key { found=1 } END { exit !found }'
+}
+
+_select_yubikey_agent() {
+  local agent_socket
+  local -a agent_sockets
+  agent_sockets=()
+  [[ -n "${SSH_AUTH_SOCK:-}" ]] && agent_sockets+=("$SSH_AUTH_SOCK")
+  [[ -d "$HOME/.ssh/agent" ]] && agent_sockets+=("$HOME"/.ssh/agent/*(N))
+
+  for agent_socket in "${agent_sockets[@]}"; do
+    if _yubikey_agent_has_ed25519_key "$agent_socket"; then
+      export SSH_AUTH_SOCK="$agent_socket"
+      return 0
+    fi
+  done
+  return 1
+}
+
 _load_linux_yubikey_keys_now() {
   [[ "$OS" = "linux" ]] || return 0
 
   local piv_tool ssh_add ssh_agent openssl_cmd slot certificate key_type provider
   piv_tool="${commands[yubico-piv-tool]:-}"
-  ssh_add="${commands[ssh-add]:-}"
+  ssh_add="$HOME/.local/bin/ssh-add"
+  [[ -x "$ssh_add" ]] || ssh_add="${commands[ssh-add]:-}"
   ssh_agent="${commands[ssh-agent]:-}"
   openssl_cmd="${commands[openssl]:-}"
   [[ -n "$piv_tool" ]] || piv_tool="$(command -v yubico-piv-tool 2>/dev/null)"
@@ -157,6 +185,8 @@ _load_linux_yubikey_keys_now() {
   [[ -n "$ssh_agent" ]] || ssh_agent="$(command -v ssh-agent 2>/dev/null)"
   [[ -n "$openssl_cmd" ]] || openssl_cmd="$(command -v openssl 2>/dev/null)"
   [[ -x "$piv_tool" && -x "$ssh_add" && -x "$ssh_agent" && -x "$openssl_cmd" ]] || return 0
+
+  _select_yubikey_agent && return 0
 
   local -A provider_by_type selected_providers
   provider_by_type=(
@@ -181,7 +211,10 @@ _load_linux_yubikey_keys_now() {
   fi
 
   for provider in ${(k)selected_providers}; do
-    "$ssh_add" -s "$provider" || return 1
+    if ! "$ssh_add" -s "$provider"; then
+      eval "$($ssh_agent -s)" >/dev/null
+      "$ssh_add" -s "$provider" || return 1
+    fi
   done
 }
 
@@ -195,9 +228,31 @@ _load_linux_yubikey_keys() {
   _load_linux_yubikey_keys_now
 }
 
+_stable_ssh_binary() {
+  if [[ "$OS" = linux && -x /usr/bin/ssh ]]; then
+    print -r -- /usr/bin/ssh
+  else
+    print -r -- "${commands[ssh]:-ssh}"
+  fi
+}
+
+_ssh_uses_yubikey_ed25519() {
+  local provider ssh_bin
+  ssh_bin="$(_stable_ssh_binary)"
+  provider="$("$ssh_bin" -G "$@" 2>/dev/null |
+    command awk '$1 == "pkcs11provider" { print $2; exit }')"
+  [[ "$provider" = /usr/lib64/libykcs11.so.2 ]]
+}
+
 ssh() {
+  local ssh_bin
+  ssh_bin="$(_stable_ssh_binary)"
   _load_linux_yubikey_keys
-  command ssh "$@"
+  if _ssh_uses_yubikey_ed25519 "$@"; then
+    "$ssh_bin" -o PKCS11Provider=none "$@"
+  else
+    "$ssh_bin" "$@"
+  fi
 }
 
 # Git

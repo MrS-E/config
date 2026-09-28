@@ -64,18 +64,36 @@ setup() {
   assert_output 'OPENSSH_BIN="$OPENSSH_PREFIX/bin/ssh"'
 }
 
-@test "Zsh resolves SSH from the user-local bin directory" {
+@test "Zsh selects the stable system SSH client" {
   local home="$BATS_TEST_TMPDIR/home"
 
   mkdir -p "$home/.local/bin"
   touch "$home/.local/bin/ssh"
   chmod +x "$home/.local/bin/ssh"
 
-  run env HOME="$home" PATH="/usr/bin:/bin" zsh -df -c \
-    'source "$1" >/dev/null 2>&1 && command -v ssh' _ "$REPO_DIR/zshrc"
+  run env HOME="$home" PATH="$home/.local/bin:/usr/bin:/bin" zsh -df -c \
+    'source "$1" >/dev/null 2>&1 && _stable_ssh_binary' _ "$REPO_DIR/zshrc"
 
   assert_success
-  assert_output "$home/.local/bin/ssh"
+  assert_output "/usr/bin/ssh"
+}
+
+@test "Zsh uses the user-local ssh-add for YubiKey PKCS#11" {
+  run grep -F 'ssh_add="$HOME/.local/bin/ssh-add"' "$REPO_DIR/zshrc"
+
+  assert_success
+}
+
+@test "Zsh selects an agent that contains the Ed25519 YubiKey key" {
+  run grep -F '_select_yubikey_agent && return 0' "$REPO_DIR/zshrc"
+
+  assert_success
+}
+
+@test "Zsh disables direct YubiKey PKCS#11 for the system SSH client" {
+  run grep -F '"$ssh_bin" -o PKCS11Provider=none "$@"' "$REPO_DIR/zshrc"
+
+  assert_success
 }
 
 @test "Zsh lazily loads the Fedora YubiKey provider for Ed25519 PIV slots" {
