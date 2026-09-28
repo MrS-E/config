@@ -142,6 +142,59 @@ alias fzfile='rg --no-heading --line-number "" | fzf'
 alias sshproxy='ssh -D 8080 -C -N'
 alias sshdisconnect='rm -f /tmp/ssh*'
 
+# Load YubiKey PIV providers only when SSH is first used. GNOME Keyring's SSH
+# agent can handle the RSA slot on some systems, but does not expose the
+# Ed25519 slot 9d; use a real OpenSSH agent for both providers on Fedora.
+_load_fedora_yubikey_keys_now() {
+  [[ "$OS" = "linux" ]] || return 0
+
+  local piv_tool ssh_add ssh_agent
+  piv_tool="${commands[yubico-piv-tool]:-}"
+  ssh_add="${commands[ssh-add]:-}"
+  ssh_agent="${commands[ssh-agent]:-}"
+  [[ -n "$piv_tool" ]] || piv_tool="$(command -v yubico-piv-tool 2>/dev/null)"
+  [[ -n "$ssh_add" ]] || ssh_add="$(command -v ssh-add 2>/dev/null)"
+  [[ -n "$ssh_agent" ]] || ssh_agent="$(command -v ssh-agent 2>/dev/null)"
+  [[ -x "$HOME/.local/bin/ssh-add" ]] && ssh_add="$HOME/.local/bin/ssh-add"
+  [[ -x "$HOME/.local/bin/ssh-agent" ]] && ssh_agent="$HOME/.local/bin/ssh-agent"
+  [[ -x "$piv_tool" && -x "$ssh_add" && -x "$ssh_agent" ]] || return 0
+
+  local -a providers=()
+  if "$piv_tool" -a read-certificate -s 9d >/dev/null 2>&1 &&
+     [[ -r /usr/lib64/libykcs11.so.2 ]]; then
+    providers+=(/usr/lib64/libykcs11.so.2)
+  fi
+  if "$piv_tool" -a read-certificate -s 9a >/dev/null 2>&1 &&
+     [[ -r /usr/lib64/pkcs11/opensc-pkcs11.so ]]; then
+    providers+=(/usr/lib64/pkcs11/opensc-pkcs11.so)
+  fi
+  ((${#providers} > 0)) || return 0
+
+  if [[ -z "${SSH_AUTH_SOCK:-}" || "${SSH_AUTH_SOCK:-}" == */gcr/* ]]; then
+    eval "$($ssh_agent -s)" >/dev/null
+  fi
+
+  local provider
+  for provider in "${providers[@]}"; do
+    "$ssh_add" -s "$provider" || return 1
+  fi
+}
+
+yubikey-load() {
+  _load_fedora_yubikey_keys_now
+}
+
+_load_fedora_yubikey_keys() {
+  [[ "${_FEDORA_YUBIKEY_LOAD_ATTEMPTED:-0}" = 1 ]] && return 0
+  _FEDORA_YUBIKEY_LOAD_ATTEMPTED=1
+  _load_fedora_yubikey_keys_now
+}
+
+ssh() {
+  _load_fedora_yubikey_keys
+  command ssh "$@"
+}
+
 # Git
 alias branch='git branch'
 alias clone='git clone'
