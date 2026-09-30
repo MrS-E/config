@@ -55,7 +55,8 @@ hidden) by the baseline:
   This validates dispatch paths and contract behavior, not real Homebrew.
 - **Fedora Atomic** has no practical rpm-ostree-capable Podman image. The
   container ships a documented mock `rpm-ostree` and mock `toolbox`; Flatpak
-  tests remain real where feasible.
+  tests remain real where feasible. Nix is intentionally installed in a
+  dedicated Toolbx rather than layered onto the immutable host.
 - **`chsh`**, **`systemctl enable --now`**, Tailscale, CUPS, firewall, and
   ClamAV are limited inside unprivileged containers and may fail in the
   baseline. These are annotated, not blocking.

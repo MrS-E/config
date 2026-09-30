@@ -27,6 +27,7 @@ run() {
   install_toolbox_packages latex
   install_toolbox_packages mobile
   install_toolbox_packages cli-dev
+  install_toolbox_packages nix
 }
 
 case "${1:-}" in

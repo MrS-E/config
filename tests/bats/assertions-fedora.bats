@@ -8,8 +8,8 @@ load "/workspace/tests/bats/helpers/assertions.bash"
 
 setup_file() {
   # Run OS-specific Fedora steps before assertions (accept failures in containers).
-  # Skip slow Flatpak app installs; remote-only step is fast enough.
-  "$REPO_DIR/setup.sh" --exclude fedora/06-flatpak-apps.sh 2>/dev/null || true
+  # Skip slow Flatpak app and external Nix installer steps.
+  "$REPO_DIR/setup.sh" --exclude fedora/06-flatpak-apps.sh,fedora/16-nix.sh 2>/dev/null || true
 }
 
 setup() {
@@ -50,4 +50,37 @@ setup() {
   assert_dir_exists "$HOME/.zsh/zsh-autosuggestions"
   assert_dir_exists "$HOME/.zsh/zsh-syntax-highlighting"
   assert_dir_exists "$HOME/.zsh/zsh-autocomplete"
+}
+
+@test "Nix step runs the official installer and configures flakes" {
+  local mock_bin="$BATS_TEST_TMPDIR/mock-bin"
+  local nix_home="$BATS_TEST_TMPDIR/nix-home"
+  mkdir -p "$mock_bin"
+  printf '%s\n' \
+    '#!/usr/bin/env bash' \
+    'set -e' \
+    '[[ "${1:-}" == "--proto" ]]' \
+    '[[ "${2:-}" == "=https" ]]' \
+    '[[ "${3:-}" == "--tlsv1.2" ]]' \
+    '[[ "${4:-}" == "-L" ]]' \
+    '[[ "${5:-}" == "https://nixos.org/nix/install" ]]' \
+    "printf '%s\\n' 'touch \"\$HOME/.nix-install-ran\"'" \
+    > "$mock_bin/curl"
+  chmod +x "$mock_bin/curl"
+
+  run env HOME="$nix_home" PATH="$mock_bin:/usr/local/bin:/usr/bin:/bin" \
+    NIX_STEP="$REPO_DIR/setup/fedora/16-nix.sh" \
+    bash -c '
+      source "$NIX_STEP" help >/dev/null
+      NIX_DEFAULT_PROFILE="$HOME/no-system-nix"
+      NIX_USER_PROFILE="$HOME/no-user-nix"
+      run
+    '
+  assert_success
+  assert [ -f "$nix_home/.nix-install-ran" ]
+  assert [ -f "$nix_home/.config/nix/nix.conf" ]
+  run grep -Fxc -- "experimental-features = nix-command flakes" \
+    "$nix_home/.config/nix/nix.conf"
+  assert_success
+  assert_output "1"
 }

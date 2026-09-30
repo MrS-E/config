@@ -27,9 +27,9 @@ Cross-platform dotfiles repository supporting **macOS**, **Fedora**, **Fedora At
 | OS | Step Directory | Package Managers | Status |
 |---|---|---|---|
 | **macOS** | `setup/macos/` | Homebrew | ✅ Active |
-| **Fedora** | `setup/fedora/` | dnf, COPR, Flatpak | ✅ Active |
-| **Fedora Atomic** | `setup/fedora-atomic/` | rpm-ostree, Flatpak, Toolbx | ✅ Tested (only Test Suit) |
-| **Manjaro** | `setup/manjaro/` | pacman, AUR (yay) | ✅ Tested (only Test Suit) |
+| **Fedora** | `setup/fedora/` | dnf, COPR, Flatpak, Nix | ✅ Active |
+| **Fedora Atomic** | `setup/fedora-atomic/` | rpm-ostree, Flatpak, Toolbx, Nix in Toolbx | ✅ Tested (only Test Suit) |
+| **Manjaro** | `setup/manjaro/` | pacman, AUR (yay), Nix | ✅ Tested (only Test Suit) |
 
 ## Repository Layout
 
@@ -302,6 +302,8 @@ daemons.
 | `12-bun.sh` | Install Bun via official installer |
 | `13-junie.sh` | Install Junie CLI |
 | `14-tailscale.sh` | Enable and start Tailscale |
+| `15-starship.sh` | Install Starship via the official installer |
+| `16-nix.sh` | Install Nix in single-user mode and enable `nix-command` + flakes |
 
 ### Fedora Atomic Steps (`setup/fedora-atomic/`)
 
@@ -318,6 +320,7 @@ daemons.
 | `09-toolbox-packages.sh` | Install packages in each toolbox |
 | `10-toolbox-latex.sh` | Install LTEX LS in latex toolbox |
 | `11-toolbox-mobile.sh` | Install ktlint + SwiftLint in mobile toolbox |
+| `12-nix-toolbox.sh` | Install Nix in a dedicated `nix` Toolbx without modifying the host |
 | `99-reboot-notice.sh` | Print reboot reminder |
 
 ### Manjaro Steps (`setup/manjaro/`)
@@ -337,6 +340,17 @@ daemons.
 | `11-joplin.sh` | Install Joplin note-taking app |
 | `12-cisco-note.sh` | Cisco AnyConnect VPN note |
 | `13-celeste-note.sh` | Celeste cloud sync note |
+| `14-nix.sh` | Install Nix in single-user mode and enable `nix-command` + flakes |
+
+Nix on Fedora and Manjaro is installed with the official single-user installer,
+so it does not add a system daemon or alter the distribution package manifests.
+The per-user configuration at `~/.config/nix/nix.conf` enables flakes and the
+modern `nix` command interface.
+
+Fedora Atomic deliberately does not layer Nix onto the immutable host. Instead,
+`12-nix-toolbox.sh` creates or reuses a dedicated `nix` Toolbx, installs Nix
+there, and keeps the host managed by `rpm-ostree`. Use `toolbox enter nix` to
+work in that environment.
 
 ### Package Manifests
 
@@ -797,6 +811,7 @@ These are concrete suggestions to improve the config over time. None are blocker
 - [x] vscode(ium) config
 - [ ] verify PKCS11 provider paths (`providers.fedora`)
 - [x] neovim config
+- [x] Nix setup
 
 #### Fedora Atomic (Tested in containers)
 
@@ -811,6 +826,7 @@ These are concrete suggestions to improve the config over time. None are blocker
 - [x] vscode(ium) config
 - [ ] verify PKCS11 provider paths (`providers.fedora`)
 - [x] neovim config
+- [x] Nix setup in a dedicated Toolbx
 
 #### Manjaro (Tested in containers)
 
@@ -825,3 +841,4 @@ These are concrete suggestions to improve the config over time. None are blocker
 - [x] vscode(ium) config
 - [ ] verify PKCS11 provider paths (`providers.fedora`)
 - [x] neovim config
+- [x] Nix setup

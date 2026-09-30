@@ -8,8 +8,8 @@ load "/workspace/tests/bats/helpers/assertions.bash"
 
 setup_file() {
   # Run OS-specific Fedora Atomic steps before assertions (accept failures).
-  # Skip slow Flatpak app installs.
-  "$REPO_DIR/setup.sh" --exclude fedora-atomic/07-flatpak-apps.sh 2>/dev/null || true
+  # Skip slow Flatpak app installs and the external Nix installer.
+  "$REPO_DIR/setup.sh" --exclude fedora-atomic/07-flatpak-apps.sh,fedora-atomic/12-nix-toolbox.sh 2>/dev/null || true
 }
 
 setup() {
@@ -37,6 +37,13 @@ setup() {
     [[ -z "$tb" || "$tb" =~ ^[[:space:]]*# ]] && continue
     assert [ -f "$REPO_DIR/setup/fedora-atomic/toolboxes/$tb.txt" ]
   done < "$REPO_DIR/setup/fedora-atomic/toolboxes.txt"
+}
+
+@test "Nix toolbox manifest and step exist" {
+  assert [ -f "$REPO_DIR/setup/fedora-atomic/toolboxes/nix.txt" ]
+  assert [ -x "$REPO_DIR/setup/fedora-atomic/12-nix-toolbox.sh" ]
+  run grep -F "toolbox enter nix" "$REPO_DIR/setup/fedora-atomic/12-nix-toolbox.sh"
+  assert_success
 }
 
 @test "flatpak remote flathub exists" {
