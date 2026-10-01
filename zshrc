@@ -135,7 +135,7 @@ o() {
 
 # nix-darwin (macOS system manager for launchd daemons)
 if [[ "$OS" = "macos" ]]; then
-  alias nix-system-reload='sudo darwin-rebuild switch --flake "path:$HOME/nix-darwin-config"'
+  alias nix-system-reload='sudo darwin-rebuild switch --flake "path:$HOME/config/nix-darwin"'
 fi
 
 # Grep

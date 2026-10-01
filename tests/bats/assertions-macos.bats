@@ -94,6 +94,17 @@ setup() {
   assert_output_partial "this step requires macOS"
 }
 
+@test "nix-darwin step defaults to the config repository" {
+  run env -u NIX_DARWIN_CONFIG_DIR \
+    NIX_DARWIN_STEP="$REPO_DIR/setup/macos/10-nix-darwin.sh" \
+    bash -c '
+      source "$NIX_DARWIN_STEP" help >/dev/null
+      printf "%s\n" "$NIX_DARWIN_CONFIG_DIR"
+    '
+  assert_success
+  assert_output "$REPO_DIR/nix-darwin"
+}
+
 @test "nix-darwin step initializes and adapts the flake on Apple Silicon" {
   local mock_bin="$BATS_TEST_TMPDIR/nix-darwin-mock-bin"
   local nix_home="$BATS_TEST_TMPDIR/nix-darwin-home"
@@ -118,11 +129,11 @@ setup() {
     '    printf "%s\\n" init >> "$HOME/nix-darwin-calls"' \
     '    ;;' \
     '  *"flake lock path:"*)' \
-    '    [[ "${5:-}" == "path:$HOME/nix-darwin-config" ]]' \
-    '    : > "$HOME/nix-darwin-config/flake.lock"' \
+    '    [[ "${5:-}" == "path:$HOME/nix-darwin" ]]' \
+    '    : > "$HOME/nix-darwin/flake.lock"' \
     '    printf "%s\\n" lock >> "$HOME/nix-darwin-calls"' \
     '    ;;' \
-    '  *"run nix-darwin -- switch --flake path:$HOME/nix-darwin-config --no-write-lock-file")' \
+    '  *"run nix-darwin -- switch --flake path:$HOME/nix-darwin --no-write-lock-file")' \
     '    printf "%s\\n" switch >> "$HOME/nix-darwin-calls"' \
     '    ;;' \
     '  *) exit 2 ;;' \
@@ -151,7 +162,7 @@ setup() {
     NIX_DARWIN_STEP="$REPO_DIR/setup/macos/10-nix-darwin.sh" \
     bash -c '
       source "$NIX_DARWIN_STEP" help >/dev/null
-      NIX_DARWIN_CONFIG_DIR="$HOME/nix-darwin-config"
+      NIX_DARWIN_CONFIG_DIR="$HOME/nix-darwin"
       NIX_DARWIN_HOSTNAME="test-mac"
       NIX_DARWIN_ETC_DIR="$HOME/mock-etc"
       mkdir -p "$NIX_DARWIN_ETC_DIR/nix" "$NIX_DARWIN_ETC_DIR/resolver"
@@ -164,23 +175,23 @@ setup() {
       run
     '
   assert_success
-  assert [ -f "$nix_home/nix-darwin-config/flake.nix" ]
+  assert [ -f "$nix_home/nix-darwin/flake.nix" ]
   run grep -Fc -- 'nixpkgs.hostPlatform = "aarch64-darwin";' \
-    "$nix_home/nix-darwin-config/flake.nix"
+    "$nix_home/nix-darwin/flake.nix"
   assert_success
   assert_output "1"
   run grep -Fc -- 'darwinConfigurations."test-mac"' \
-    "$nix_home/nix-darwin-config/flake.nix"
+    "$nix_home/nix-darwin/flake.nix"
   assert_success
   assert_output "1"
   run grep -Fc -- 'nix.settings.experimental-features = "nix-command flakes";' \
-    "$nix_home/nix-darwin-config/flake.nix"
+    "$nix_home/nix-darwin/flake.nix"
   assert_success
   assert_output "1"
   run grep -F -- 'services.tailscale.enable' \
-    "$nix_home/nix-darwin-config/flake.nix"
+    "$nix_home/nix-darwin/flake.nix"
   assert_failure
-  assert [ -f "$nix_home/nix-darwin-config/flake.lock" ]
+  assert [ -f "$nix_home/nix-darwin/flake.lock" ]
   run grep -Fxc -- init "$nix_home/nix-darwin-calls"
   assert_success
   assert_output "1"
@@ -190,7 +201,7 @@ setup() {
   run grep -Fxc -- switch "$nix_home/nix-darwin-calls"
   assert_success
   assert_output "2"
-  run grep -Fxc -- '--extra-experimental-features nix-command flakes run nix-darwin -- switch --flake path:'"$nix_home"'/nix-darwin-config --no-write-lock-file' \
+  run grep -Fxc -- '--extra-experimental-features nix-command flakes run nix-darwin -- switch --flake path:'"$nix_home"'/nix-darwin --no-write-lock-file' \
     "$nix_home/nix-darwin-nix-args"
   assert_success
   assert_output "2"

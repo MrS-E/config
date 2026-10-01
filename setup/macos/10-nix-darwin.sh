@@ -12,7 +12,7 @@ source "$SCRIPT_DIR/common.bash"
 # nix-darwin is the macOS system manager for launchd daemons.
 NIX_DEFAULT_PROFILE="/nix/var/nix/profiles/default/bin/nix"
 NIX_USER_PROFILE="$HOME/.nix-profile/bin/nix"
-NIX_DARWIN_CONFIG_DIR="${NIX_DARWIN_CONFIG_DIR:-$HOME/nix-darwin-config}"
+NIX_DARWIN_CONFIG_DIR="${NIX_DARWIN_CONFIG_DIR:-$REPO_DIR/nix-darwin}"
 NIX_DARWIN_HOSTNAME="${NIX_DARWIN_HOSTNAME:-}"
 NIX_DARWIN_ETC_DIR="${NIX_DARWIN_ETC_DIR:-/etc}"
 NIX_EXPERIMENTAL_FEATURES=(--extra-experimental-features "nix-command flakes")
@@ -26,10 +26,11 @@ presteps() {
 
 help() {
   cat <<'EOF'
-Bootstrap an optional nix-darwin configuration in ~/nix-darwin-config. The
-generated flake is adapted to the current hostname and macOS architecture, then
-configured with Nix flakes, then activated as root. Existing installer-managed
-/etc files are preserved with *.before-nix-darwin backups; skip this step with
+Bootstrap an optional nix-darwin configuration in the config repository's
+nix-darwin/ directory. The generated flake is adapted to the current hostname
+and macOS architecture, then configured with Nix flakes and activated as root.
+Existing installer-managed /etc files are preserved with
+*.before-nix-darwin backups. Skip this step with
 --exclude macos/10-nix-darwin.sh if needed.
 EOF
 }

@@ -50,6 +50,7 @@ config/
 │   ├── fedora/                 # Fedora steps + dnf/flatpak/copr manifests
 │   ├── fedora-atomic/          # Fedora Atomic steps + rpm-ostree/toolbox manifests
 │   └── manjaro/                # Manjaro steps + pacman/aur manifests
+├── nix-darwin/                 # nix-darwin flake for declarative macOS settings
 ├── tests/                      # Podman + bats-core test matrix
 ├── zshrc                       # ZSH shell configuration
 ├── gitconfig                   # Git global configuration
@@ -71,6 +72,7 @@ config/
 | `setup.sh` | Orchestration-only runner. Detects OS, discovers numbered step scripts under `setup/general/` and `setup/<os>/`, applies selection filters (`--all`, `--only`, `--exclude`, `--interactive`), and runs each step as a separate process via `presteps` then `run`. No setup logic lives here. |
 | `setup/general/` | OS-agnostic steps that run first on every platform: symlink dotfiles, register git filters, create shared editor directories. `common.bash` provides platform-neutral primitives (logging, symlink helpers, git clone guards, manifest parsing). |
 | `setup/<os>/` | Platform-specific numbered steps with companion manifests and a `common.bash` helper library. Steps are idempotent — safe to run repeatedly. |
+| `nix-darwin/` | nix-darwin flake and lock file for declarative macOS system settings and launchd services. |
 | `zshrc` | ZSH config: OS/hardware detection, history settings, aliases, platform-aware clip/clippaste helpers, completion system, Starship prompt with custom fallback, version managers (bun), ZSH plugins, custom script shell-integration. |
 | `gitconfig` | Git config: GPG SSH signing, codium/vscode as difftool/mergetool, LFS, pull rebase, credential cache. |
 | `vimrc` | Vim config: persistent undo, custom theme, indentation, whitespace display, statusline. |
@@ -253,11 +255,12 @@ OS-agnostic steps that run first on every platform:
 | `07-waveforms.sh` | Download and install Digilent WaveForms from the official `.dmg` (not in Brewfile; falls back to the browser if Cloudflare blocks `curl`) |
 | `08-kitty-permissions.sh` | Open macOS Privacy & Security settings for Kitty permissions |
 | `09-nix.sh` | Install Nix using the official installer and enable `nix-command` + flakes |
-| `10-nix-darwin.sh` | Bootstrap nix-darwin in `~/nix-darwin-config` for declarative macOS settings and launchd daemons |
+| `10-nix-darwin.sh` | Bootstrap nix-darwin from this repository's `nix-darwin/` directory for declarative macOS settings and launchd daemons |
 
 `nix-darwin` is the macOS system manager for launchd daemons.
-`10-nix-darwin.sh` initializes the configuration with the nix-darwin flake
-template, sets `nixpkgs.hostPlatform` to the detected Darwin platform (including
+`10-nix-darwin.sh` uses the repository's `nix-darwin/` flake, initializing it
+from the nix-darwin template if `flake.nix` is absent. It sets
+`nixpkgs.hostPlatform` to the detected Darwin platform (including
 `aarch64-darwin` on Apple Silicon), renames the generated `simple`
 configuration to the local hostname, enables
 `nix.settings.experimental-features = "nix-command flakes"`, and runs the
@@ -269,20 +272,19 @@ It does not overwrite an existing `flake.nix`; use
 `--exclude macos/10-nix-darwin.sh` when the optional bootstrap is not wanted.
 Before activation, it resolves `flake.lock` as the regular user and passes
 `--no-write-lock-file` to the root activation, preventing `sudo` from leaving a
-root-owned lock file in the home directory. If a previous failed bootstrap did
-leave that lock file root-owned, the step repairs ownership of that one file.
+root-owned lock file in the config repository. If a previous failed bootstrap
+did leave that lock file root-owned, the step repairs ownership of that one file.
 Known conflicting files at `/etc/nix/nix.conf`, `/etc/bashrc`, and `/etc/zshrc`
 are moved to matching `.before-nix-darwin` backups before nix-darwin takes
 ownership; inspect those backups before deleting them. After activation,
 declare additional launchd daemons in the flake and apply later changes with
-`sudo darwin-rebuild switch --flake ~/nix-darwin-config`. If the pinned tool
-needs to be bootstrapped directly, use
+`sudo darwin-rebuild switch --flake "path:$HOME/config/nix-darwin"`.
+If the pinned tool needs to be bootstrapped directly, use
 `sudo nix run nix-darwin/master#darwin-rebuild -- switch`.
 Open a new shell after activation; `zshrc` adds `/run/current-system/sw/bin`
 when it exists so `darwin-rebuild` is available without an absolute path.
-From the nix-darwin flake directory, the zsh alias `nix-system-reload` runs
-`sudo darwin-rebuild switch --flake .` to apply changes and reload managed
-daemons.
+The `nix-system-reload` zsh alias targets the same repository flake from any
+working directory, applying changes and reloading managed daemons.
 
 ### Runtime Versions (`nixvm`)
 
