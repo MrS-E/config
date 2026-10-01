@@ -621,13 +621,12 @@ Uses a **base + overlay** pattern to keep settings DRY across platforms:
 
 ### ZSH Integration
 
-The `zshrc` provides two functions for managing settings:
+The `zshrc` provides two functions for managing settings and extensions. Run them from the repository root:
 
-- **`code export`**: writes current VSCodium settings back to the repo:
-  - Shared settings → `settings.base.json`
-  - Platform-specific settings → `settings.macos.json` / `settings.linux.json`
-- **`code import`**: merges repo settings into VSCodium:
-  - Symlinks `settings.base.json` + platform overlay → VSCodium user settings
+1. After changing VSCodium settings or extensions, run `code export vscodium`. This saves a full settings backup, splits shared and platform-specific settings into the base and OS overlay files, and exports the installed extension list.
+2. On another machine, run `code import vscodium` to merge the base and current OS overlay into VSCodium's user settings and install the extensions listed in `vscodium/extensions`.
+
+Both commands require the `codium` CLI; exporting and importing the base/overlay settings also requires `jq`.
 
 ### Extensions
 
@@ -739,19 +738,3 @@ Both scripts are auto-loaded by `zshrc` via shell integration, so their commands
 | **Git filters for platform values** | Use clean/smudge filters (`pkcs11-provider` pattern) to keep platform-specific paths tokenized in commits, resolved in working trees |
 | **Base + overlay settings** | `vscodium/` uses shared `settings.base.json` + platform-specific overlays |
 | **Provider path tables** | `ssh/providers.mac` / `ssh/providers.fedora` hold only key=value pairs, never hosts |
-
-## Recommendations
-
-These are concrete suggestions to improve the config over time. None are blockers — just ideas worth pursuing.
-
-### High Priority
-
-- **Verify Fedora provider paths**: `ssh/providers.fedora` has `TODO_VERIFY_*` placeholders. Verify `/usr/lib64/pkcs11/libykcs11.so` and `/usr/lib64/pkcs11/opensc-pkcs11.so` on real Fedora hardware with the `ykcs11` and `opensc` packages installed.
-- **Populate `settings.linux.json`**: `vscodium/settings.linux.json` is empty `{}`. Add Linux-specific VSCodium settings (e.g. paths, terminal profiles).
-- **Resolve `VISUAL=3` in zshrc**: The env var `VISUAL=3` is set in `zshrc` — the value `3` is unclear. Either document what it does or fix it (likely meant to be `VISUAL=nvim` or similar).
-
-### Medium Priority
-
-- **Add shellcheck CI**: All setup scripts are shell (`sh`/`bash`). A pre-commit hook or CI step running `shellcheck` would catch common issues.
-- **Untrack `known_hosts.old` and `.netrwhist`**: These auto-generated files are tracked in git but are ephemeral data, not config. Consider removing from tracking or adding to `.gitignore`.
-- **Document `code export`/`code import` workflow**: The VSCodium settings sync flow is powerful but not obvious. Consider a dedicated section showing end-to-end usage.
