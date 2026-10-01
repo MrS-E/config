@@ -502,7 +502,7 @@ Loaded via native zsh `source` (no plugin manager):
 
 - **Home Manager package profile**: provides the selected macOS packages without managing dotfiles or editor settings
 - **FZF**: fuzzy finder with fd integration, `Ctrl+T` / `Ctrl+R` / `Alt+C` bindings
-- **Tailscale**: completions
+- **Tailscale**: CLI completions outside macOS (the macOS GUI app is not invoked as a CLI)
 - **TheFuck**: auto-correction tool (`eval $(thefuck --alias)`)
 - **1Password CLI**: completions
 

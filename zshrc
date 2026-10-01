@@ -4,6 +4,8 @@
 export EDITOR=vim
 export VISUAL=vim
 export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+mkdir -p "$XDG_DATA_HOME/zsh"
 
 if [[ -d "$HOME/Library/Android/sdk" ]]; then
   export ANDROID_HOME="$HOME/Library/Android/sdk"
@@ -350,7 +352,8 @@ fi
 ##########
 # Tailscale
 ##########
-if command -v tailscale >/dev/null 2>&1; then
+# The macOS tailscale-gui package exposes its app binary, not the CLI.
+if [[ "$OS" != "macos" ]] && command -v tailscale >/dev/null 2>&1; then
   source <(tailscale completion zsh)
 fi
 

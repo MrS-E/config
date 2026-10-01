@@ -66,3 +66,66 @@ EOF
   run grep -nE 'brew shellenv|/opt/homebrew|/usr/local/bin/brew' "$REPO_DIR/zshrc"
   assert_failure
 }
+
+@test "zshrc initializes storage for recent directories" {
+  local test_home="$BATS_TEST_TMPDIR/home"
+  local mock_bin="$BATS_TEST_TMPDIR/mock-bin"
+  mkdir -p "$mock_bin"
+
+  printf '%s\n' \
+    '#!/usr/bin/env sh' \
+    'if [ "$1" = "-n" ] && [ "$2" = "hw.memsize" ]; then' \
+    '  printf "%s\\n" 17179869184' \
+    '  exit 0' \
+    'fi' \
+    'exit 1' \
+    > "$mock_bin/sysctl"
+  printf '%s\n' '#!/usr/bin/env sh' 'exit 0' > "$mock_bin/tailscale"
+  chmod +x "$mock_bin/sysctl" "$mock_bin/tailscale"
+
+  run env HOME="$test_home" PATH="$mock_bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin" \
+    REPO_DIR="$REPO_DIR" zsh -f -c '
+      unset XDG_DATA_HOME
+      source "$REPO_DIR/zshrc"
+      [[ "$XDG_DATA_HOME" = "$HOME/.local/share" && -d "$XDG_DATA_HOME/zsh" ]]
+    '
+
+  assert_success
+}
+
+@test "zshrc does not invoke the Tailscale GUI binary for completion on macOS" {
+  local test_home="$BATS_TEST_TMPDIR/home"
+  local mock_bin="$BATS_TEST_TMPDIR/mock-bin"
+  local tailscale_marker="$BATS_TEST_TMPDIR/tailscale-was-invoked"
+  mkdir -p "$mock_bin"
+
+  printf '%s\n' \
+    '#!/usr/bin/env sh' \
+    'case "$1" in' \
+    '  -s) printf "%s\\n" Darwin ;;' \
+    '  -m) printf "%s\\n" arm64 ;;' \
+    '  *) exit 1 ;;' \
+    'esac' \
+    > "$mock_bin/uname"
+  printf '%s\n' \
+    '#!/usr/bin/env sh' \
+    'printf "%s\\n" invoked > "$TAILSCALE_MARKER"' \
+    > "$mock_bin/tailscale"
+  printf '%s\n' \
+    '#!/usr/bin/env sh' \
+    'if [ "$1" = "-n" ] && [ "$2" = "hw.memsize" ]; then' \
+    '  printf "%s\\n" 17179869184' \
+    '  exit 0' \
+    'fi' \
+    'exit 1' \
+    > "$mock_bin/sysctl"
+  chmod +x "$mock_bin/uname" "$mock_bin/tailscale" "$mock_bin/sysctl"
+
+  run env HOME="$test_home" PATH="$mock_bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin" \
+    REPO_DIR="$REPO_DIR" TAILSCALE_MARKER="$tailscale_marker" zsh -f -c '
+      source "$REPO_DIR/zshrc"
+      [[ ! -e "$TAILSCALE_MARKER" ]]
+    '
+
+  assert_success
+}
