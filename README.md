@@ -91,7 +91,7 @@ This repo uses four git clean/smudge filters, registered by `setup/general/02-gi
 
 - **`scrub-apikey`** — redacts API keys in `junie/models/*.json` on commit (clean only; smudge passes through unchanged).
 - **`junie-settings`** — stores only `stepsLimit`, `shareAnonymousStatistics`, `subagentsMode`, `diffViewMode`, and `toolbarVisibility` from `junie/settings.json`; other settings are cached locally under `.git` and restored on checkout.
-- **`junie-mcp`** — normalizes each server's `enabled` value in `junie/mcp/mcp.json` to `false` in Git; local values are cached under `.git` and restored on checkout.
+- **`junie-mcp`** — omits each server's `enabled` key from the Git version of `junie/mcp/mcp.json`; local values are cached under `.git` and restored on checkout.
 - **`pkcs11-provider`** — tokenizes PKCS#11 provider paths in `ssh/config.d/*` on commit (`@YKCS11@`, `@OPENSC@`) and resolves them to the current platform's real paths on checkout. Provider paths are defined in `ssh/providers.mac` and `ssh/providers.fedora`.
 
 The Junie JSON filters use Python 3. After enabling them, run `git add --renormalize junie/settings.json junie/mcp/mcp.json` once to normalize the existing index contents and seed the local caches. Git may still show these paths as modified in `git status` after local-only edits; `git diff` and committed content use the normalized filters. Running `git add` on these paths refreshes their filtered index state and saves current local-only values.
@@ -645,7 +645,7 @@ cat vscodium/extensions | xargs -L1 codium --install-extension
 ## Junie Configuration
 
 - **`settings.json`**: Junie AI assistant settings; only the five shared keys listed above are tracked, while other keys are held in the per-clone cache under `.git`
-- **`mcp/mcp.json`**: MCP server configuration; `enabled` values are ignored by Git and held in the per-clone cache under `.git`
+- **`mcp/mcp.json`**: MCP server configuration; `enabled` keys are omitted from Git, with local values held in the per-clone cache under `.git`
 - **Model configs**: API keys in `junie/models/*.json` are protected by the `scrub-apikey` git filter — they never appear in commits (redacted to `REDACTED`)
 - **Logs excluded** from repo (gitignored)
 

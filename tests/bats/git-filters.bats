@@ -90,7 +90,7 @@ load "/workspace/tests/bats/helpers/assertions.bash"
   assert_success
 }
 
-@test "Junie filters track selected settings and ignore MCP enabled values" {
+@test "Junie filters track selected settings and omit MCP enabled keys" {
   local repo="$BATS_TEST_TMPDIR/junie-filter-repo"
   mkdir -p "$repo/setup/general" "$repo/scripts" "$repo/junie/mcp"
   cp "$REPO_DIR/.gitattributes" "$repo/"
@@ -121,7 +121,7 @@ def show(path):
 assert set(show("junie/settings.json")) == {
     "stepsLimit", "shareAnonymousStatistics", "subagentsMode", "diffViewMode", "toolbarVisibility"
 }
-assert show("junie/mcp/mcp.json")["mcpServers"]["example"]["enabled"] is False
+assert "enabled" not in show("junie/mcp/mcp.json")["mcpServers"]["example"]
 ' "$repo"
   assert_success
 

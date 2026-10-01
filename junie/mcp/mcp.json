@@ -5,22 +5,19 @@
                 "-y",
                 "chrome-devtools-mcp@latest"
             ],
-            "command": "npx",
-            "enabled": false
+            "command": "npx"
         },
         "browsermcp": {
             "args": [
                 "@browsermcp/mcp@latest"
             ],
-            "command": "npx",
-            "enabled": false
+            "command": "npx"
         },
         "xcode": {
             "args": [
                 "mcpbridge"
             ],
-            "command": "xcrun",
-            "enabled": false
+            "command": "xcrun"
         }
     }
 }

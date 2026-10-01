@@ -37,7 +37,7 @@ def clean_mcp(value):
         for name, server in servers.items():
             if isinstance(server, dict):
                 server = dict(server)
-                server["enabled"] = False
+                server.pop("enabled", None)
             normalized_servers[name] = server
         normalized["mcpServers"] = normalized_servers
     return normalized
