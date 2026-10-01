@@ -61,7 +61,7 @@ config/
 ├── lazygit/                    # Lazygit TUI keybinding overrides
 ├── vscodium/                   # VSCodium (base+overlay settings pattern)
 ├── ssh/                        # SSH config, host stanzas, YubiKey PKCS11
-├── scripts/                    # Custom CLI tools (project, work-finder)
+├── scripts/                    # Custom CLI tools (nixvm, project, work-finder)
 ├── Nextcloud/                  # Nextcloud desktop client config
 └── junie/                      # Junie AI assistant settings
 ```
@@ -81,7 +81,7 @@ config/
 | `lazygit/` | Lazygit TUI: custom keybinding overrides. |
 | `vscodium/` | VSCodium: base+overlay settings (`settings.base.json` + platform-specific overlays), extensions list, `code export`/`code import` zsh functions. |
 | `ssh/` | SSH config: `config` entry point (Include, ControlMaster, keychain), `config.d/*` host stanzas (private, homelab, infra, zhaw), YubiKey PKCS11 provider filter. |
-| `scripts/` | Custom CLI tools: `project` (project directory switcher), `work-finder` (git/file activity scanner). Both support `--shell-integration` for zsh wrapper + completion generation. |
+| `scripts/` | Custom CLI tools: `nixvm` (Nix-backed Java, Ruby, and Python versions), `project` (project directory switcher), and `work-finder` (git/file activity scanner). They use `--shell-integration` where a Zsh wrapper is needed. |
 | `Nextcloud/` | Nextcloud desktop client config (`nextcloud.cfg`) and sync-exclude patterns (`sync-exclude.lst`). |
 | `junie/` | Junie AI assistant: `settings.json`, model configs with API key scrub filter. |
 
@@ -283,6 +283,37 @@ when it exists so `darwin-rebuild` is available without an absolute path.
 From the nix-darwin flake directory, the zsh alias `nix-system-reload` runs
 `sudo darwin-rebuild switch --flake .` to apply changes and reload managed
 daemons.
+
+### Runtime Versions (`nixvm`)
+
+`nixvm` manages global Java JDK, Ruby, and Python selections on macOS. It
+requires Nix with the `nix-command` and `flakes` features enabled; the existing
+`setup/macos/09-nix.sh` step installs Nix and enables those features. `nixvm`
+does not bootstrap Nix or modify the nix-darwin configuration. It uses the
+configured `nixpkgs` flake and supports only package attributes explicitly
+mapped by the tool, so arbitrary upstream patch releases are not selectable.
+Run `nixvm list --available` to see which of those attributes are available for
+the current Mac and Nixpkgs revision.
+
+```bash
+nixvm list                         # installed and available versions
+nixvm list python --installed      # only installed Python versions
+nixvm list --available             # available versions for all runtimes
+nixvm install java 21
+nixvm install ruby 3.3
+nixvm install python 3.12
+nixvm use java 21
+nixvm remove python 3.12
+```
+
+The existing Zsh script loader activates the shell integration automatically:
+`use` adds the selected runtime's `bin` directory to the current shell's
+`PATH`, sets `JAVA_HOME` for Java, and persists one global selection per
+runtime for later Zsh sessions. Install references and active selections live
+under `${XDG_DATA_HOME:-$HOME/.local/share}/nixvm`. Removing a version drops only
+the manager-owned reference (and clears it if active); it does not delete a
+Nix store path directly. Nix garbage collection can reclaim outputs that no
+longer have other references.
 
 ### Fedora Steps (`setup/fedora/`)
 

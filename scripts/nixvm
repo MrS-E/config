@@ -1,0 +1,558 @@
+#!/usr/bin/env bash
+set -euo pipefail
+umask 077
+
+nixvm__error() {
+  printf 'nixvm: %s\n' "$*" >&2
+}
+
+nixvm__usage() {
+  cat <<'EOF'
+nixvm - Nix-backed Java, Ruby, and Python version manager
+
+Usage:
+  nixvm install <runtime> <version>
+  nixvm list [runtime] [--available|--installed]
+  nixvm use <runtime> <version>
+  nixvm remove <runtime> <version>
+  nixvm --shell-integration
+  nixvm --help
+
+Runtimes: java, ruby, python
+Versions are limited to supported attributes in the configured Nixpkgs flake.
+EOF
+}
+
+nixvm__data_dir() {
+  printf '%s/nixvm\n' "${XDG_DATA_HOME:-$HOME/.local/share}"
+}
+
+nixvm__validate_runtime() {
+  case "$1" in
+    java|ruby|python) return 0 ;;
+    *)
+      nixvm__error "Unknown runtime '$1'. Choose java, ruby, or python."
+      return 1
+      ;;
+  esac
+}
+
+nixvm__supported_versions() {
+  case "$1" in
+    java) printf '%s\n' 8 11 17 21 23 24 25 ;;
+    ruby) printf '%s\n' 3.0 3.1 3.2 3.3 3.4 3.5 ;;
+    python) printf '%s\n' 3.9 3.10 3.11 3.12 3.13 3.14 ;;
+    *) return 1 ;;
+  esac
+}
+
+nixvm__attribute_for_version() {
+  case "$1:$2" in
+    java:8) printf '%s\n' jdk8 ;;
+    java:11) printf '%s\n' jdk11 ;;
+    java:17) printf '%s\n' jdk17 ;;
+    java:21) printf '%s\n' jdk21 ;;
+    java:23) printf '%s\n' jdk23 ;;
+    java:24) printf '%s\n' jdk24 ;;
+    java:25) printf '%s\n' jdk25 ;;
+    ruby:3.0) printf '%s\n' ruby_3_0 ;;
+    ruby:3.1) printf '%s\n' ruby_3_1 ;;
+    ruby:3.2) printf '%s\n' ruby_3_2 ;;
+    ruby:3.3) printf '%s\n' ruby_3_3 ;;
+    ruby:3.4) printf '%s\n' ruby_3_4 ;;
+    ruby:3.5) printf '%s\n' ruby_3_5 ;;
+    python:3.9) printf '%s\n' python39 ;;
+    python:3.10) printf '%s\n' python310 ;;
+    python:3.11) printf '%s\n' python311 ;;
+    python:3.12) printf '%s\n' python312 ;;
+    python:3.13) printf '%s\n' python313 ;;
+    python:3.14) printf '%s\n' python314 ;;
+    *) return 1 ;;
+  esac
+}
+
+nixvm__require_macos() {
+  local os
+  if ! os="$(uname -s 2>/dev/null)"; then
+    nixvm__error "Could not determine the operating system."
+    return 1
+  fi
+  if [[ "$os" != Darwin ]]; then
+    nixvm__error "nixvm currently supports macOS only."
+    return 1
+  fi
+}
+
+nixvm__require_nix() {
+  if ! command -v nix >/dev/null 2>&1; then
+    nixvm__error "Nix is required. Install it and enable nix-command and flakes (see setup/macos/09-nix.sh)."
+    return 1
+  fi
+}
+
+nixvm__nix_system() {
+  local arch
+  if ! arch="$(uname -m 2>/dev/null)"; then
+    nixvm__error "Could not determine the macOS architecture."
+    return 1
+  fi
+  case "$arch" in
+    arm64|aarch64) printf '%s\n' aarch64-darwin ;;
+    x86_64|amd64) printf '%s\n' x86_64-darwin ;;
+    *)
+      nixvm__error "Unsupported macOS architecture '$arch'."
+      return 1
+      ;;
+  esac
+}
+
+nixvm__candidate_attribute_list() {
+  local runtime version attribute result='['
+  for runtime in java ruby python; do
+    for version in $(nixvm__supported_versions "$runtime"); do
+      attribute="$(nixvm__attribute_for_version "$runtime" "$version")"
+      result="$result \"$attribute\""
+    done
+  done
+  printf '%s ]\n' "$result"
+}
+
+nixvm__available_attributes() {
+  local system="$1" candidate_attributes apply_expr output
+  candidate_attributes="$(nixvm__candidate_attribute_list)"
+  apply_expr="pkgs: let candidates = ${candidate_attributes}; system = \"${system}\"; isAvailable = name: let package = builtins.getAttr name pkgs; meta = package.meta or {}; in !(meta.broken or false) && builtins.elem system (meta.platforms or [ system ]); in builtins.concatStringsSep \"\\n\" (builtins.filter (name: builtins.hasAttr name pkgs && isAvailable name) candidates)"
+
+  if output="$(nix eval --raw --apply "$apply_expr" "nixpkgs#legacyPackages.${system}")"; then
+    printf '%s\n' "$output"
+  else
+    nixvm__error "Could not query the configured Nixpkgs flake. Ensure nix-command and flakes are enabled and the nixpkgs flake is reachable."
+    return 1
+  fi
+}
+
+nixvm__contains_attribute() {
+  local attributes="$1" attribute="$2"
+  case $'\n'"$attributes"$'\n' in
+    *$'\n'"$attribute"$'\n'*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+nixvm__available_versions_for_runtime() {
+  local runtime="$1" attributes="$2" version attribute result='' separator=''
+  for version in $(nixvm__supported_versions "$runtime"); do
+    attribute="$(nixvm__attribute_for_version "$runtime" "$version")"
+    if nixvm__contains_attribute "$attributes" "$attribute"; then
+      result="${result}${separator}${version}"
+      separator=' '
+    fi
+  done
+  printf '%s\n' "$result"
+}
+
+nixvm__installed_versions() {
+  local runtime="$1" install_dir reference
+  install_dir="$(nixvm__data_dir)/installed/$runtime"
+  [[ -d "$install_dir" ]] || return 0
+
+  for reference in "$install_dir"/*; do
+    [[ -L "$reference" && -e "$reference" ]] || continue
+    printf '%s\n' "${reference##*/}"
+  done
+}
+
+nixvm__format_versions() {
+  local versions="$1" version separator=''
+  if [[ -z "$versions" ]]; then
+    printf '(none)'
+    return 0
+  fi
+  for version in $versions; do
+    printf '%s%s' "$separator" "$version"
+    separator=', '
+  done
+}
+
+nixvm__install() {
+  local runtime="$1" version="$2" attribute system available_attributes
+  local install_dir reference
+
+  nixvm__validate_runtime "$runtime" || return 1
+  if ! attribute="$(nixvm__attribute_for_version "$runtime" "$version")"; then
+    nixvm__error "Unsupported $runtime version '$version'. Run 'nixvm list $runtime --available' to see supported versions."
+    return 1
+  fi
+  nixvm__require_macos || return 1
+  nixvm__require_nix || return 1
+  system="$(nixvm__nix_system)" || return 1
+  available_attributes="$(nixvm__available_attributes "$system")" || return 1
+
+  if ! nixvm__contains_attribute "$available_attributes" "$attribute"; then
+    nixvm__error "$runtime version '$version' ($attribute) is not available for $system in the configured Nixpkgs flake."
+    return 1
+  fi
+
+  install_dir="$(nixvm__data_dir)/installed/$runtime"
+  if ! mkdir -p "$install_dir"; then
+    nixvm__error "Could not create the install directory '$install_dir'."
+    return 1
+  fi
+  reference="$install_dir/$version"
+  if [[ -L "$reference" && -e "$reference" ]]; then
+    printf 'Already installed: %s %s\n' "$runtime" "$version"
+    return 0
+  fi
+  if [[ -e "$reference" && ! -L "$reference" ]]; then
+    nixvm__error "Install path '$reference' exists and is not a nixvm-managed reference."
+    return 1
+  fi
+  if [[ -L "$reference" ]] && ! rm -f "$reference"; then
+    nixvm__error "Could not remove the broken install reference at '$reference'."
+    return 1
+  fi
+  if ! nix build --out-link "$reference" "nixpkgs#$attribute"; then
+    if [[ -L "$reference" ]] && ! rm -f "$reference"; then
+      nixvm__error "Could not remove the failed install reference at '$reference'."
+    fi
+    nixvm__error "Nix failed to build Nixpkgs attribute '$attribute'."
+    return 1
+  fi
+  if [[ ! -L "$reference" || ! -e "$reference" ]]; then
+    nixvm__error "Nix completed without creating the expected output reference for '$attribute'."
+    return 1
+  fi
+
+  printf 'Installed %s %s (%s).\n' "$runtime" "$version" "$attribute"
+}
+
+nixvm__use() {
+  local runtime="$1" version="$2" reference active_dir active_file temp_file
+
+  nixvm__validate_runtime "$runtime" || return 1
+  if ! nixvm__attribute_for_version "$runtime" "$version" >/dev/null; then
+    nixvm__error "Unsupported $runtime version '$version'. Run 'nixvm list $runtime --available' to see supported versions."
+    return 1
+  fi
+  nixvm__require_macos || return 1
+
+  reference="$(nixvm__data_dir)/installed/$runtime/$version"
+  if [[ ! -L "$reference" || ! -d "$reference/bin" ]]; then
+    nixvm__error "$runtime version '$version' is not installed. Run 'nixvm install $runtime $version' first."
+    return 1
+  fi
+
+  active_dir="$(nixvm__data_dir)/active"
+  if ! mkdir -p "$active_dir"; then
+    nixvm__error "Could not create the active-state directory '$active_dir'."
+    return 1
+  fi
+  active_file="$active_dir/$runtime"
+  if [[ -L "$active_file" || -d "$active_file" ]]; then
+    nixvm__error "Active-state path '$active_file' is not a regular file."
+    return 1
+  fi
+  if ! temp_file="$(mktemp "$active_dir/.${runtime}.XXXXXX")"; then
+    nixvm__error "Could not create a temporary active-state file in '$active_dir'."
+    return 1
+  fi
+  if ! printf '%s\n' "$version" > "$temp_file"; then
+    if ! rm -f "$temp_file"; then
+      nixvm__error "Could not remove the incomplete active-state file '$temp_file'."
+    fi
+    nixvm__error "Could not write the active version for $runtime."
+    return 1
+  fi
+  if ! mv -f "$temp_file" "$active_file"; then
+    if ! rm -f "$temp_file"; then
+      nixvm__error "Could not remove the temporary active-state file '$temp_file'."
+    fi
+    nixvm__error "Could not save the active version for $runtime."
+    return 1
+  fi
+
+  printf 'Using %s %s.\n' "$runtime" "$version"
+}
+
+nixvm__remove() {
+  local runtime="$1" version="$2" reference active_file active_version=''
+  local was_active=0
+
+  nixvm__validate_runtime "$runtime" || return 1
+  if ! nixvm__attribute_for_version "$runtime" "$version" >/dev/null; then
+    nixvm__error "Unsupported $runtime version '$version'. Run 'nixvm list $runtime --available' to see supported versions."
+    return 1
+  fi
+  nixvm__require_macos || return 1
+
+  reference="$(nixvm__data_dir)/installed/$runtime/$version"
+  if [[ ! -L "$reference" ]]; then
+    if [[ -e "$reference" ]]; then
+      nixvm__error "Install path '$reference' is not a nixvm-managed reference."
+    else
+      nixvm__error "$runtime version '$version' is not installed."
+    fi
+    return 1
+  fi
+
+  active_file="$(nixvm__data_dir)/active/$runtime"
+  if [[ -L "$active_file" || -d "$active_file" ]]; then
+    nixvm__error "Active-state path '$active_file' is not a regular file."
+    return 1
+  fi
+  if [[ -e "$active_file" ]]; then
+    if [[ ! -f "$active_file" || ! -r "$active_file" ]]; then
+      nixvm__error "Could not read the active version for $runtime."
+      return 1
+    fi
+    if ! IFS= read -r active_version < "$active_file" && [[ -z "$active_version" ]]; then
+      nixvm__error "Could not read the active version for $runtime."
+      return 1
+    fi
+  fi
+
+  if [[ "$active_version" == "$version" ]]; then
+    if ! rm -f "$active_file"; then
+      nixvm__error "Could not clear the active version for $runtime."
+      return 1
+    fi
+    was_active=1
+  fi
+  if ! rm -f "$reference"; then
+    if [[ "$was_active" -eq 1 ]]; then
+      nixvm__error "Could not remove the install reference; the active selection for $runtime was cleared."
+    else
+      nixvm__error "Could not remove the install reference at '$reference'."
+    fi
+    return 1
+  fi
+
+  if [[ "$was_active" -eq 1 ]]; then
+    printf 'Removed %s %s and cleared its active selection.\n' "$runtime" "$version"
+  else
+    printf 'Removed %s %s.\n' "$runtime" "$version"
+  fi
+}
+
+nixvm__emit_shell_integration() {
+  cat <<'EOF'
+if [[ -z "${_NIXVM_SHELL_INTEGRATION_LOADED:-}" ]]; then
+  typeset -g _NIXVM_SHELL_INTEGRATION_LOADED=1
+  typeset -ga _NIXVM_MANAGED_PATHS
+  _NIXVM_MANAGED_PATHS=()
+  typeset -g _NIXVM_ORIGINAL_JAVA_HOME_SET="${+JAVA_HOME}"
+  typeset -g _NIXVM_ORIGINAL_JAVA_HOME="${JAVA_HOME-}"
+  typeset -g _NIXVM_MANAGED_JAVA_HOME=0
+fi
+
+_nixvm__refresh() {
+  local data_dir="${XDG_DATA_HOME:-$HOME/.local/share}/nixvm"
+  local runtime active_file version package_root bin_path entry managed_path is_managed java_home=''
+  local -a cleaned_path desired_paths
+
+  cleaned_path=()
+  for entry in "${path[@]}"; do
+    is_managed=0
+    for managed_path in "${_NIXVM_MANAGED_PATHS[@]}"; do
+      if [[ "$entry" == "$managed_path" ]]; then
+        is_managed=1
+        break
+      fi
+    done
+    if (( is_managed == 0 )); then
+      cleaned_path+=("$entry")
+    fi
+  done
+
+  _NIXVM_MANAGED_PATHS=()
+  desired_paths=()
+  for runtime in java ruby python; do
+    active_file="$data_dir/active/$runtime"
+    [[ -r "$active_file" ]] || continue
+    version=''
+    IFS= read -r version < "$active_file" || continue
+    case "$version" in
+      ''|*[!0-9.]*|.*|*..*|*.) continue ;;
+    esac
+
+    package_root="$data_dir/installed/$runtime/$version"
+    bin_path="$package_root/bin"
+    [[ -d "$bin_path" ]] || continue
+
+    is_managed=0
+    for entry in "${cleaned_path[@]}"; do
+      if [[ "$entry" == "$bin_path" ]]; then
+        is_managed=1
+        break
+      fi
+    done
+    if (( is_managed == 0 )); then
+      for entry in "${desired_paths[@]}"; do
+        if [[ "$entry" == "$bin_path" ]]; then
+          is_managed=1
+          break
+        fi
+      done
+    fi
+    if (( is_managed == 0 )); then
+      desired_paths+=("$bin_path")
+      _NIXVM_MANAGED_PATHS+=("$bin_path")
+    fi
+    if [[ "$runtime" == java ]]; then
+      java_home="$package_root"
+    fi
+  done
+
+  path=("${desired_paths[@]}" "${cleaned_path[@]}")
+  if [[ -n "$java_home" ]]; then
+    export JAVA_HOME="$java_home"
+    _NIXVM_MANAGED_JAVA_HOME=1
+  elif (( _NIXVM_MANAGED_JAVA_HOME != 0 )); then
+    if [[ "$_NIXVM_ORIGINAL_JAVA_HOME_SET" == 1 ]]; then
+      export JAVA_HOME="$_NIXVM_ORIGINAL_JAVA_HOME"
+    else
+      unset JAVA_HOME
+    fi
+    _NIXVM_MANAGED_JAVA_HOME=0
+  fi
+}
+
+nixvm() {
+  local command_name="${1:-}" command_status refresh_status=0
+  if command nixvm "$@"; then
+    command_status=0
+  else
+    command_status=$?
+  fi
+  case "$command_name" in
+    use|remove)
+      if _nixvm__refresh; then
+        refresh_status=0
+      else
+        refresh_status=$?
+      fi
+      ;;
+  esac
+  if [[ "$command_status" -ne 0 ]]; then
+    return "$command_status"
+  fi
+  if [[ "$refresh_status" -ne 0 ]]; then
+    return "$refresh_status"
+  fi
+  return "$command_status"
+}
+
+_nixvm__refresh
+EOF
+}
+
+nixvm__print_runtime_list() {
+  local runtime="$1" mode="$2" available_attributes="$3" versions
+
+  if [[ "$mode" != available ]]; then
+    versions="$(nixvm__installed_versions "$runtime")"
+    printf 'Installed %s versions: ' "$runtime"
+    nixvm__format_versions "$versions"
+    printf '\n'
+  fi
+  if [[ "$mode" != installed ]]; then
+    versions="$(nixvm__available_versions_for_runtime "$runtime" "$available_attributes")"
+    printf 'Available %s versions: ' "$runtime"
+    nixvm__format_versions "$versions"
+    printf '\n'
+  fi
+}
+
+nixvm__list() {
+  local runtime='' mode='both' argument system='' available_attributes=''
+  local selected_runtime
+
+  for argument in "$@"; do
+    case "$argument" in
+      java|ruby|python)
+        if [[ -n "$runtime" ]]; then
+          nixvm__error 'Only one runtime can be listed at a time.'
+          return 2
+        fi
+        runtime="$argument"
+        ;;
+      --available|--installed)
+        if [[ "$mode" != both ]]; then
+          nixvm__error 'Choose either --available or --installed, not both.'
+          return 2
+        fi
+        mode="${argument#--}"
+        ;;
+      *)
+        nixvm__error "Unexpected list argument '$argument'."
+        return 2
+        ;;
+    esac
+  done
+
+  nixvm__require_macos || return 1
+  if [[ "$mode" != installed ]]; then
+    nixvm__require_nix || return 1
+    system="$(nixvm__nix_system)" || return 1
+    available_attributes="$(nixvm__available_attributes "$system")" || return 1
+  fi
+
+  if [[ -n "$runtime" ]]; then
+    nixvm__print_runtime_list "$runtime" "$mode" "$available_attributes"
+  else
+    for selected_runtime in java ruby python; do
+      nixvm__print_runtime_list "$selected_runtime" "$mode" "$available_attributes"
+    done
+  fi
+}
+
+nixvm__main() {
+  local command_name="${1:-}"
+  case "$command_name" in
+    -h|--help|help)
+      nixvm__usage
+      ;;
+    --shell-integration)
+      if [[ "$#" -ne 1 ]]; then
+        nixvm__error 'Usage: nixvm --shell-integration'
+        return 2
+      fi
+      nixvm__emit_shell_integration
+      ;;
+    install)
+      if [[ "$#" -ne 3 ]]; then
+        nixvm__error 'Usage: nixvm install <runtime> <version>'
+        return 2
+      fi
+      nixvm__install "$2" "$3"
+      ;;
+    use)
+      if [[ "$#" -ne 3 ]]; then
+        nixvm__error 'Usage: nixvm use <runtime> <version>'
+        return 2
+      fi
+      nixvm__use "$2" "$3"
+      ;;
+    remove)
+      if [[ "$#" -ne 3 ]]; then
+        nixvm__error 'Usage: nixvm remove <runtime> <version>'
+        return 2
+      fi
+      nixvm__remove "$2" "$3"
+      ;;
+    list)
+      shift
+      nixvm__list "$@"
+      ;;
+    '')
+      nixvm__usage >&2
+      return 2
+      ;;
+    *)
+      nixvm__error "Unknown command '$command_name'."
+      nixvm__usage >&2
+      return 2
+      ;;
+  esac
+}
+
+nixvm__main "$@"
