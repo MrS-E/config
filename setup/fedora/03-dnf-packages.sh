@@ -11,6 +11,9 @@ source "$SCRIPT_DIR/common.bash"
 
 DNF_FILE="$SCRIPT_DIR/dnf.txt"
 
+# Refresh this manifest with explicitly installed packages only (excluding dependencies):
+# dnf repoquery --userinstalled --qf '%{name}\n' | sort > "$DNF_FILE"
+
 presteps() {
   [[ -f /etc/fedora-release ]] || die "this step requires Fedora"
   command_exists dnf || die "dnf not found"
