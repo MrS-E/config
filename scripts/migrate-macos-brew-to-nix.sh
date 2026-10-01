@@ -9,6 +9,7 @@ BREW_BIN=""
 CURL_BIN=""
 BREW_PREFIX=""
 MIGRATION_FORMULAE=""
+MIGRATION_REQUESTED_FORMULAE=""
 MIGRATION_CASKS=""
 MIGRATION_BACKUP_FILE=""
 
@@ -195,6 +196,33 @@ manifest_entry_count() {
   awk -v directive="$directive" '$1 == directive { count += 1 } END { print count + 0 }' "$manifest"
 }
 
+manifest_missing_entries() {
+  local directive="$1"
+  local entries="$2"
+  local entries_delimited="${entries//$'\n'/|}"
+  local manifest="$3"
+
+  awk -v directive="$directive" -v entries="$entries_delimited" '
+    BEGIN {
+      entry_count = split(entries, entry_names, /[|]/)
+      for (i = 1; i <= entry_count; i += 1) {
+        if (entry_names[i] != "") wanted[entry_names[i]] = 1
+      }
+    }
+    $1 == directive {
+      entry = $2
+      sub(/^"/, "", entry)
+      sub(/".*/, "", entry)
+      found[entry] = 1
+    }
+    END {
+      for (entry in wanted) {
+        if (!(entry in found)) print entry
+      }
+    }
+  ' "$manifest"
+}
+
 unique_backup_file() {
   local backup_dir="$1"
   local timestamp candidate suffix
@@ -229,15 +257,18 @@ check_backup_location() {
 capture_inventory() {
   MIGRATION_FORMULAE="$("$BREW_BIN" list --formula --full-name)" \
     || migration_die "could not list installed Homebrew formulae"
+  MIGRATION_REQUESTED_FORMULAE="$("$BREW_BIN" list --formula --installed-on-request --full-name)" \
+    || migration_die "could not list Homebrew formulae installed on request"
   MIGRATION_CASKS="$("$BREW_BIN" list --cask --full-name)" \
     || migration_die "could not list installed Homebrew casks"
 }
 
 create_backup() {
   local backup_dir="$1"
-  local formula_count="$2"
-  local cask_count="$3"
-  local manifest_formula_count manifest_cask_count
+  local requested_formulae="$2"
+  local installed_casks="$3"
+  local requested_formula_count cask_count
+  local manifest_formula_count manifest_cask_count missing_formulae missing_casks
 
   MIGRATION_BACKUP_FILE="$(unique_backup_file "$backup_dir")"
   migration_log "Writing installed Homebrew inventory to $MIGRATION_BACKUP_FILE..."
@@ -249,10 +280,15 @@ create_backup() {
 
   manifest_formula_count="$(manifest_entry_count brew "$MIGRATION_BACKUP_FILE")"
   manifest_cask_count="$(manifest_entry_count cask "$MIGRATION_BACKUP_FILE")"
-  [[ "$manifest_formula_count" == "$formula_count" ]] \
-    || migration_die "backup contains $manifest_formula_count formula entries but Homebrew reports $formula_count installed; no packages were removed"
-  [[ "$manifest_cask_count" == "$cask_count" ]] \
-    || migration_die "backup contains $manifest_cask_count cask entries but Homebrew reports $cask_count installed; no packages were removed"
+  missing_formulae="$(manifest_missing_entries brew "$requested_formulae" "$MIGRATION_BACKUP_FILE")"
+  [[ -z "$missing_formulae" ]] \
+    || migration_die "backup is missing installed-on-request formulae: ${missing_formulae//$'\n'/, }; no packages were removed"
+  missing_casks="$(manifest_missing_entries cask "$installed_casks" "$MIGRATION_BACKUP_FILE")"
+  [[ -z "$missing_casks" ]] \
+    || migration_die "backup is missing installed casks: ${missing_casks//$'\n'/, }; no packages were removed"
+
+  requested_formula_count="$(line_count "$requested_formulae")"
+  cask_count="$(line_count "$installed_casks")"
 
   if [[ ! -s "$MIGRATION_BACKUP_FILE" ]]; then
     printf '%s\n' '# No installed Homebrew formulae or casks were present at migration time.' \
@@ -260,7 +296,8 @@ create_backup() {
   fi
 
   migration_log "Backup created and verified; it will be retained at $MIGRATION_BACKUP_FILE."
-  migration_log "Verified $formula_count formulae and $cask_count casks."
+  migration_log "Backup contains $manifest_formula_count formula entries and $manifest_cask_count cask entries."
+  migration_log "Verified all $requested_formula_count formulae installed on request and all $cask_count casks."
 }
 
 uninstall_formulae() {
@@ -320,7 +357,6 @@ migration_report_failure() {
 main() {
   local assume_yes=0
   local backup_dir="${HOME:-}"
-  local formula_count cask_count
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -354,9 +390,7 @@ main() {
   umask 077
   backup_dir="$(check_backup_location "$backup_dir")"
   capture_inventory
-  formula_count="$(line_count "$MIGRATION_FORMULAE")"
-  cask_count="$(line_count "$MIGRATION_CASKS")"
-  create_backup "$backup_dir" "$formula_count" "$cask_count"
+  create_backup "$backup_dir" "$MIGRATION_REQUESTED_FORMULAE" "$MIGRATION_CASKS"
 
   uninstall_formulae
   uninstall_casks
