@@ -2,7 +2,6 @@
 name: docs-writer
 description: "Documentation engineer. Writes and updates README files, API docs, KDocs/docstrings, CHANGELOG entries and user-facing documentation to match a code change. Use after a change lands to keep documentation in sync with the code."
 tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit", "WebSearch"]
-model: "custom:gml"
 reasoningLevel: "medium"
 maxTurns: 40
 ---

@@ -2,7 +2,6 @@
 name: reviewer
 description: "Senior code reviewer. Reviews a change, a diff, or a file for correctness, readability, maintainability and adherence to project conventions, then reports concrete findings ordered by severity. Read-only: never edits files. Use when you need a critical second opinion on code that already exists."
 tools: ["Read", "Grep", "Glob", "Bash", "WebSearch"]
-model: "custom:gml"
 reasoningLevel: "high"
 maxTurns: 40
 ---

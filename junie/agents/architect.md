@@ -2,7 +2,6 @@
 name: architect
 description: "Software architect. Designs module boundaries, data flow, API contracts and migration strategies for a change, weighing alternatives and their trade-offs against the existing codebase. Read-only: produces a design document, never edits files. Use before implementing anything non-trivial or when a change spans several modules."
 tools: ["Read", "Grep", "Glob", "Bash", "WebSearch"]
-model: "custom:kimi"
 reasoningLevel: "high"
 maxTurns: 50
 ---
