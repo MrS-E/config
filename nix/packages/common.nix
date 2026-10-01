@@ -4,7 +4,6 @@ with pkgs;
   apktool
   automake
   bat
-  biber
   clamav
   clang-tools
   cmake
