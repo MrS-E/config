@@ -268,6 +268,29 @@ replacements and manual/vendor exceptions.
 Since `brew bundle` is retired, clean setup no longer installs VSCodium or its
 extensions; they remain outside this migration.
 
+For a Mac that still has Homebrew installed, the opt-in one-shot migration is
+`scripts/migrate-macos-brew-to-nix.sh`. It writes a unique, persistent
+`Brewfile.backup-*` under `~/` by default (or in a directory selected with
+`--backup-dir`), verifies the installed formula/cask counts, removes every
+formula and cask reported as installed by Homebrew, runs Homebrew's official
+uninstaller, and then runs the normal `setup.sh` flow, including Nix bootstrap
+and nix-darwin activation. It is not part of automatic setup. The script asks
+you to type `REMOVE HOMEBREW`; use `--yes` only when explicitly authorizing a
+non-interactive run. If `~/nix-darwin-config/flake.nix` exists, set
+`NIX_DARWIN_CONFIG_DIR` explicitly so the migration knows which flake to use.
+For example, `NIX_DARWIN_CONFIG_DIR="$PWD/nix"` selects this repository's
+Apple Silicon configuration. Run it from the repository checkout with
+`./scripts/migrate-macos-brew-to-nix.sh`.
+
+The backup is a package inventory, not a copy of applications, service state,
+settings, or application data. In particular, an installed VSCodium cask is
+removed; its settings and extensions are not backed up or managed by Nix. The
+migration script never overwrites or deletes the backup; keep it. If you later
+choose to restore Homebrew, reinstall Homebrew and use
+`brew bundle --file /path/to/Brewfile.backup-<timestamp>` to attempt to
+reinstall the recorded bundle. The backup directory must be outside the
+Homebrew prefix so the official uninstaller cannot remove it.
+
 `setup/macos/10-nix-darwin.sh` activates the repository flake by default. Set
 `NIX_DARWIN_CONFIG_DIR` explicitly to use an external flake, and optionally set
 `NIX_DARWIN_HOSTNAME` to choose its `darwinConfigurations` output. The step

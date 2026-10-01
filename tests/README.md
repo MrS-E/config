@@ -22,6 +22,7 @@ tests/
 │   ├── assertions-fedora.bats
 │   ├── assertions-manjaro.bats
 │   ├── assertions-fedora-atomic.bats
+│   ├── migrate-brew-to-nix.bats       # mocked one-shot Homebrew migration safeguards
 │   └── assertions-macos.bats
 └── baselines/                         # recorded pre-migration results (see README.md)
 ```
@@ -51,8 +52,9 @@ hidden) by the baseline:
 
 - **macOS** cannot run natively in Podman. `test-macos` uses a Linux container
   with mocked `uname` (returns `Darwin`), `open`, `ssh-agent`, and `ssh-add`;
-  individual Nix tests provide their own mock. The container has no `brew`
-  command and does not perform real nix-darwin activation.
+  individual Nix and Homebrew migration tests provide their own mocks. The
+  container has no real `brew` command and does not perform real nix-darwin
+  activation or Homebrew uninstallation.
 - **Fedora Atomic** has no practical rpm-ostree-capable Podman image. The
   container ships a documented mock `rpm-ostree` and mock `toolbox`; Flatpak
   tests remain real where feasible.
