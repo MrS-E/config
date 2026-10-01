@@ -543,9 +543,9 @@ if (( $+commands[brew] )); then
 
         dump="$(mktemp -t brewfile-dump)"
         leaves="$(mktemp -t brewfile-leaves)"
-        brew leaves --installed-on-request > "$leaves"
+        command brew leaves --installed-on-request > "$leaves"
 
-        brew bundle dump --file="$dump" --force
+        command brew bundle dump --file="$dump" --force
 
         awk '
         NR == FNR {
