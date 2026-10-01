@@ -140,7 +140,7 @@ alias fzfile='rg --no-heading --line-number "" | fzf'
 
 # SSH
 alias sshproxy='ssh -D 8080 -C -N'
-alias sshdisconnect='rm -f /tmp/ssh*'
+alias sshdisconnect='rm -rf /tmp/ssh*'
 
 # Git
 alias branch='git branch'
@@ -332,7 +332,7 @@ export PATH="$PATH:/usr/local/bin"
 # Jetbrains Junie
 ##########
 
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$PATH:$HOME/.local/bin"
 
 ##########
 # NVM

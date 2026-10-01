@@ -477,6 +477,20 @@ Two PKCS#11 modules are used depending on the host:
 
 Provider paths are unified across macOS and Linux via the PKCS#11 git filter (see above).
 
+#### Fedora Ed25519 YubiKey limitation
+
+Ed25519 keys stored on a YubiKey are currently **not supported by the Fedora
+setup**. Fedora's system `ssh` client cannot use `libykcs11.so.2` for these
+keys. A separately fetched/user-local OpenSSH client was tested as a workaround,
+but caused severe problems, including hangs and major slowdowns while
+establishing SSH connections, so it must not be used as the default client.
+
+The last state in which Ed25519 YubiKey keys were usable was commit
+`70af199e` (`fix ssh yubikey import`), but that state still had the SSH hangs
+and slowdowns described above. Fedora currently supports the OpenSC-backed
+YubiKey hosts, but not Ed25519 YubiKey authentication through the standard
+setup.
+
 ## Vim Configuration
 
 ### vimrc

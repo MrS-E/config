@@ -1,7 +1,7 @@
 Host minix tailscale-minix macminim4 tailscale-macminim4 storage debianmini system
     Port 22
     PKCS11Provider @YKCS11@
-    IdentityFile ~/.ssh/yubikey-9d.pub
+    IdentityFile ~/.ssh/yubikey-9c.pub
     IdentitiesOnly yes
 
 Host macminim4 tailscale-macminim4 storage
