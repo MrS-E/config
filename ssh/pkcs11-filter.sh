@@ -45,8 +45,8 @@ case "$cmd" in
       # Fallback if providers file not yet checked out (fresh clone race).
       case "$(uname -s)" in
         Darwin)
-          YKCS11="/opt/homebrew/lib/libykcs11.dylib"
-          OPENSC="/opt/homebrew/lib/opensc-pkcs11.so"
+          YKCS11="/Users/simeon.stix/.nix-profile/lib/libykcs11.dylib"
+          OPENSC="/Users/simeon.stix/.nix-profile/lib/opensc-pkcs11.so"
           ;;
         *)
           cat

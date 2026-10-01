@@ -11,7 +11,7 @@ tests/
 │   ├── Containerfile.fedora           # real Fedora image + bats
 │   ├── Containerfile.manjaro          # real Manjaro image + bats
 │   ├── Containerfile.fedora-atomic    # Fedora + mocked rpm-ostree/toolbox (fallback)
-│   └── Containerfile.macos-mock       # Fedora + mocked uname/brew/ssh (macOS mock)
+│   └── Containerfile.macos-mock       # Fedora + mocked macOS identity/desktop/SSH commands
 ├── bats/
 │   ├── helpers/
 │   │   ├── common.bash                # run_setup, platform_script, env
@@ -50,9 +50,9 @@ documented limitations of the container environment and are recorded (not
 hidden) by the baseline:
 
 - **macOS** cannot run natively in Podman. `test-macos` uses a Linux container
-  with mocked `uname` (returns `Darwin`), `brew`, `open`, `ssh-agent`, and
-  `ssh-add`.
-  This validates dispatch paths and contract behavior, not real Homebrew.
+  with mocked `uname` (returns `Darwin`), `open`, `ssh-agent`, and `ssh-add`;
+  individual Nix tests provide their own mock. The container has no `brew`
+  command and does not perform real nix-darwin activation.
 - **Fedora Atomic** has no practical rpm-ostree-capable Podman image. The
   container ships a documented mock `rpm-ostree` and mock `toolbox`; Flatpak
   tests remain real where feasible.
@@ -60,7 +60,7 @@ hidden) by the baseline:
   ClamAV are limited inside unprivileged containers and may fail in the
   baseline. These are annotated, not blocking.
 - **External network installers** (JetBrains Toolbox, Proton Bridge, Bun,
-  Junie, Joplin, Nix, nix-darwin, Dracula vim theme) are slow/flaky and may fail; the
+  Junie, Joplin, WaveForms, Dracula vim theme) are slow/flaky and may fail; the
   baseline records their pass/fail/skip status.
 
 The baseline is intentionally **non-blocking**: current scripts are not yet

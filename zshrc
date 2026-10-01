@@ -35,6 +35,9 @@ case "$(uname -s)" in
     if [[ -d /run/current-system/sw/bin ]] && [[ ":$PATH:" != *":/run/current-system/sw/bin:"* ]]; then
       export PATH="/run/current-system/sw/bin:$PATH"
     fi
+    if [[ -d "$HOME/.nix-profile/bin" ]] && [[ ":$PATH:" != *":$HOME/.nix-profile/bin:"* ]]; then
+      export PATH="$HOME/.nix-profile/bin:$PATH"
+    fi
     ;;
   Linux)
     export OS="linux"
@@ -216,6 +219,13 @@ alias hosts='vim $HOME/.ssh/known_hosts'
 ##########
 autoload -Uz compinit
 zmodload zsh/complist
+
+if [[ -d /usr/share/zsh/site-functions ]]; then
+  FPATH="/usr/share/zsh/site-functions:$FPATH"
+fi
+if [[ -d "$HOME/.nix-profile/share/zsh/site-functions" ]]; then
+  FPATH="$HOME/.nix-profile/share/zsh/site-functions:$FPATH"
+fi
 compinit
 
 # bash completions into zsh
@@ -250,12 +260,6 @@ if [[ -d /usr/share/bash-completion/completions ]]; then
     fi
     source "$cfile"
   done
-fi
-
-if [[ -d /usr/share/zsh/site-functions ]]; then
-  FPATH="/usr/share/zsh/site-functions:$FPATH"
-elif command -v brew >/dev/null 2>&1; then
-  FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
 fi
 
 ##########
@@ -307,25 +311,8 @@ else
 fi
 
 ##########
-# Homebrew
-##########
-if ! command -v brew >/dev/null 2>&1; then
-  [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)" 
-  [[ -x /usr/local/bin/brew ]] && eval "$(/usr/local/bin/brew shellenv)"
-fi
-[[ -x /opt/homebrew/bin/brew ]] && export PATH="/opt/homebrew/sbin:/opt/homebrew/bin:$PATH"
-# TODO add brew paths for intel mac
-
-##########
 # FZF
 ##########
-
-if (( $+commands[brew] )); then
-  BREW_PREFIX="$(brew --prefix 2>/dev/null)"
-  if [[ -n "$BREW_PREFIX" && -d "$BREW_PREFIX/opt/fzf/bin" && ":$PATH:" != *":$BREW_PREFIX/opt/fzf/bin:"* ]]; then
-    export PATH="$BREW_PREFIX/opt/fzf/bin:$PATH"
-  fi
-fi
 
 if (( $+commands[fzf] )); then
   source <(fzf --zsh)
@@ -361,13 +348,6 @@ if [[ -s "/home/sstix/.bun/_bun" ]]; then
 fi
 
 ##########
-# GNU grep (Homebrew)
-##########
-if command -v brew >/dev/null 2>&1; then
-  export PATH="$(brew --prefix)/opt/grep/libexec/gnubin:$PATH"
-fi
-
-##########
 # Tailscale
 ##########
 if command -v tailscale >/dev/null 2>&1; then
@@ -388,19 +368,21 @@ fi
 # Prefer local clones if present
 if [[ -f "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
   source "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh"
-elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
-  source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+elif [[ -f "$HOME/.nix-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+  source "$HOME/.nix-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 fi
 
 if [[ -f "$HOME/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
   source "$HOME/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
+elif [[ -f "$HOME/.nix-profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
+  source "$HOME/.nix-profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
 fi
 
 # Syntax highlighting should be last
 if [[ -f "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
   source "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-  source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+elif [[ -f "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+  source "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
 
 ##########
@@ -480,33 +462,6 @@ git() {
       ;;
   esac
 }
-
-# Homebrew
-if (( $+commands[brew] )); then
-  brew() {
-    case "$1" in
-      fullupgrade)
-        command brew update && command brew upgrade && command brew cleanup -s
-        ;;
-      file)
-        shift
-        local brewfile="${1:-Brewfile}"
-        local backup="${brewfile}.old"
-        if [[ -f "$brewfile" ]]; then
-          if [[ -f "$backup" ]]; then
-            mv "$brewfile" "${backup}.$(date +%Y%m%d%H%M%S)"
-          else
-            mv "$brewfile" "$backup"
-          fi
-        fi
-        command brew bundle dump --file="$brewfile" --describe --force
-        ;;
-      *)
-        command brew "$@"
-        ;;
-    esac
-  }
-fi 
 
 # Custom Utility
 local CUSTOM_SCRIPTS="$CONFIG_DIR/scripts"
