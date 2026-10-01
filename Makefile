@@ -33,7 +33,7 @@ BATS_COMMON  := tests/bats/smoke.bats tests/bats/idempotency.bats tests/bats/git
 BATS_FEDORA  := $(BATS_COMMON) tests/bats/assertions-fedora.bats tests/bats/ssh-pkcs11-fedora.bats
 BATS_MANJARO := $(BATS_COMMON) tests/bats/assertions-manjaro.bats
 BATS_ATOMIC  := $(BATS_COMMON) tests/bats/assertions-fedora-atomic.bats
-BATS_MACOS   := $(BATS_COMMON) tests/bats/assertions-macos.bats
+BATS_MACOS   := $(BATS_COMMON) tests/bats/assertions-macos.bats tests/bats/nixvm.bats
 
 OS_LIST := fedora manjaro fedora-atomic macos
 

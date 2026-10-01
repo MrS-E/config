@@ -290,10 +290,12 @@ daemons.
 requires Nix with the `nix-command` and `flakes` features enabled; the existing
 `setup/macos/09-nix.sh` step installs Nix and enables those features. `nixvm`
 does not bootstrap Nix or modify the nix-darwin configuration. It uses the
-configured `nixpkgs` flake and supports only package attributes explicitly
-mapped by the tool, so arbitrary upstream patch releases are not selectable.
-Run `nixvm list --available` to see which of those attributes are available for
-the current Mac and Nixpkgs revision.
+configured `nixpkgs` flake to discover versioned JDK (`jdk21`), Ruby
+(`ruby_3_3`), and Python (`python312`) package attributes instead of maintaining
+a hardcoded version list. Availability follows the current Mac architecture
+and Nixpkgs revision; arbitrary upstream patch releases without a corresponding
+Nixpkgs attribute are not selectable. Run `nixvm list --available` to see the
+current choices.
 
 ```bash
 nixvm list                         # installed and available versions

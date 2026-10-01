@@ -6,6 +6,13 @@ nixvm__error() {
   printf 'nixvm: %s\n' "$*" >&2
 }
 
+nixvm__warn_shell_not_integrated() {
+  if [[ "${_NIXVM_SHELL_WRAPPER_ACTIVE:-}" != 1 ]]; then
+    nixvm__error "The current shell was not updated because the Zsh integration is not loaded. Run 'eval \"\$(nixvm --shell-integration)\"' in Zsh or start a new Zsh session."
+  fi
+  return 0
+}
+
 nixvm__usage() {
   cat <<'EOF'
 nixvm - Nix-backed Java, Ruby, and Python version manager
@@ -37,38 +44,25 @@ nixvm__validate_runtime() {
   esac
 }
 
-nixvm__supported_versions() {
-  case "$1" in
-    java) printf '%s\n' 8 11 17 21 23 24 25 ;;
-    ruby) printf '%s\n' 3.0 3.1 3.2 3.3 3.4 3.5 ;;
-    python) printf '%s\n' 3.9 3.10 3.11 3.12 3.13 3.14 ;;
+nixvm__validate_version_syntax() {
+  local runtime="$1" version="$2"
+  case "$runtime" in
+    java) [[ "$version" =~ ^[0-9]+$ ]] ;;
+    ruby|python) [[ "$version" =~ ^[0-9]+\.[0-9]+$ ]] ;;
     *) return 1 ;;
   esac
 }
 
 nixvm__attribute_for_version() {
-  case "$1:$2" in
-    java:8) printf '%s\n' jdk8 ;;
-    java:11) printf '%s\n' jdk11 ;;
-    java:17) printf '%s\n' jdk17 ;;
-    java:21) printf '%s\n' jdk21 ;;
-    java:23) printf '%s\n' jdk23 ;;
-    java:24) printf '%s\n' jdk24 ;;
-    java:25) printf '%s\n' jdk25 ;;
-    ruby:3.0) printf '%s\n' ruby_3_0 ;;
-    ruby:3.1) printf '%s\n' ruby_3_1 ;;
-    ruby:3.2) printf '%s\n' ruby_3_2 ;;
-    ruby:3.3) printf '%s\n' ruby_3_3 ;;
-    ruby:3.4) printf '%s\n' ruby_3_4 ;;
-    ruby:3.5) printf '%s\n' ruby_3_5 ;;
-    python:3.9) printf '%s\n' python39 ;;
-    python:3.10) printf '%s\n' python310 ;;
-    python:3.11) printf '%s\n' python311 ;;
-    python:3.12) printf '%s\n' python312 ;;
-    python:3.13) printf '%s\n' python313 ;;
-    python:3.14) printf '%s\n' python314 ;;
-    *) return 1 ;;
-  esac
+  local runtime="$1" version="$2" catalog="$3"
+  local entry_runtime='' entry_version='' attribute=''
+  while IFS='|' read -r entry_runtime entry_version attribute; do
+    if [[ "$entry_runtime" == "$runtime" && "$entry_version" == "$version" && -n "$attribute" ]]; then
+      printf '%s\n' "$attribute"
+      return 0
+    fi
+  done <<< "$catalog"
+  return 1
 }
 
 nixvm__require_macos() {
@@ -90,6 +84,10 @@ nixvm__require_nix() {
   fi
 }
 
+nixvm__run_nix() {
+  nix --extra-experimental-features "nix-command flakes" "$@"
+}
+
 nixvm__nix_system() {
   local arch
   if ! arch="$(uname -m 2>/dev/null)"; then
@@ -106,23 +104,32 @@ nixvm__nix_system() {
   esac
 }
 
-nixvm__candidate_attribute_list() {
-  local runtime version attribute result='['
-  for runtime in java ruby python; do
-    for version in $(nixvm__supported_versions "$runtime"); do
-      attribute="$(nixvm__attribute_for_version "$runtime" "$version")"
-      result="$result \"$attribute\""
-    done
-  done
-  printf '%s ]\n' "$result"
-}
+nixvm__available_catalog() {
+  local system="$1" apply_expr output
+  apply_expr="pkgs: let
+    system = \"${system}\";
+    names = builtins.attrNames pkgs;
+    javaPattern = \"^jdk([0-9]+)$\";
+    rubyPattern = \"^ruby_([0-9]+)_([0-9]+)$\";
+    pythonPattern = \"^python([0-9])([0-9]+)$\";
+    isAvailable = name:
+      let availability = builtins.tryEval (
+        let package = builtins.getAttr name pkgs; meta = package.meta or {};
+        in !(meta.broken or false) && builtins.elem system (meta.platforms or [ system ])
+      );
+      in availability.success && availability.value;
+    matchingNames = pattern: builtins.filter (name: builtins.match pattern name != null && isAvailable name) names;
+    recordsFor = runtime: versionFor: packageNames: builtins.map (name: runtime + \"|\" + versionFor name + \"|\" + name) packageNames;
+    javaNames = matchingNames javaPattern;
+    rubyNames = matchingNames rubyPattern;
+    pythonNames = matchingNames pythonPattern;
+  in builtins.concatStringsSep \"\\n\" (
+    recordsFor \"java\" (name: builtins.head (builtins.match javaPattern name)) javaNames
+    ++ recordsFor \"ruby\" (name: builtins.concatStringsSep \".\" (builtins.match rubyPattern name)) rubyNames
+    ++ recordsFor \"python\" (name: builtins.concatStringsSep \".\" (builtins.match pythonPattern name)) pythonNames
+  )"
 
-nixvm__available_attributes() {
-  local system="$1" candidate_attributes apply_expr output
-  candidate_attributes="$(nixvm__candidate_attribute_list)"
-  apply_expr="pkgs: let candidates = ${candidate_attributes}; system = \"${system}\"; isAvailable = name: let package = builtins.getAttr name pkgs; meta = package.meta or {}; in !(meta.broken or false) && builtins.elem system (meta.platforms or [ system ]); in builtins.concatStringsSep \"\\n\" (builtins.filter (name: builtins.hasAttr name pkgs && isAvailable name) candidates)"
-
-  if output="$(nix eval --raw --apply "$apply_expr" "nixpkgs#legacyPackages.${system}")"; then
+  if output="$(nixvm__run_nix eval --raw --apply "$apply_expr" "nixpkgs#legacyPackages.${system}")"; then
     printf '%s\n' "$output"
   else
     nixvm__error "Could not query the configured Nixpkgs flake. Ensure nix-command and flakes are enabled and the nixpkgs flake is reachable."
@@ -130,23 +137,21 @@ nixvm__available_attributes() {
   fi
 }
 
-nixvm__contains_attribute() {
-  local attributes="$1" attribute="$2"
-  case $'\n'"$attributes"$'\n' in
-    *$'\n'"$attribute"$'\n'*) return 0 ;;
-    *) return 1 ;;
-  esac
-}
-
 nixvm__available_versions_for_runtime() {
-  local runtime="$1" attributes="$2" version attribute result='' separator=''
-  for version in $(nixvm__supported_versions "$runtime"); do
-    attribute="$(nixvm__attribute_for_version "$runtime" "$version")"
-    if nixvm__contains_attribute "$attributes" "$attribute"; then
-      result="${result}${separator}${version}"
-      separator=' '
+  local runtime="$1" catalog="$2" entry_runtime='' version='' attribute=''
+  local versions='' sorted_versions result='' separator=''
+  while IFS='|' read -r entry_runtime version attribute; do
+    if [[ "$entry_runtime" == "$runtime" && -n "$version" ]]; then
+      versions="${versions}${version}"$'\n'
     fi
-  done
+  done <<< "$catalog"
+
+  sorted_versions="$(printf '%s' "$versions" | LC_ALL=C sort -t . -k1,1n -k2,2n)"
+  while IFS= read -r version; do
+    [[ -n "$version" ]] || continue
+    result="${result}${separator}${version}"
+    separator=' '
+  done <<< "$sorted_versions"
   printf '%s\n' "$result"
 }
 
@@ -174,21 +179,20 @@ nixvm__format_versions() {
 }
 
 nixvm__install() {
-  local runtime="$1" version="$2" attribute system available_attributes
+  local runtime="$1" version="$2" attribute system catalog
   local install_dir reference
 
   nixvm__validate_runtime "$runtime" || return 1
-  if ! attribute="$(nixvm__attribute_for_version "$runtime" "$version")"; then
+  if ! nixvm__validate_version_syntax "$runtime" "$version"; then
     nixvm__error "Unsupported $runtime version '$version'. Run 'nixvm list $runtime --available' to see supported versions."
     return 1
   fi
   nixvm__require_macos || return 1
   nixvm__require_nix || return 1
   system="$(nixvm__nix_system)" || return 1
-  available_attributes="$(nixvm__available_attributes "$system")" || return 1
-
-  if ! nixvm__contains_attribute "$available_attributes" "$attribute"; then
-    nixvm__error "$runtime version '$version' ($attribute) is not available for $system in the configured Nixpkgs flake."
+  catalog="$(nixvm__available_catalog "$system")" || return 1
+  if ! attribute="$(nixvm__attribute_for_version "$runtime" "$version" "$catalog")"; then
+    nixvm__error "Unsupported $runtime version '$version'. Run 'nixvm list $runtime --available' to see supported versions."
     return 1
   fi
 
@@ -210,7 +214,7 @@ nixvm__install() {
     nixvm__error "Could not remove the broken install reference at '$reference'."
     return 1
   fi
-  if ! nix build --out-link "$reference" "nixpkgs#$attribute"; then
+  if ! nixvm__run_nix build --out-link "$reference" "nixpkgs#$attribute"; then
     if [[ -L "$reference" ]] && ! rm -f "$reference"; then
       nixvm__error "Could not remove the failed install reference at '$reference'."
     fi
@@ -229,7 +233,7 @@ nixvm__use() {
   local runtime="$1" version="$2" reference active_dir active_file temp_file
 
   nixvm__validate_runtime "$runtime" || return 1
-  if ! nixvm__attribute_for_version "$runtime" "$version" >/dev/null; then
+  if ! nixvm__validate_version_syntax "$runtime" "$version"; then
     nixvm__error "Unsupported $runtime version '$version'. Run 'nixvm list $runtime --available' to see supported versions."
     return 1
   fi
@@ -271,6 +275,7 @@ nixvm__use() {
   fi
 
   printf 'Using %s %s.\n' "$runtime" "$version"
+  nixvm__warn_shell_not_integrated
 }
 
 nixvm__remove() {
@@ -278,7 +283,7 @@ nixvm__remove() {
   local was_active=0
 
   nixvm__validate_runtime "$runtime" || return 1
-  if ! nixvm__attribute_for_version "$runtime" "$version" >/dev/null; then
+  if ! nixvm__validate_version_syntax "$runtime" "$version"; then
     nixvm__error "Unsupported $runtime version '$version'. Run 'nixvm list $runtime --available' to see supported versions."
     return 1
   fi
@@ -328,6 +333,7 @@ nixvm__remove() {
 
   if [[ "$was_active" -eq 1 ]]; then
     printf 'Removed %s %s and cleared its active selection.\n' "$runtime" "$version"
+    nixvm__warn_shell_not_integrated
   else
     printf 'Removed %s %s.\n' "$runtime" "$version"
   fi
@@ -418,6 +424,8 @@ _nixvm__refresh() {
 
 nixvm() {
   local command_name="${1:-}" command_status refresh_status=0
+  local _NIXVM_SHELL_WRAPPER_ACTIVE=1
+  export _NIXVM_SHELL_WRAPPER_ACTIVE
   if command nixvm "$@"; then
     command_status=0
   else
@@ -446,7 +454,7 @@ EOF
 }
 
 nixvm__print_runtime_list() {
-  local runtime="$1" mode="$2" available_attributes="$3" versions
+  local runtime="$1" mode="$2" available_catalog="$3" versions
 
   if [[ "$mode" != available ]]; then
     versions="$(nixvm__installed_versions "$runtime")"
@@ -455,7 +463,7 @@ nixvm__print_runtime_list() {
     printf '\n'
   fi
   if [[ "$mode" != installed ]]; then
-    versions="$(nixvm__available_versions_for_runtime "$runtime" "$available_attributes")"
+    versions="$(nixvm__available_versions_for_runtime "$runtime" "$available_catalog")"
     printf 'Available %s versions: ' "$runtime"
     nixvm__format_versions "$versions"
     printf '\n'
@@ -463,7 +471,7 @@ nixvm__print_runtime_list() {
 }
 
 nixvm__list() {
-  local runtime='' mode='both' argument system='' available_attributes=''
+  local runtime='' mode='both' argument system='' available_catalog=''
   local selected_runtime
 
   for argument in "$@"; do
@@ -493,14 +501,14 @@ nixvm__list() {
   if [[ "$mode" != installed ]]; then
     nixvm__require_nix || return 1
     system="$(nixvm__nix_system)" || return 1
-    available_attributes="$(nixvm__available_attributes "$system")" || return 1
+    available_catalog="$(nixvm__available_catalog "$system")" || return 1
   fi
 
   if [[ -n "$runtime" ]]; then
-    nixvm__print_runtime_list "$runtime" "$mode" "$available_attributes"
+    nixvm__print_runtime_list "$runtime" "$mode" "$available_catalog"
   else
     for selected_runtime in java ruby python; do
-      nixvm__print_runtime_list "$selected_runtime" "$mode" "$available_attributes"
+      nixvm__print_runtime_list "$selected_runtime" "$mode" "$available_catalog"
     done
   fi
 }

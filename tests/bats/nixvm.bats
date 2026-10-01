@@ -9,10 +9,9 @@ setup() {
   NIXVM_TEST_ROOT="$BATS_TEST_TMPDIR/nixvm"
   NIXVM_TEST_BIN="$NIXVM_TEST_ROOT/bin"
   NIXVM_NO_NIX_BIN="$NIXVM_TEST_ROOT/bin-without-nix"
-  mkdir -p "$NIXVM_TEST_BIN" "$NIXVM_NO_NIX_BIN" "$NIXVM_TEST_ROOT/home" \
+  mkdir -p "$NIXVM_TEST_BIN" "$NIXVM_NO_NIX_BIN" \
     "$NIXVM_TEST_ROOT/data" "$NIXVM_TEST_ROOT/fake-store"
 
-  export HOME="$NIXVM_TEST_ROOT/home"
   export XDG_DATA_HOME="$NIXVM_TEST_ROOT/data"
   export NIXVM_SCRIPT="$REPO_DIR/scripts/nixvm"
   export NIXVM_NIX_OUTPUTS="$NIXVM_TEST_ROOT/fake-store"
@@ -34,13 +33,50 @@ EOF
 set -eu
 printf '%s\n' "$*" >> "$NIXVM_NIX_LOG"
 
-case "${1:-}" in
+nix_command=''
+experimental_features=''
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    --extra-experimental-features)
+      experimental_features="${2:-}"
+      shift 2
+      ;;
+    eval|build)
+      nix_command="$1"
+      shift
+      break
+      ;;
+    *)
+      printf 'unexpected mock Nix argument: %s\n' "$1" >&2
+      exit 13
+      ;;
+  esac
+done
+
+if [[ "${NIXVM_REQUIRE_NIX_FEATURES:-0}" == 1 && "$experimental_features" != "nix-command flakes" ]]; then
+  printf "error: experimental Nix feature 'nix-command' is disabled\n" >&2
+  exit 14
+fi
+
+case "$nix_command" in
   eval)
+    if [[ "${NIXVM_NIX_EVAL_JDK23_EOL:-0}" == 1 && "$*" != *"builtins.tryEval"* ]]; then
+      printf 'error: OpenJDK 23 was removed as it has reached its end of life\n' >&2
+      exit 15
+    fi
     if [[ "${NIXVM_NIX_EVAL_FAIL:-0}" == 1 ]]; then
       printf 'mock Nix evaluation failed\n' >&2
       exit 10
     fi
-    printf '%s\n' jdk17 jdk21 ruby_3_3 python312
+    if [[ -n "${NIXVM_NIX_EVAL_OUTPUT:-}" ]]; then
+      printf '%s\n' "$NIXVM_NIX_EVAL_OUTPUT"
+    else
+      printf '%s\n' \
+        'java|17|jdk17' \
+        'java|21|jdk21' \
+        'ruby|3.3|ruby_3_3' \
+        'python|3.12|python312'
+    fi
     ;;
   build)
     if [[ "${NIXVM_NIX_BUILD_FAIL:-0}" == 1 ]]; then
@@ -118,6 +154,44 @@ install_test_runtimes() {
   [[ "$output" != *"Installed ruby versions:"* ]]
 }
 
+@test "available versions and install attributes are discovered from Nixpkgs" {
+  local nixpkgs_catalog nix_log
+  nixpkgs_catalog=$'java|17|jdk17\njava|21|jdk21\njava|26|jdk26\nruby|3.3|ruby_3_3\nruby|3.6|ruby_3_6\npython|3.12|python312\npython|3.15|python315'
+
+  run env NIXVM_NIX_EVAL_OUTPUT="$nixpkgs_catalog" \
+    "$REPO_DIR/scripts/nixvm" list --available
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == *"Available java versions: 17, 21, 26"* ]]
+  [[ "$output" == *"Available ruby versions: 3.3, 3.6"* ]]
+  [[ "$output" == *"Available python versions: 3.12, 3.15"* ]]
+
+  nix_log="$(<"$NIXVM_NIX_LOG")"
+  [[ "$nix_log" == *"builtins.attrNames pkgs"* ]]
+
+  run env NIXVM_NIX_EVAL_OUTPUT="$nixpkgs_catalog" \
+    "$REPO_DIR/scripts/nixvm" install java 26
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == *"Installed java 26 (jdk26)"* ]]
+  [[ -L "$XDG_DATA_HOME/nixvm/installed/java/26" ]]
+
+  run env NIXVM_NIX_EVAL_OUTPUT="$nixpkgs_catalog" \
+    "$REPO_DIR/scripts/nixvm" install ruby 3.6
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == *"Installed ruby 3.6 (ruby_3_6)"* ]]
+
+  run env NIXVM_NIX_EVAL_OUTPUT="$nixpkgs_catalog" \
+    "$REPO_DIR/scripts/nixvm" install python 3.15
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == *"Installed python 3.15 (python315)"* ]]
+}
+
+@test "available listing skips retired Nixpkgs attributes that fail evaluation" {
+  run env NIXVM_NIX_EVAL_JDK23_EOL=1 "$REPO_DIR/scripts/nixvm" list --available java
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == *"Available java versions: 17, 21"* ]]
+  [[ "$output" != *"23"* ]]
+}
+
 @test "installed-only listing works without Nix" {
   run "$REPO_DIR/scripts/nixvm" install python 3.12
   [[ "$status" -eq 0 ]]
@@ -155,6 +229,17 @@ install_test_runtimes() {
   [[ "$output" == *"Nix failed to build Nixpkgs attribute 'jdk21'"* ]]
 }
 
+@test "supplies required experimental features to Nix operations" {
+  run env NIXVM_REQUIRE_NIX_FEATURES=1 "$REPO_DIR/scripts/nixvm" install java 21
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == *"Installed java 21 (jdk21)"* ]]
+
+  local nix_log
+  nix_log="$(<"$NIXVM_NIX_LOG")"
+  [[ "$nix_log" == *"--extra-experimental-features nix-command flakes eval"* ]]
+  [[ "$nix_log" == *"--extra-experimental-features nix-command flakes build"* ]]
+}
+
 @test "use persists an installed version independently for each runtime" {
   run "$REPO_DIR/scripts/nixvm" use java 21
   [[ "$status" -ne 0 ]]
@@ -179,6 +264,28 @@ install_test_runtimes() {
   [[ "$active_version" == 3.12 ]]
 }
 
+@test "direct use warns when the current shell integration is not loaded" {
+  install_test_runtimes
+
+  run zsh -c '
+    unset JAVA_HOME
+    "$NIXVM_SCRIPT" use java 21
+    java_bin="$XDG_DATA_HOME/nixvm/installed/java/21/bin"
+    case ":$PATH:" in
+      *":$java_bin:"*) has_java_bin=1 ;;
+      *) has_java_bin=0 ;;
+    esac
+    print -r -- "JAVA_HOME=${JAVA_HOME-}"
+    print -r -- "HAS_JAVA_BIN=$has_java_bin"
+  '
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == *"Using java 21."* ]]
+  [[ "$output" == *"current shell was not updated"* ]]
+  [[ "$output" == *"nixvm --shell-integration"* ]]
+  [[ "$output" == *$'JAVA_HOME=\nHAS_JAVA_BIN=0'* ]]
+  [[ -f "$XDG_DATA_HOME/nixvm/active/java" ]]
+}
+
 @test "shell integration restores selected runtime paths and JAVA_HOME at startup" {
   install_test_runtimes
   "$REPO_DIR/scripts/nixvm" use java 21 >/dev/null
@@ -199,9 +306,17 @@ install_test_runtimes() {
 
 @test "current Zsh use refreshes PATH for every runtime without duplicates" {
   install_test_runtimes
+  local java_bin system_bin
+  java_bin="$XDG_DATA_HOME/nixvm/installed/java/21/bin"
+  system_bin="$NIXVM_TEST_ROOT/system-bin"
+  mkdir -p "$system_bin"
+  printf '#!/usr/bin/env sh\nprintf "system-java\\n"\n' > "$system_bin/java"
+  printf '#!/usr/bin/env sh\nprintf "managed-java\\n"\n' > "$java_bin/java"
+  chmod +x "$system_bin/java" "$java_bin/java"
+  export NIXVM_TEST_SYSTEM_BIN="$system_bin"
 
   run zsh -c '
-    export PATH="/workspace/scripts:$PATH"
+    export PATH="$NIXVM_TEST_SYSTEM_BIN:/workspace/scripts:$PATH"
     eval "$("$NIXVM_SCRIPT" --shell-integration)"
     nixvm use java 21
     nixvm use java 21
@@ -221,12 +336,17 @@ install_test_runtimes() {
     print -r -- "RUBY_COUNT=$ruby_count"
     print -r -- "PYTHON_COUNT=$python_count"
     print -r -- "JAVA_HOME=$JAVA_HOME"
+    print -r -- "JAVA_COMMAND=$(command -v java)"
+    print -r -- "JAVA_OUTPUT=$(java)"
   '
   [[ "$status" -eq 0 ]]
   [[ "$output" == *"JAVA_COUNT=1"* ]]
   [[ "$output" == *"RUBY_COUNT=1"* ]]
   [[ "$output" == *"PYTHON_COUNT=1"* ]]
   [[ "$output" == *"JAVA_HOME=$XDG_DATA_HOME/nixvm/installed/java/21"* ]]
+  [[ "$output" == *"JAVA_COMMAND=$XDG_DATA_HOME/nixvm/installed/java/21/bin/java"* ]]
+  [[ "$output" == *"JAVA_OUTPUT=managed-java"* ]]
+  [[ "$output" != *"current shell was not updated"* ]]
 }
 
 @test "remove rejects invalid requests and non-manager install paths" {
