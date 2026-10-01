@@ -135,7 +135,7 @@ o() {
 
 # nix-darwin (macOS system manager for launchd daemons)
 if [[ "$OS" = "macos" ]]; then
-  alias nix-system-reload='sudo darwin-rebuild switch --flake .'
+  alias nix-system-reload='sudo darwin-rebuild switch --flake "path:$HOME/nix-darwin-config"'
 fi
 
 # Grep
@@ -305,6 +305,11 @@ else
     RPROMPT="%(?..%F{red}[%?]%f)"
   }
 fi
+
+##########
+# Nix  Darwin Configuration
+##########
+export PATH="/run/current-system/sw/bin:$PATH"
 
 ##########
 # Homebrew
