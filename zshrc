@@ -32,6 +32,7 @@ case "$(uname -s)" in
 
     export MAC_RAM_GB="$(( $(sysctl -n hw.memsize) / 1024 / 1024 / 1024 ))"
 
+    # nix-darwin system
     if [[ -d /run/current-system/sw/bin ]] && [[ ":$PATH:" != *":/run/current-system/sw/bin:"* ]]; then
       export PATH="/run/current-system/sw/bin:$PATH"
     fi
@@ -290,28 +291,6 @@ if [[ "$OS" = "macos" ]]; then
 fi
 
 ##########
-# Prompt
-##########
-if command -v starship >/dev/null 2>&1; then
-  eval "$(starship init zsh)"
-else
-  precmd_functions=(render_prompt)
-
-  function render_prompt {
-    PROMPT=""
-    PROMPT+="%(1j.%B%%%b .)"
-    PROMPT+="%~ "
-    PROMPT+="%(?.%F{green}.%F{red})%B$%b%f "
-    RPROMPT="%(?..%F{red}[%?]%f)"
-  }
-fi
-
-##########
-# Nix  Darwin Configuration
-##########
-export PATH="/run/current-system/sw/bin:$PATH"
-
-##########
 # Homebrew
 ##########
 if ! command -v brew >/dev/null 2>&1; then
@@ -406,6 +385,23 @@ if [[ -f "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; th
   source "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
   source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+fi
+
+##########
+# Prompt
+##########
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+else
+  precmd_functions=(render_prompt)
+
+  function render_prompt {
+    PROMPT=""
+    PROMPT+="%(1j.%B%%%b .)"
+    PROMPT+="%~ "
+    PROMPT+="%(?.%F{green}.%F{red})%B$%b%f "
+    RPROMPT="%(?..%F{red}[%?]%f)"
+  }
 fi
 
 ##########
