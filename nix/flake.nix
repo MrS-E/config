@@ -51,7 +51,10 @@
             };
 
             home-manager.useGlobalPkgs = true;
-            home-manager.users."simeon.stix" = import ./home-manager/packages.nix;
+            home-manager.users."simeon.stix" = {
+              imports = [ ./home-manager/packages.nix ];
+              targets.darwin.copyApps.enable = false;
+            };
           }
         ];
       };
