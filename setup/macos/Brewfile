@@ -17,6 +17,8 @@ brew "afl++"
 brew "glib"
 # Low-level library for pixel manipulation
 brew "pixman"
+# TIFF library and utilities
+brew "libtiff"
 # Tool for reverse engineering 3rd party, closed, binary Android apps
 brew "apktool"
 # Automatic configure script builder
@@ -37,6 +39,10 @@ brew "clang-format"
 brew "cmake"
 # Documentation for CMake
 brew "cmake-docs"
+# YAML Parser
+brew "libyaml"
+# Dependency manager for Cocoa projects
+brew "cocoapods"
 # GNU File, Shell, and Text utilities
 brew "coreutils"
 # Static analysis of C and C++ code
@@ -51,8 +57,6 @@ brew "dfu-util"
 brew "direnv"
 # .NET Core
 brew "dotnet"
-# YAML Parser
-brew "libyaml"
 # Command-line fuzzy finder written in Go
 brew "fzf"
 # GNU compiler collection
@@ -75,6 +79,10 @@ brew "pkgconf"
 brew "gobject-introspection"
 # Open-source build automation tool based on the Groovy and Kotlin DSL
 brew "gradle"
+# Development kit for the Java programming language
+brew "openjdk@21"
+# Open-source build automation tool based on the Groovy and Kotlin DSL
+brew "gradle@8"
 # Generic library support script
 brew "libtool"
 # Graph visualization software from AT&T and Bell Labs
@@ -95,6 +103,8 @@ brew "icu4c@76"
 brew "icu4c@77"
 # Tools and libraries to manipulate images in select formats
 brew "imagemagick"
+# Install and debug iPhone apps from the command-line
+brew "ios-deploy"
 # Sane PBXProj files
 brew "kin"
 # Anti-bikeshedding Kotlin linter with built-in formatter
@@ -127,12 +137,12 @@ brew "ninja"
 brew "nmap"
 # Open-source, cross-platform JavaScript runtime environment
 brew "node"
+# Open-source, cross-platform JavaScript runtime environment
+brew "node@24"
 # Libraries for security-enabled client and server applications
 brew "nss"
 # Development kit for the Java programming language
 brew "openjdk@17"
-# Development kit for the Java programming language
-brew "openjdk@21"
 # Tools and libraries for smart cards
 brew "opensc"
 # OpenBSD freely-licensed SSH connectivity tools
@@ -157,12 +167,16 @@ brew "python@3.13"
 brew "qemu"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
+# Powerful, clean, object-oriented scripting language
+brew "ruby@3.3"
 # Display and control your Android device
 brew "scrcpy"
 # 7-Zip is a file archiver with a high compression ratio
 brew "sevenzip"
 # Shell Script Compiler
 brew "shc"
+# Static analysis and lint tool, for (ba)sh scripts
+brew "shellcheck"
 # Work with remote images registries
 brew "skopeo"
 # SOcket CAT: netcat on steroids
@@ -181,6 +195,8 @@ brew "telnet"
 brew "thefuck"
 # Display directories as trees (with optional color/HTML output)
 brew "tree"
+# Extremely fast Python package installer and resolver, written in Rust
+brew "uv"
 # Internet file retriever
 brew "wget"
 # JavaScript package manager
@@ -313,10 +329,10 @@ vscode "repreng.csv"
 vscode "rpinski.shebang-snippets"
 vscode "shd101wyy.markdown-preview-enhanced"
 vscode "sndst00m.vscode-native-svg-preview"
+vscode "solomonkinard.compare-text"
 vscode "sr-team.clang-tidy-sr-team-fork"
 vscode "tecosaur.latex-utilities"
 vscode "timonwong.shellcheck"
 vscode "torn4dom4n.latex-support"
 vscode "waderyan.gitblame"
 vscode "yzhang.markdown-all-in-one"
-npm "typescript"
