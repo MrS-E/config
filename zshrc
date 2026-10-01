@@ -142,6 +142,22 @@ o() {
 # nix-darwin (macOS system manager for launchd daemons)
 if [[ "$OS" = "macos" ]]; then
   alias nix-system-reload='sudo darwin-rebuild switch --flake "path:$HOME/config/nix-darwin"'
+
+  # Rebuild and activate Home Manager without nix-darwin system activation.
+  nix-system-update() {
+    local config_dir="${NIX_DARWIN_CONFIG_DIR:-$CONFIG_DIR/nix}"
+    local configuration="${NIX_DARWIN_HOSTNAME:-aarch64-darwin}"
+    local username
+    local activation_package
+
+    username="$(id -un)" || return
+    activation_package="$(nix --extra-experimental-features 'nix-command flakes' build \
+      --no-link \
+      --no-write-lock-file \
+      --print-out-paths \
+      "path:$config_dir#darwinConfigurations.$configuration.config.home-manager.users.\"$username\".home.activationPackage")" || return
+    "$activation_package/activate"
+  }
 fi
 
 # Grep

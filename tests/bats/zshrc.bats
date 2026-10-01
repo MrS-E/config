@@ -67,6 +67,58 @@ EOF
   assert_failure
 }
 
+@test "nix-system-update activates Home Manager without nix-darwin" {
+  local test_home="$BATS_TEST_TMPDIR/home"
+  local mock_bin="$BATS_TEST_TMPDIR/mock-bin"
+  local activation_dir="$BATS_TEST_TMPDIR/home-manager"
+  local nix_arguments="$BATS_TEST_TMPDIR/nix-arguments"
+  local activation_marker="$BATS_TEST_TMPDIR/activation-marker"
+  mkdir -p "$mock_bin" "$activation_dir"
+
+  printf '%s\n' \
+    '#!/usr/bin/env sh' \
+    'case "$1" in' \
+    '  -s) printf "%s\\n" Darwin ;;' \
+    '  -m) printf "%s\\n" arm64 ;;' \
+    '  *) exit 1 ;;' \
+    'esac' \
+    > "$mock_bin/uname"
+  printf '%s\n' \
+    '#!/usr/bin/env sh' \
+    'if [ "$1" = "-n" ] && [ "$2" = "hw.memsize" ]; then' \
+    '  printf "%s\\n" 17179869184' \
+    '  exit 0' \
+    'fi' \
+    'exit 1' \
+    > "$mock_bin/sysctl"
+  cat > "$mock_bin/nix" <<'EOF'
+#!/usr/bin/env sh
+printf '%s\n' "$@" > "$NIX_TEST_ARGUMENTS"
+printf '%s\n' "$NIX_TEST_ACTIVATION_PACKAGE"
+EOF
+  cat > "$activation_dir/activate" <<'EOF'
+#!/usr/bin/env sh
+printf '%s\n' activated > "$NIX_TEST_ACTIVATION_MARKER"
+EOF
+  chmod +x "$mock_bin/uname" "$mock_bin/sysctl" "$mock_bin/nix" "$activation_dir/activate"
+
+  run env HOME="$test_home" PATH="$mock_bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin" \
+    REPO_DIR="$REPO_DIR" \
+    NIX_TEST_ARGUMENTS="$nix_arguments" \
+    NIX_TEST_ACTIVATION_PACKAGE="$activation_dir" \
+    NIX_TEST_ACTIVATION_MARKER="$activation_marker" \
+    zsh -f -c '
+      unset NIX_DARWIN_CONFIG_DIR NIX_DARWIN_HOSTNAME
+      source "$REPO_DIR/zshrc"
+      nix-system-update
+      [[ -f "$NIX_TEST_ACTIVATION_MARKER" ]] || exit 1
+      command grep -Fq -- "path:$REPO_DIR/nix#darwinConfigurations.aarch64-darwin.config.home-manager.users.\"$(id -un)\".home.activationPackage" "$NIX_TEST_ARGUMENTS" || exit 1
+      ! command grep -Fq -- "darwin-rebuild" "$NIX_TEST_ARGUMENTS"
+    '
+
+  assert_success
+}
+
 @test "zshrc initializes storage for recent directories" {
   local test_home="$BATS_TEST_TMPDIR/home"
   local mock_bin="$BATS_TEST_TMPDIR/mock-bin"
