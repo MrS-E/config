@@ -2,6 +2,7 @@
 # DEV
 # =========================
 .idea
+.junie
 
 # =========================
 # SSH (ignore everything)
