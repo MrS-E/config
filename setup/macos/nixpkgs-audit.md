@@ -1,6 +1,6 @@
 # Homebrew Brewfile to Nixpkgs audit
 
-This document records the package-by-package comparison of `setup/macos/Brewfile` with Nixpkgs.
+This document records the package-by-package comparison of the reduced `setup/macos/Brewfile` with Nixpkgs.
 
 ## Scope and method
 
@@ -11,30 +11,25 @@ This document records the package-by-package comparison of `setup/macos/Brewfile
 
 | Brewfile entries | Total | Nixpkgs mappings | Current migration result |
 |---|---:|---:|---:|
-| Formulae | 105 | 100 | 98 usable; 2 unsupported; 5 without a usable mapping |
-| Casks | 41 | 35 | 22 selected; 13 excluded or unusable; 6 without a mapping |
+| Formulae | 60 | 57 | 55 usable; 2 unsupported; 3 without a usable mapping |
+| Casks | 37 | 31 | 21 selected; 10 excluded or unusable; 6 without a mapping |
 | VS Code extensions | 40 | Historical 21/19 catalog | Excluded from Nix |
 
 ## Found or mapped in Nixpkgs
 
-### Formulae (100/105 mappings; 98 usable on `aarch64-darwin`)
+### Formulae (57/60 mappings; 55 usable on `aarch64-darwin`)
 
-- `openssl@3` → `openssl_3_6`; `llvm`; `afl++` → `aflplusplus` (**not Darwin-available**); `glib`; `pixman`; `libtiff`; `apktool`; `autoconf`; `automake`; `bat`; `biber`; `ccache`; `clamav`; `clang-format` → `clang-tools`; `cmake`; `libyaml`; `cocoapods`; `coreutils`; `cppcheck`; `curl`.
-- `libusb` → `libusb1`; `dfu-util`; `direnv`; `dotnet` → `dotnet-sdk`; `fzf`; `gcc`; `git-lfs`; `libgcrypt`; `libksba`; `gnupg`; `gnuplot`; `go`; `pkgconf`; `gobject-introspection`; `gradle`; `openjdk@21` → `openjdk21`; `gradle@8` → `gradle_8`; `libtool`; `graphviz`; `grep` → `gnugrep`.
-- `sdl2-compat`; `ffmpeg`; `pygobject3` → `python3Packages.pygobject3`; `gstreamer` → `gst_all_1.gstreamer`; `icu4c@76` → `icu76`; `icu4c@77` → `icu77`; `imagemagick`; `ios-deploy`; `ktlint`; `lazygit`; `lftp`; `libpq`; `libslirp`; `ltex-ls-plus`; `make` → `gnumake`; `mbpoll` (**not Darwin-available**); `mkcert`; `mosquitto`; `mysql-client` → `mariadb.client` (**MariaDB client, not Oracle MySQL**); `neovim`.
-- `ninja`; `nmap`; `node` → `nodejs`; `node@24` → `nodejs_24`; `nss`; `openjdk@17` → `openjdk17`; `opensc`; `openssh`; `picocom`; `plantuml`; `podlet`; `podman`; `podman-compose`; `pulseaudio`; `python@3.13` → `python313`; `qemu`; `ripgrep`; `ruby@3.3` → `ruby_3_3`; `scrcpy`; `sevenzip` → `_7zz`.
-- `shc`; `shellcheck`; `skopeo`; `socat`; `sound-touch` → `soundtouch`; `starship`; `swiftlint`; `tailscale`; `telnet` → `inetutils`; `tree`; `uv`; `wget`; `yarn`; `ykman` → `yubikey-manager`; `yubico-piv-tool`; `zlib`; `zsh-autocomplete`; `zsh-autosuggestions`; `zsh-syntax-highlighting`; `homebrew-ffmpeg/ffmpeg/ffmpeg` → `ffmpeg`.
+- `apktool`; `automake`; `bat`; `biber`; `clamav`; `clang-format` → `clang-tools`; `cmake`; `coreutils`; `cppcheck`; `curl`; `dfu-util`; `direnv`; `dotnet` → `dotnet-sdk`; `fzf`; `gcc`; `git-lfs`; `gnuplot`; `go`; `gradle`; `grep` → `gnugrep`.
+- `gstreamer` → `gst_all_1.gstreamer`; `imagemagick`; `ios-deploy`; `ktlint`; `lazygit`; `lftp`; `ltex-ls-plus`; `make` → `gnumake`; `mkcert`; `mysql-client` → `mariadb.client` (**MariaDB client, not Oracle MySQL**); `neovim`; `ninja`; `nmap`; `opensc`; `openssh`; `picocom`; `plantuml`.
+- `podlet`; `podman-compose`; `qemu`; `ripgrep`; `scrcpy`; `sevenzip` → `_7zz`; `shellcheck`; `socat`; `starship`; `swiftlint`; `telnet` → `inetutils`; `tree`; `uv`; `wget`; `yarn`; `ykman` → `yubikey-manager`; `yubico-piv-tool`; `zlib`.
 
-Pinned versions for the versioned formulae: `openssl_3_6` 3.6.4; `icu76`/`icu77` 76.1/77.1; `gradle`/`gradle_8` 8.14.4; `openjdk17`/`openjdk21` 17.0.19/21.0.11; `nodejs`/`nodejs_24` 24.21.0; `python313` 3.13.15; and `ruby_3_3` 3.3.10. The default and versioned `gradle` and `nodejs` attributes resolve to identical derivations on this pin, so each is included once in the Home Manager profile.
+`afl++` → `aflplusplus` and `mbpoll` → `mbpoll` both have Nixpkgs attributes, but neither supports Darwin. The other retained formulae without a usable Nixpkgs mapping are listed below. The retained `gradle` attribute is version 8.14.4; `mariadb.client` is 11.4.12 and is not Oracle MySQL. The reduced Brewfile no longer contains the former version-pinned formulae or either FFmpeg entry.
 
-Nixpkgs `ffmpeg` 9.0.1 already enables both `with-webp` and `with-xvid` equivalents (`withWebp` and `withXvid`); no override is needed. The two Brew FFmpeg entries map to this one Nix derivation.
+### Casks (31/37 mappings; 21 selected)
 
-### Casks (35/41 mappings; 22 selected)
-
-- `android-platform-tools` → `android-tools` (**selected**); `arduino-ide` (**Linux-only**); `burp-suite` → `burpsuite` (**not usable: its FHS environment pulls Linux-only glibc**); `figma` → `figma-linux` (**unofficial, Linux-only**); `firefox` (**selected**); `freecad` (**no Darwin support**); `google-chrome` (**selected**); `imhex` (**selected**); `jetbrains-toolbox` (**selected**); `kitty` (**selected**).
-- `mactex` → `texliveFull` (**selected; TeX Live, not the MacTeX GUI bundle**); `meshlab` (**selected**); `mqtt-explorer` (**selected**); `nextcloud-vfs` → `nextcloud-client` (**Linux-only; no macOS VFS equivalent**); `nordic-nrf-command-line-tools` → `nrf-command-line-tools` (**Linux-only**); `obsidian` (**selected**); `openscad` (**selected**); `postman` (**selected**); `proton-mail-bridge` → `protonmail-bridge` (**selected**); `protonvpn` → `proton-vpn` (**selected**).
-- `proxyman` (**selected**); `prusaslicer` → `prusa-slicer` (**excluded: its WebKitGTK dependency is marked broken**); `raspberry-pi-imager` → `rpi-imager` (**no Darwin support**); `raycast` (**selected**); `segger-jlink` (**excluded: Nix requires explicit acceptance of SEGGER's non-free license**); `segger-ozone` (**Linux-only**); `slack` (**selected**); `spotify` (**selected**); `tailscale-app` → `tailscale-gui` (**selected**); `temurin@8` → `temurin-bin-8` (**Intel macOS only**).
-- `thunderbird` (**selected**); `vlc` (**Linux-only**); `vscodium` (**available but explicitly excluded from this migration**); `wireshark-app` → `wireshark` (**selected**); `zotero` (**selected**).
+- `android-platform-tools` → `android-tools` (**selected**); `burp-suite` → `burpsuite` (**not usable: its FHS environment pulls Linux-only glibc**); `figma` → `figma-linux` (**unofficial, Linux-only**); `firefox` (**selected**); `google-chrome` (**selected**); `imhex` (**selected**); `jetbrains-toolbox` (**selected**); `kitty` (**selected**).
+- `mactex` → `texliveFull` (**selected; TeX Live, not the MacTeX GUI bundle**); `meshlab` (**selected**); `mqtt-explorer` (**selected**); `nextcloud-vfs` → `nextcloud-client` (**Linux-only; no macOS VFS equivalent**); `nordic-nrf-command-line-tools` → `nrf-command-line-tools` (**Linux-only**); `obsidian` (**selected**); `postman` (**selected**); `proton-mail-bridge` → `protonmail-bridge` (**selected**); `protonvpn` → `proton-vpn` (**selected**); `proxyman` (**selected**).
+- `prusaslicer` → `prusa-slicer` (**excluded: its WebKitGTK dependency is marked broken**); `raspberry-pi-imager` → `rpi-imager` (**no Darwin support**); `raycast` (**selected**); `segger-jlink` (**excluded: Nix requires explicit acceptance of SEGGER's non-free license**); `segger-ozone` (**Linux-only**); `slack` (**selected**); `spotify` (**selected**); `tailscale-app` → `tailscale-gui` (**selected**); `thunderbird` (**selected**); `vlc` (**Linux-only**); `vscodium` (**available but explicitly excluded from this migration**); `wireshark-app` → `wireshark` (**selected**); `zotero` (**selected**).
 
 ### VS Code extensions (21/40)
 
@@ -44,15 +39,13 @@ Nixpkgs `ffmpeg` 9.0.1 already enables both `with-webp` and `with-xvid` equivale
 
 ## No package mapping found in Nixpkgs
 
-### Formulae (5/105)
+### Formulae (3/60)
 
 - `adb-enhanced` — Nixpkgs has standard ADB through `android-tools`, but not this enhanced tool.
 - `cmake-docs` — no separate package attribute was found; `cmake` itself is available.
 - `kin`.
-- `openssl@1.1` — removed from Nixpkgs as end-of-life.
-- `thefuck` — removed from Nixpkgs due to maintenance and Python compatibility issues; `pay-respects` is an alternative, not an identical replacement.
 
-### Casks (6/41)
+### Casks (6/37)
 
 - `bettermouse`; `creality-print`; `diffmerge`; `macdroid`; `proton-drive`; `texifier`.
 
@@ -65,10 +58,10 @@ Nixpkgs has `ms-vscode-remote.remote-ssh` as an alternative to `jeanp413.open-re
 
 ## Migration notes
 
-- The Brewfile contains seven taps: `can1357/tap`, `finestructure/tap`, `grishka/grishka`, `homebrew-ffmpeg/ffmpeg`, `jetbrains/junie`, `jundot/omlx`, and `nikitabobko/tap`. Taps are package sources rather than package entries, so they are not included in the counts above; their other contents were not audited.
-- `nix/packages/common.nix` represents the 95 portable formula mappings with 93 distinct package declarations; `gradle_8` and `nodejs_24` resolve to the same derivations as their defaults, and duplicate Brew FFmpeg entries are collapsed. `darwin.nix` adds Darwin-only `cocoapods` and `ios-deploy`; `aarch64-darwin.nix` contains the 22 selected cask replacements. No Fedora or Intel Darwin output is defined.
+- The reduced Brewfile contains seven taps: `can1357/tap`, `finestructure/tap`, `grishka/grishka`, `homebrew-ffmpeg/ffmpeg`, `jetbrains/junie`, `jundot/omlx`, and `nikitabobko/tap`. Taps are package sources rather than package entries, so they are not included in the counts above; their other contents were not audited. The FFmpeg tap remains listed, but the reduced Brewfile has no FFmpeg formula entry.
+- `nix/packages/common.nix` contains the 54 retained portable formula replacements; `darwin.nix` adds `ios-deploy`, and `aarch64-darwin.nix` contains the 21 selected cask replacements. The reduced Brewfile retains `podman-compose` but no `podman` engine; local Compose use therefore requires a separately available Podman engine or remote socket. No Fedora or Intel Darwin output is defined.
 - The locked Nixpkgs revision does not advertise `x86_64-darwin` as a supported system. Adding Intel macOS later will require a compatible Nixpkgs revision and a fresh platform audit; the architecture-specific module keeps that extension point separate.
 - The Home Manager configuration allows unfree packages only by predicate for `google-chrome`, `jetbrains-toolbox`, `mqtt-explorer`, `obsidian`, `postman`, `proxyman`, `raycast`, `slack`, `spotify`, and `tailscale-gui`. No formulae are unfree.
 - `burpsuite` cannot evaluate for Darwin because its FHS environment needs Linux `glibc`; `prusa-slicer` pulls a broken WebKitGTK dependency. Both remain manual/vendor exceptions. `segger-jlink` is excluded until its SEGGER license terms are explicitly accepted; no acceptance flag is set.
-- The cask `vscodium`, its extensions/settings, and the un-audited tap contents are not added to Nix. The Brewfile has no standalone `npm` entry; npm remains bundled with the selected Node.js packages. WaveForms remains in its independent vendor installer.
+- The cask `vscodium`, its extensions/settings, and the un-audited tap contents are not added to Nix. The reduced Brewfile has no Node.js or `npm` formula entry; WaveForms remains in its independent vendor installer. The Zsh plugins are installed from Git by the macOS setup step rather than through Nix.
 - Re-audit when updating `nix/flake.lock`; package names, versions, licenses, and platform support can change.

@@ -1,66 +1,40 @@
 { pkgs }:
 with pkgs;
 [
-  openssl_3_6
-  llvm
-  glib
-  pixman
-  libtiff
   apktool
-  autoconf
   automake
   bat
   biber
-  ccache
   clamav
   clang-tools
   cmake
-  libyaml
   coreutils
   cppcheck
   curl
-  libusb1
   dfu-util
   direnv
   dotnet-sdk
   fzf
   gcc
   git-lfs
-  libgcrypt
-  libksba
-  gnupg
   gnuplot
   go
   pkgconf
-  gobject-introspection
   gradle
-  openjdk21
-  libtool
-  graphviz
   gnugrep
-  sdl2-compat
   ffmpeg
-  python3Packages.pygobject3
   gst_all_1.gstreamer
-  icu76
-  icu77
   imagemagick
   ktlint
   lazygit
   lftp
-  libpq
-  libslirp
   ltex-ls-plus
   gnumake
   mkcert
-  mosquitto
   mariadb.client
   neovim
   ninja
   nmap
-  nodejs
-  nss
-  openjdk17
   opensc
   openssh
   picocom
@@ -68,21 +42,14 @@ with pkgs;
   podlet
   podman
   podman-compose
-  pulseaudio
-  python313
   qemu
   ripgrep
-  ruby_3_3
   scrcpy
   _7zz
-  shc
   shellcheck
-  skopeo
   socat
-  soundtouch
   starship
   swiftlint
-  tailscale
   inetutils
   tree
   uv
@@ -91,7 +58,4 @@ with pkgs;
   yubikey-manager
   yubico-piv-tool
   zlib
-  zsh-autocomplete
-  zsh-autosuggestions
-  zsh-syntax-highlighting
 ]
