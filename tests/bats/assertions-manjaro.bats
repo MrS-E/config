@@ -55,3 +55,36 @@ setup() {
   assert [ -x "$dir/04-aur-packages.sh" ]
   assert [ -x "$dir/05-default-shell.sh" ]
 }
+
+@test "Nix step runs the official installer and configures flakes" {
+  local mock_bin="$BATS_TEST_TMPDIR/mock-bin"
+  local nix_home="$BATS_TEST_TMPDIR/nix-home"
+  mkdir -p "$mock_bin"
+  printf '%s\n' \
+    '#!/usr/bin/env bash' \
+    'set -e' \
+    '[[ "${1:-}" == "--proto" ]]' \
+    '[[ "${2:-}" == "=https" ]]' \
+    '[[ "${3:-}" == "--tlsv1.2" ]]' \
+    '[[ "${4:-}" == "-L" ]]' \
+    '[[ "${5:-}" == "https://nixos.org/nix/install" ]]' \
+    "printf '%s\\n' 'touch \"\$HOME/.nix-install-ran\"'" \
+    > "$mock_bin/curl"
+  chmod +x "$mock_bin/curl"
+
+  run env HOME="$nix_home" PATH="$mock_bin:/usr/local/bin:/usr/bin:/bin" \
+    NIX_STEP="$REPO_DIR/setup/manjaro/14-nix.sh" \
+    bash -c '
+      source "$NIX_STEP" help >/dev/null
+      NIX_DEFAULT_PROFILE="$HOME/no-system-nix"
+      NIX_USER_PROFILE="$HOME/no-user-nix"
+      run
+    '
+  assert_success
+  assert [ -f "$nix_home/.nix-install-ran" ]
+  assert [ -f "$nix_home/.config/nix/nix.conf" ]
+  run grep -Fxc -- "experimental-features = nix-command flakes" \
+    "$nix_home/.config/nix/nix.conf"
+  assert_success
+  assert_output "1"
+}
