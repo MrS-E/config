@@ -46,7 +46,7 @@ config/
 │   │   ├── 01-symlinks.sh
 │   │   ├── 02-git-filters.sh
 │   │   └── 03-vim-base.sh
-│   ├── macos/                  # macOS steps + legacy Brewfile audit inventory
+│   ├── macos/                  # macOS steps + Brewfile audit inventory
 │   ├── fedora/                 # Fedora steps + dnf/flatpak/copr manifests
 │   ├── fedora-atomic/          # Fedora Atomic steps + rpm-ostree/toolbox manifests
 │   └── manjaro/                # Manjaro steps + pacman/aur manifests
@@ -296,7 +296,7 @@ Homebrew prefix so the official uninstaller cannot remove it.
 `NIX_DARWIN_HOSTNAME` to choose its `darwinConfigurations` output. The step
 never initializes, edits, or locks an external configuration. If
 `~/nix-darwin-config/flake.nix` already exists and no override is selected, the
-step stops with instructions rather than silently abandoning it. The historic
+step stops with instructions rather than silently abandoning it. The reduced
 `setup/macos/Brewfile` remains only as audit inventory; setup no longer installs
 Homebrew or runs `brew bundle`.
 
@@ -487,7 +487,7 @@ Loaded via native zsh `source` (no plugin manager):
 - **zsh-autosuggestions**: fish-style autosuggestions as you type
 - **zsh-syntax-highlighting**: real-time command syntax coloring
 - **zsh-autocomplete**: type-ahead completion in all contexts
-- Prefers local plugin clones, with Nix profile fallbacks on macOS
+- macOS sources the Nix profile packages when available; Fedora continues to install these plugins as Git clones under `~/.zsh`
 
 ### Additional Integrations
 
@@ -759,8 +759,8 @@ Both scripts are auto-loaded by `zshrc` via shell integration, so their commands
 1. Identify the correct platform manifest (see [Package Manifests](#package-manifests) table above).
 2. For macOS, add a verified package attribute to the appropriate module in
    `nix/packages/` (`common.nix`, `darwin.nix`, or `aarch64-darwin.nix`) and
-   update the [Nixpkgs audit](setup/macos/nixpkgs-audit.md). The `Brewfile` is
-   historical inventory and is not exported or consumed by setup.
+   update the [Nixpkgs audit](setup/macos/nixpkgs-audit.md). The reduced
+   `Brewfile` remains an audit inventory and is not consumed by setup.
 3. For Fedora, Flatpak, and Manjaro, add the package/app ID to the appropriate
    text file (one per line). After installing, use the platform export command:
    - Fedora: `dnf repoquery --userinstalled --qf "%{name}\n" | sort > setup/fedora/dnf.txt`

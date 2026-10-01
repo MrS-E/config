@@ -3,8 +3,9 @@
 # dispatch, and contract behavior — NOT real macOS or nix-darwin activation. See
 # Containerfile.macos-mock.
 
-load "/workspace/tests/bats/helpers/common.bash"
-load "/workspace/tests/bats/helpers/assertions.bash"
+REPO_DIR="${REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+load "$REPO_DIR/tests/bats/helpers/common.bash"
+load "$REPO_DIR/tests/bats/helpers/assertions.bash"
 
 setup() {
   require_os macos
@@ -82,6 +83,21 @@ create_nix_darwin_mocks() {
 @test "zshrc prepends the Home Manager user profile on macOS" {
   run grep -F -- 'export PATH="$HOME/.nix-profile/bin:$PATH"' "$REPO_DIR/zshrc"
   assert_success
+}
+
+@test "Home Manager provides Zsh plugins with Git-clone fallbacks" {
+  local plugin nix_line git_line
+
+  for plugin in zsh-autosuggestions zsh-autocomplete zsh-syntax-highlighting; do
+    run grep -Fx -- "  $plugin" "$REPO_DIR/nix/packages/common.nix"
+    assert_success
+
+    nix_line="$(grep -nF -- ".nix-profile/share/$plugin/" "$REPO_DIR/zshrc" | head -n 1 | cut -d: -f1)"
+    git_line="$(grep -nF -- "\$HOME/.zsh/$plugin/" "$REPO_DIR/zshrc" | head -n 1 | cut -d: -f1)"
+    assert [ -n "$nix_line" ]
+    assert [ -n "$git_line" ]
+    assert [ "$nix_line" -lt "$git_line" ]
+  done
 }
 
 @test "Kitty permissions step opens both privacy panes" {

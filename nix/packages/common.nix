@@ -58,4 +58,7 @@ with pkgs;
   yubikey-manager
   yubico-piv-tool
   zlib
+  zsh-autocomplete
+  zsh-autosuggestions
+  zsh-syntax-highlighting
 ]
