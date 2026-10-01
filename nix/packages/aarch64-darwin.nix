@@ -2,6 +2,7 @@
 with pkgs;
 [
   android-tools
+  burpsuite
   firefox
   google-chrome
   imhex
@@ -13,6 +14,7 @@ with pkgs;
   obsidian
   openscad
   postman
+  proton-pass
   protonmail-bridge
   proton-vpn
   proxyman
@@ -22,4 +24,5 @@ with pkgs;
   tailscale-gui
   thunderbird
   wireshark
+  vscodium
 ]
