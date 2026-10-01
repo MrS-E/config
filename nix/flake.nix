@@ -42,6 +42,7 @@
                 "tailscale-gui"
               ];
             nix.settings.experimental-features = "nix-command flakes";
+            ids.gids.nixbld = 350;
             system.stateVersion = 4;
 
             # Home Manager needs user metadata; leave this account out of users.knownUsers.
