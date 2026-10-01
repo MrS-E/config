@@ -3,7 +3,7 @@
 FROM fedora:40
 
 RUN dnf -y install --setopt=install_weak_deps=False \
-        bats git sudo wget curl tar unzip which findutils procps-ng \
+        bats git sudo wget curl tar unzip which findutils procps-ng python3 \
         zsh vim neovim flatpak openssh && \
     dnf -y clean all
 
