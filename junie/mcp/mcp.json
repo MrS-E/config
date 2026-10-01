@@ -1,25 +1,25 @@
 {
     "mcpServers": {
-        "xcode": {
-            "command": "xcrun",
-            "args": [
-                "mcpbridge"
-            ],
-            "enabled": false
-        },
-        "browsermcp": {
-            "command": "npx",
-            "args": [
-                "@browsermcp/mcp@latest"
-            ],
-            "enabled": false
-        },
         "Chrome DevTools": {
-            "command": "npx",
             "args": [
                 "-y",
                 "chrome-devtools-mcp@latest"
             ],
+            "command": "npx",
+            "enabled": false
+        },
+        "browsermcp": {
+            "args": [
+                "@browsermcp/mcp@latest"
+            ],
+            "command": "npx",
+            "enabled": false
+        },
+        "xcode": {
+            "args": [
+                "mcpbridge"
+            ],
+            "command": "xcrun",
             "enabled": false
         }
     }
