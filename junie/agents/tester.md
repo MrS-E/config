@@ -2,6 +2,7 @@
 name: tester
 description: "Test engineer. Reproduces reported bugs, writes and runs focused tests for a change, and reports what is covered and what still fails. Edits test code and test fixtures only — never production code. Use to prove a bug exists, to verify a fix, or to raise coverage on a risky change."
 tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
+model: "custom:deepseek"
 reasoningLevel: "high"
 maxTurns: 60
 ---

@@ -2,6 +2,7 @@
 name: coder
 description: "Implementation engineer. Writes and modifies production code, applies a design or a concrete fix, and keeps the change minimal and consistent with the surrounding codebase. Use for any task that requires editing source files."
 tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit", "WebSearch"]
+model: "custom:deepseek"
 reasoningLevel: "high"
 maxTurns: 80
 ---

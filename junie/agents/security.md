@@ -2,6 +2,7 @@
 name: security
 description: "Application security engineer. Audits code and configuration for injection, auth/authz flaws, secret leakage, insecure storage, unsafe deserialisation, dependency and platform-security issues, then reports findings with severity and a concrete remediation. Read-only: never edits files. Use before shipping anything that handles untrusted input, credentials, or sensitive data."
 tools: ["Read", "Grep", "Glob", "Bash", "WebSearch"]
+model: "custom:deepseek"
 reasoningLevel: "high"
 maxTurns: 50
 ---

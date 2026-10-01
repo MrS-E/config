@@ -2,6 +2,7 @@
 name: build-devops
 description: "Build and environment engineer. Diagnoses and fixes build, dependency, CI and toolchain problems — failing Gradle/Xcode/npm builds, version conflicts, broken environments, missing SDKs and configuration errors. Use when the problem is the build or the environment rather than the application logic."
 tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
+model: "custom:deepseek"
 reasoningLevel: "high"
 maxTurns: 60
 ---

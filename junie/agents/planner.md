@@ -2,6 +2,7 @@
 name: planner
 description: "Planning and refactoring specialist. Breaks a large or vague task into an ordered, verifiable step plan, and designs safe incremental refactorings that keep the codebase working at every step. Read-only: produces the plan, does not edit files. Use before starting anything too big to hold in one head."
 tools: ["Read", "Grep", "Glob", "Bash"]
+model: "custom:gml"
 reasoningLevel: "high"
 maxTurns: 40
 ---
