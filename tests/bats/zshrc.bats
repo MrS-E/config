@@ -28,7 +28,18 @@ EOF
 @test "zshrc initializes Starship after adding user-local bin to PATH" {
   local test_home="$BATS_TEST_TMPDIR/home"
   local fake_bin="$test_home/.local/bin"
-  mkdir -p "$fake_bin"
+  local mock_bin="$BATS_TEST_TMPDIR/mock-bin"
+  mkdir -p "$fake_bin" "$mock_bin"
+
+  printf '%s\n' \
+    '#!/usr/bin/env sh' \
+    'if [ "$1" = "-n" ] && [ "$2" = "hw.memsize" ]; then' \
+    '  printf "%s\\n" 17179869184' \
+    '  exit 0' \
+    'fi' \
+    'exit 1' \
+    > "$mock_bin/sysctl"
+  chmod +x "$mock_bin/sysctl"
 
   printf '%s\n' \
     '#!/usr/bin/env sh' \
@@ -37,11 +48,21 @@ EOF
     > "$fake_bin/starship"
   chmod +x "$fake_bin/starship"
 
-  run env HOME="$test_home" PATH="/usr/local/bin:/usr/bin:/bin" \
+  run env HOME="$test_home" PATH="$mock_bin:/usr/local/bin:/usr/bin:/bin" \
     REPO_DIR="$REPO_DIR" zsh -f -c '
       source "$REPO_DIR/zshrc"
-      [[ "${STARSHIP_TEST_INITIALIZED:-}" == yes ]]
+      if [[ "${STARSHIP_TEST_INITIALIZED:-}" != yes ]]; then
+        print -r -- "PATH=$PATH"
+        print -r -- "starship=$(command -v starship || print missing)"
+        print -r -- "initialized=${STARSHIP_TEST_INITIALIZED:-unset}"
+        exit 1
+      fi
     '
 
   assert_success
+}
+
+@test "zshrc does not initialize Homebrew or add its prefix" {
+  run grep -nE 'brew shellenv|/opt/homebrew|/usr/local/bin/brew' "$REPO_DIR/zshrc"
+  assert_failure
 }

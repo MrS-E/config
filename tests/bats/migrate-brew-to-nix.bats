@@ -31,6 +31,12 @@ create_migration_mocks() {
 
   printf '%s\n' \
     '#!/usr/bin/env bash' \
+    'printf "%s\\n" migration-test-host' \
+    > "$mock_bin/hostname"
+  chmod +x "$mock_bin/hostname"
+
+  printf '%s\n' \
+    '#!/usr/bin/env bash' \
     'set -euo pipefail' \
     'printf "brew %s\n" "$*" >> "$MIGRATION_TEST_LOG"' \
     'case "$*" in' \

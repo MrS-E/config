@@ -28,9 +28,11 @@ setup() {
   assert [ -f "$REPO_DIR/setup/macos/Brewfile" ]
 }
 
-@test "mock brew is on PATH" {
-  run command -v brew
+@test "default macOS setup does not schedule Homebrew installation" {
+  run "$REPO_DIR/setup.sh" --list
   assert_success
+  [[ "$output" != *"01-homebrew.sh"* ]]
+  [[ "$output" != *"02-brew-bundle.sh"* ]]
 }
 
 @test "Kitty permissions step opens both privacy panes" {
@@ -56,7 +58,7 @@ setup() {
 @test "Nix step runs the official installer and configures flakes" {
   local mock_bin="$BATS_TEST_TMPDIR/mock-bin"
   local nix_home="$BATS_TEST_TMPDIR/nix-home"
-  mkdir -p "$mock_bin"
+  mkdir -p "$mock_bin" "$nix_home"
   printf '%s\n' \
     '#!/usr/bin/env bash' \
     'set -e' \
@@ -93,10 +95,13 @@ setup() {
   assert_output_partial "this step requires macOS"
 }
 
-@test "nix-darwin step initializes and adapts the flake on Apple Silicon" {
+@test "nix-darwin step activates the repository flake without editing it" {
   local mock_bin="$BATS_TEST_TMPDIR/nix-darwin-mock-bin"
   local nix_home="$BATS_TEST_TMPDIR/nix-darwin-home"
-  mkdir -p "$mock_bin"
+  local flake_hash lock_hash
+  mkdir -p "$mock_bin" "$nix_home"
+  flake_hash="$(git -C "$REPO_DIR" hash-object nix/flake.nix)"
+  lock_hash="$(git -C "$REPO_DIR" hash-object nix/flake.lock)"
 
   printf '%s\n' \
     '#!/usr/bin/env bash' \
@@ -106,22 +111,22 @@ setup() {
 
   printf '%s\n' \
     '#!/usr/bin/env bash' \
+    'printf "%s\\n" test-mac' \
+    > "$mock_bin/hostname"
+  chmod +x "$mock_bin/hostname"
+
+  printf '%s\n' \
+    '#!/usr/bin/env bash' \
     'set -euo pipefail' \
-    'case "$*" in' \
-    '  *"flake init -t nix-darwin")' \
-    '    [[ ! -f flake.nix ]]' \
-    '    printf "%s\\n" "{ " "  outputs = { nix-darwin, ... }: let" "    configuration = { pkgs, ... }: {" "      system.stateVersion = 4;" "    };" "  in {" "    darwinConfigurations.\"simple\" = nix-darwin.lib.darwinSystem {" "      modules = [ configuration ];" "    };" "  };" "}" > flake.nix' \
-    '    printf "%s\\n" init >> "$HOME/nix-darwin-calls"' \
-    '    ;;' \
-    '  *"flake lock")' \
-    '    : > flake.lock' \
-    '    printf "%s\\n" lock >> "$HOME/nix-darwin-calls"' \
-    '    ;;' \
-    '  *"run nix-darwin -- switch --flake . --no-write-lock-file")' \
-    '    printf "%s\\n" switch >> "$HOME/nix-darwin-calls"' \
-    '    ;;' \
-    '  *) exit 2 ;;' \
-    'esac' \
+    '[[ "${1:-}" == "--extra-experimental-features" ]]' \
+    '[[ "${2:-}" == "nix-command flakes" ]]' \
+    '[[ "${3:-}" == run ]]' \
+    '[[ "${4:-}" == "path:$REPO_DIR/nix#darwin-rebuild" ]]' \
+    '[[ "${5:-}" == "--" ]]' \
+    '[[ "${6:-}" == switch ]]' \
+    '[[ "${7:-}" == "--flake" ]]' \
+    '[[ "${8:-}" == "path:$REPO_DIR/nix#aarch64-darwin" ]]' \
+    '[[ "${9:-}" == "--no-write-lock-file" ]]' \
     'printf "%s\\n" "$*" >> "$HOME/nix-darwin-nix-args"' \
     > "$mock_bin/nix"
   chmod +x "$mock_bin/nix"
@@ -143,10 +148,11 @@ setup() {
   chmod +x "$mock_bin/sudo"
 
   run env HOME="$nix_home" PATH="$mock_bin:/usr/local/bin:/usr/bin:/bin" \
+    REPO_DIR="$REPO_DIR" NIX_DARWIN_CONFIG_DIR="" \
     NIX_DARWIN_STEP="$REPO_DIR/setup/macos/10-nix-darwin.sh" \
     bash -c '
       source "$NIX_DARWIN_STEP" help >/dev/null
-      NIX_DARWIN_CONFIG_DIR="$HOME/nix-darwin-config"
+      NIX_DARWIN_CONFIG_DIR="$REPO_DIR/nix"
       NIX_DARWIN_HOSTNAME="test-mac"
       NIX_DARWIN_ETC_DIR="$HOME/mock-etc"
       mkdir -p "$NIX_DARWIN_ETC_DIR/nix" "$NIX_DARWIN_ETC_DIR/resolver"
@@ -159,33 +165,13 @@ setup() {
       run
     '
   assert_success
-  assert [ -f "$nix_home/nix-darwin-config/flake.nix" ]
-  run grep -Fc -- 'nixpkgs.hostPlatform = "aarch64-darwin";' \
-    "$nix_home/nix-darwin-config/flake.nix"
+  [[ ! -e "$nix_home/nix-darwin-config/flake.nix" ]]
+  [[ "$(git -C "$REPO_DIR" hash-object nix/flake.nix)" == "$flake_hash" ]]
+  [[ "$(git -C "$REPO_DIR" hash-object nix/flake.lock)" == "$lock_hash" ]]
+  run grep -Fc -- 'darwinConfigurations."aarch64-darwin"' "$REPO_DIR/nix/flake.nix"
   assert_success
   assert_output "1"
-  run grep -Fc -- 'darwinConfigurations."test-mac"' \
-    "$nix_home/nix-darwin-config/flake.nix"
-  assert_success
-  assert_output "1"
-  run grep -Fc -- 'nix.settings.experimental-features = "nix-command flakes";' \
-    "$nix_home/nix-darwin-config/flake.nix"
-  assert_success
-  assert_output "1"
-  run grep -F -- 'services.tailscale.enable' \
-    "$nix_home/nix-darwin-config/flake.nix"
-  assert_failure
-  assert [ -f "$nix_home/nix-darwin-config/flake.lock" ]
-  run grep -Fxc -- init "$nix_home/nix-darwin-calls"
-  assert_success
-  assert_output "1"
-  run grep -Fxc -- lock "$nix_home/nix-darwin-calls"
-  assert_success
-  assert_output "2"
-  run grep -Fxc -- switch "$nix_home/nix-darwin-calls"
-  assert_success
-  assert_output "2"
-  run grep -Fxc -- '--extra-experimental-features nix-command flakes run nix-darwin -- switch --flake . --no-write-lock-file' \
+  run grep -Fxc -- "--extra-experimental-features nix-command flakes run path:$REPO_DIR/nix#darwin-rebuild -- switch --flake path:$REPO_DIR/nix#aarch64-darwin --no-write-lock-file" \
     "$nix_home/nix-darwin-nix-args"
   assert_success
   assert_output "2"
@@ -193,8 +179,8 @@ setup() {
   assert [ -f "$nix_home/mock-etc/bashrc.before-nix-darwin" ]
   assert [ -f "$nix_home/mock-etc/zshrc.before-nix-darwin" ]
   assert [ -f "$nix_home/mock-etc/resolver/ts.net" ]
-  refute [ -e "$nix_home/mock-etc/resolver/ts.net.before-nix-darwin" ]
-  refute [ -e "$nix_home/mock-etc/nix/nix.conf" ]
+  assert [ ! -e "$nix_home/mock-etc/resolver/ts.net.before-nix-darwin" ]
+  assert [ ! -e "$nix_home/mock-etc/nix/nix.conf" ]
 }
 
 @test "nix-darwin step rejects non-macOS execution" {

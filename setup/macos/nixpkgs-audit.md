@@ -58,8 +58,17 @@ Nixpkgs has `ms-vscode-remote.remote-ssh` as an alternative to `jeanp413.open-re
 
 ## Migration notes
 
+### Evaluated Home Manager profile
+
+The inventory and selection counts above describe only entries in the reduced Brewfile. Evaluation of the `aarch64-darwin` Home Manager profile in `nix/flake.nix` includes all 55 usable formula mappings and 21 selected cask mappings from that inventory, plus four packages that are not in the reduced Brewfile:
+
+- Formula additions declared in `nix/packages/common.nix`: `pkgconf`, `ffmpeg`, and `podman`.
+- Cask addition declared in `nix/packages/aarch64-darwin.nix`: `openscad`.
+
+The evaluated profile therefore contains 58 formula packages, 22 cask packages, and the three Zsh plugins; Home Manager's generated support entries are not included in those counts. The package declarations are intentionally left as-is; this audit distinguishes profile-only additions from Brewfile-derived replacements.
+
 - The reduced Brewfile contains seven taps: `can1357/tap`, `finestructure/tap`, `grishka/grishka`, `homebrew-ffmpeg/ffmpeg`, `jetbrains/junie`, `jundot/omlx`, and `nikitabobko/tap`. Taps are package sources rather than package entries, so they are not included in the counts above; their other contents were not audited. The FFmpeg tap remains listed, but the reduced Brewfile has no FFmpeg formula entry.
-- `nix/packages/common.nix` contains the 54 retained portable formula replacements plus three Nix-managed Zsh plugins; `darwin.nix` adds `ios-deploy`, and `aarch64-darwin.nix` contains the 21 selected cask replacements. The reduced Brewfile retains `podman-compose` but no `podman` engine; local Compose use therefore requires a separately available Podman engine or remote socket. No Fedora or Intel Darwin output is defined.
+- `nix/packages/common.nix` contains 57 formula packages (54 Brewfile-derived plus the three profile-only additions) and the three Nix-managed Zsh plugins; `darwin.nix` adds Brewfile-derived `ios-deploy`, for 58 formula packages total. `aarch64-darwin.nix` contains 21 Brewfile-selected casks plus profile-only `openscad`, for 22 casks total. The reduced Brewfile retains `podman-compose` but not `podman`; the evaluated Nix profile supplies the Podman CLI, though a machine/socket still needs to be configured and running. No Fedora or Intel Darwin output is defined.
 - The locked Nixpkgs revision does not advertise `x86_64-darwin` as a supported system. Adding Intel macOS later will require a compatible Nixpkgs revision and a fresh platform audit; the architecture-specific module keeps that extension point separate.
 - The Home Manager configuration allows unfree packages only by predicate for `google-chrome`, `jetbrains-toolbox`, `mqtt-explorer`, `obsidian`, `postman`, `proxyman`, `raycast`, `slack`, `spotify`, and `tailscale-gui`. No formulae are unfree.
 - `burpsuite` cannot evaluate for Darwin because its FHS environment needs Linux `glibc`; `prusa-slicer` pulls a broken WebKitGTK dependency. Both remain manual/vendor exceptions. `segger-jlink` is excluded until its SEGGER license terms are explicitly accepted; no acceptance flag is set.

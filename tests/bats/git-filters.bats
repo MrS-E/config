@@ -37,10 +37,43 @@ load "/workspace/tests/bats/helpers/assertions.bash"
   assert_success
   local expected_provider
   case "$(uname -s)" in
-    Darwin) expected_provider="$HOME/.nix-profile/lib/libykcs11.dylib" ;;
+    Darwin) expected_provider="$(sed -n 's/^YKCS11=//p' "$REPO_DIR/ssh/providers.mac")" ;;
     *) expected_provider="/usr/lib64/pkcs11/opensc-pkcs11.so" ;;
   esac
   run grep -F "PKCS11Provider $expected_provider" "$checkout/portable/ssh/config.d/global"
+  assert_success
+}
+
+@test "git filter setup replaces legacy Homebrew provider paths" {
+  local repo="$BATS_TEST_TMPDIR/legacy-filter-repo"
+  local expected_provider
+  mkdir -p "$repo/setup/general" "$repo/ssh/config.d"
+
+  cp "$REPO_DIR/.gitattributes" "$repo/"
+  cp "$REPO_DIR/setup/general/common.bash" "$REPO_DIR/setup/general/02-git-filters.sh" "$repo/setup/general/"
+  cp "$REPO_DIR/ssh/pkcs11-filter.sh" "$REPO_DIR/ssh/providers.mac" "$REPO_DIR/ssh/providers.fedora" "$repo/ssh/"
+  printf '%s\n' 'Host github.com' '    PKCS11Provider @YKCS11@' > "$repo/ssh/config.d/global"
+
+  git -C "$repo" init --quiet
+  git -C "$repo" config user.email test@example.com
+  git -C "$repo" config user.name "Filter Test"
+  git -C "$repo" config filter.pkcs11-provider.clean "ssh/pkcs11-filter.sh clean"
+  git -C "$repo" config filter.pkcs11-provider.smudge "ssh/pkcs11-filter.sh smudge"
+  git -C "$repo" add .
+  git -C "$repo" commit --quiet -m initial
+
+  printf '%s\n' 'Host github.com' '    PKCS11Provider /opt/homebrew/lib/libykcs11.dylib' \
+    > "$repo/ssh/config.d/global"
+
+  run bash -c 'cd "$1" && "$1/setup/general/02-git-filters.sh" run' _ "$repo"
+  assert_success
+
+  expected_provider="$(sed -n 's/^YKCS11=//p' "$repo/ssh/providers.mac")"
+  run grep -F "PKCS11Provider $expected_provider" "$repo/ssh/config.d/global"
+  assert_success
+  run grep -F '/opt/homebrew' "$repo/ssh/config.d/global"
+  assert_failure
+  run git -C "$repo" diff --quiet -- ssh/config.d/global
   assert_success
 }
 

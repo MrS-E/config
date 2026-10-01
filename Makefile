@@ -67,6 +67,7 @@ define run_bats
 		-v $(WORKSPACE_MOUNT) \
 		-e HOME=/home/tester \
 		-e TEST_OS=$(1) \
+		-e REPO_DIR=$(WORKSPACE) \
 		--user tester \
 		-w $(WORKSPACE) \
 		$(IMAGE_PREFIX)/$(1) \

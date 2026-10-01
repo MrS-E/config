@@ -1,4 +1,5 @@
-# PKCS#11 provider paths for macOS (Home Manager profile).
+# PKCS#11 provider paths from the macOS Home Manager Nix profile.
+# yubico-piv-tool provides YKCS11; opensc provides OPENSC.
 # Consumed by pkcs11-filter.sh (smudge) to resolve @YKCS11@ / @OPENSC@ tokens.
 YKCS11=/Users/simeon.stix/.nix-profile/lib/libykcs11.dylib
 OPENSC=/Users/simeon.stix/.nix-profile/lib/opensc-pkcs11.so

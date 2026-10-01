@@ -295,6 +295,11 @@ if [[ "$OS" = "macos" ]]; then
 fi
 
 ##########
+# Jetbrains Junie
+##########
+export PATH="$PATH:$HOME/.local/bin"
+
+##########
 # Prompt
 ##########
 if command -v starship >/dev/null 2>&1; then
@@ -312,16 +317,6 @@ else
 fi
 
 ##########
-# Homebrew
-##########
-if ! command -v brew >/dev/null 2>&1; then
-  [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
-  [[ -x /usr/local/bin/brew ]] && eval "$(/usr/local/bin/brew shellenv)"
-fi
-[[ -x /opt/homebrew/bin/brew ]] && export PATH="/opt/homebrew/sbin:/opt/homebrew/bin:$PATH"
-# TODO add brew paths for intel mac
-
-##########
 # FZF
 ##########
 
@@ -334,12 +329,6 @@ fi
 ##########
 
 export PATH="$PATH:/usr/local/bin"
-
-##########
-# Jetbrains Junie
-##########
-
-export PATH="$PATH:$HOME/.local/bin"
 
 ##########
 # Zephyr-SDK
