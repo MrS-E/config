@@ -32,6 +32,7 @@ case "$(uname -s)" in
 
     export MAC_RAM_GB="$(( $(sysctl -n hw.memsize) / 1024 / 1024 / 1024 ))"
 
+    # nix-darwin system
     if [[ -d /run/current-system/sw/bin ]] && [[ ":$PATH:" != *":/run/current-system/sw/bin:"* ]]; then
       export PATH="/run/current-system/sw/bin:$PATH"
     fi
@@ -138,7 +139,7 @@ o() {
 
 # nix-darwin (macOS system manager for launchd daemons)
 if [[ "$OS" = "macos" ]]; then
-  alias nix-system-reload='sudo darwin-rebuild switch --flake .'
+  alias nix-system-reload='sudo darwin-rebuild switch --flake "path:$HOME/config/nix-darwin"'
 fi
 
 # Grep
@@ -309,6 +310,16 @@ else
     RPROMPT="%(?..%F{red}[%?]%f)"
   }
 fi
+
+##########
+# Homebrew
+##########
+if ! command -v brew >/dev/null 2>&1; then
+  [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+  [[ -x /usr/local/bin/brew ]] && eval "$(/usr/local/bin/brew shellenv)"
+fi
+[[ -x /opt/homebrew/bin/brew ]] && export PATH="/opt/homebrew/sbin:/opt/homebrew/bin:$PATH"
+# TODO add brew paths for intel mac
 
 ##########
 # FZF
