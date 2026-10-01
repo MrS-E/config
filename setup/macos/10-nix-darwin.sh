@@ -186,10 +186,7 @@ prepare_flake_lock() {
   fi
 
   log "Resolving nix-darwin flake inputs as the current user..."
-  (
-    cd "$NIX_DARWIN_CONFIG_DIR"
-    run_nix flake lock
-  )
+  run_nix flake lock "path:$NIX_DARWIN_CONFIG_DIR"
 }
 
 run() {
@@ -218,11 +215,9 @@ run() {
   backup_unmanaged_etc_files
 
   log "Activating nix-darwin configuration..."
-  (
-    cd "$NIX_DARWIN_CONFIG_DIR"
-    run_nix_as_root run nix-darwin -- switch --flake . --no-write-lock-file
-  )
-  log "nix-darwin activated. Use sudo darwin-rebuild switch --flake $NIX_DARWIN_CONFIG_DIR for later changes."
+  run_nix_as_root run nix-darwin -- switch \
+    --flake "path:$NIX_DARWIN_CONFIG_DIR" --no-write-lock-file
+  log "nix-darwin activated. Use sudo darwin-rebuild switch --flake 'path:$NIX_DARWIN_CONFIG_DIR' for later changes."
 }
 
 case "${1:-}" in

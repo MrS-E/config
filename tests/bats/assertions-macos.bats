@@ -56,6 +56,7 @@ setup() {
 @test "Nix step runs the official installer and configures flakes" {
   local mock_bin="$BATS_TEST_TMPDIR/mock-bin"
   local nix_home="$BATS_TEST_TMPDIR/nix-home"
+  mkdir -p "$nix_home"
   mkdir -p "$mock_bin"
   printf '%s\n' \
     '#!/usr/bin/env bash' \
@@ -104,6 +105,9 @@ setup() {
     > "$mock_bin/uname"
   chmod +x "$mock_bin/uname"
 
+  printf '%s\n' '#!/usr/bin/env bash' 'exit 0' > "$mock_bin/hostname"
+  chmod +x "$mock_bin/hostname"
+
   printf '%s\n' \
     '#!/usr/bin/env bash' \
     'set -euo pipefail' \
@@ -113,11 +117,12 @@ setup() {
     '    printf "%s\\n" "{ " "  outputs = { nix-darwin, ... }: let" "    configuration = { pkgs, ... }: {" "      system.stateVersion = 4;" "    };" "  in {" "    darwinConfigurations.\"simple\" = nix-darwin.lib.darwinSystem {" "      modules = [ configuration ];" "    };" "  };" "}" > flake.nix' \
     '    printf "%s\\n" init >> "$HOME/nix-darwin-calls"' \
     '    ;;' \
-    '  *"flake lock")' \
-    '    : > flake.lock' \
+    '  *"flake lock path:"*)' \
+    '    [[ "${5:-}" == "path:$HOME/nix-darwin-config" ]]' \
+    '    : > "$HOME/nix-darwin-config/flake.lock"' \
     '    printf "%s\\n" lock >> "$HOME/nix-darwin-calls"' \
     '    ;;' \
-    '  *"run nix-darwin -- switch --flake . --no-write-lock-file")' \
+    '  *"run nix-darwin -- switch --flake path:$HOME/nix-darwin-config --no-write-lock-file")' \
     '    printf "%s\\n" switch >> "$HOME/nix-darwin-calls"' \
     '    ;;' \
     '  *) exit 2 ;;' \
@@ -185,7 +190,7 @@ setup() {
   run grep -Fxc -- switch "$nix_home/nix-darwin-calls"
   assert_success
   assert_output "2"
-  run grep -Fxc -- '--extra-experimental-features nix-command flakes run nix-darwin -- switch --flake . --no-write-lock-file' \
+  run grep -Fxc -- '--extra-experimental-features nix-command flakes run nix-darwin -- switch --flake path:'"$nix_home"'/nix-darwin-config --no-write-lock-file' \
     "$nix_home/nix-darwin-nix-args"
   assert_success
   assert_output "2"
@@ -193,8 +198,8 @@ setup() {
   assert [ -f "$nix_home/mock-etc/bashrc.before-nix-darwin" ]
   assert [ -f "$nix_home/mock-etc/zshrc.before-nix-darwin" ]
   assert [ -f "$nix_home/mock-etc/resolver/ts.net" ]
-  refute [ -e "$nix_home/mock-etc/resolver/ts.net.before-nix-darwin" ]
-  refute [ -e "$nix_home/mock-etc/nix/nix.conf" ]
+  assert [ ! -e "$nix_home/mock-etc/resolver/ts.net.before-nix-darwin" ]
+  assert [ ! -e "$nix_home/mock-etc/nix/nix.conf" ]
 }
 
 @test "nix-darwin step rejects non-macOS execution" {
