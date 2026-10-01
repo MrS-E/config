@@ -17,8 +17,6 @@ brew "automake"
 brew "bat"
 # Backend processor for BibLaTeX
 brew "biber"
-# Object-file caching compiler wrapper
-brew "ccache"
 # Anti-virus software
 brew "clamav"
 # Formatting tools for C, C++, Obj-C, Java, JavaScript, TypeScript
@@ -27,8 +25,6 @@ brew "clang-format"
 brew "cmake"
 # Documentation for CMake
 brew "cmake-docs"
-# Dependency manager for Cocoa projects
-brew "cocoapods"
 # GNU File, Shell, and Text utilities
 brew "coreutils"
 # Static analysis of C and C++ code
@@ -53,16 +49,10 @@ brew "gnuplot"
 brew "go"
 # Open-source build automation tool based on the Groovy and Kotlin DSL
 brew "gradle"
-# Open-source build automation tool based on the Groovy and Kotlin DSL
-brew "gradle@8"
 # GNU grep, egrep and fgrep
 brew "grep"
 # Development framework for multimedia applications
 brew "gstreamer"
-# C/C++ and Java libraries for Unicode and globalization
-brew "icu4c@76"
-# C/C++ and Java libraries for Unicode and globalization
-brew "icu4c@77"
 # Tools and libraries to manipulate images in select formats
 brew "imagemagick"
 # Install and debug iPhone apps from the command-line
@@ -75,8 +65,6 @@ brew "ktlint"
 brew "lazygit"
 # Sophisticated file transfer program
 brew "lftp"
-# Postgres C API library
-brew "libpq", link: true
 # LTeX+ Language Server: maintained fork of LTeX Language Server
 brew "ltex-ls-plus"
 # Utility for directing compilation
@@ -85,8 +73,6 @@ brew "make"
 brew "mbpoll"
 # Simple tool to make locally trusted development certificates
 brew "mkcert"
-# Message broker implementing the MQTT protocol
-brew "mosquitto"
 # Open source relational database management system
 brew "mysql-client"
 # Ambitious Vim-fork focused on extensibility and agility
@@ -95,20 +81,10 @@ brew "neovim"
 brew "ninja"
 # Port scanning utility for large networks
 brew "nmap"
-# Open-source, cross-platform JavaScript runtime environment
-brew "node"
-# Open-source, cross-platform JavaScript runtime environment
-brew "node@24"
-# Libraries for security-enabled client and server applications
-brew "nss"
-# Development kit for the Java programming language
-brew "openjdk@17"
 # Tools and libraries for smart cards
 brew "opensc"
 # OpenBSD freely-licensed SSH connectivity tools
 brew "openssh"
-# Cryptography and SSL/TLS Toolkit
-brew "openssl@1.1"
 # Minimal dumb-terminal emulation program
 brew "picocom"
 # Draw UML diagrams
@@ -117,38 +93,24 @@ brew "plantuml"
 brew "podlet"
 # Alternative to docker-compose using podman
 brew "podman-compose"
-# Sound system for POSIX OSes
-brew "pulseaudio"
 # Generic machine emulator and virtualizer
 brew "qemu"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
-# Powerful, clean, object-oriented scripting language
-brew "ruby@3.3"
 # Display and control your Android device
 brew "scrcpy"
 # 7-Zip is a file archiver with a high compression ratio
 brew "sevenzip"
-# Shell Script Compiler
-brew "shc"
 # Static analysis and lint tool, for (ba)sh scripts
 brew "shellcheck"
-# Work with remote images registries
-brew "skopeo"
 # SOcket CAT: netcat on steroids
 brew "socat"
-# Audio processing library
-brew "sound-touch"
 # Cross-shell prompt for astronauts
 brew "starship"
 # Tool to enforce Swift style and conventions
 brew "swiftlint"
-# Easiest, most secure way to use WireGuard and 2FA
-brew "tailscale"
 # User interface to the TELNET protocol
 brew "telnet"
-# Programmatically correct mistyped console commands
-brew "thefuck"
 # Display directories as trees (with optional color/HTML output)
 brew "tree"
 # Extremely fast Python package installer and resolver, written in Rust
@@ -163,16 +125,8 @@ brew "ykman"
 brew "yubico-piv-tool"
 # General-purpose lossless data-compression library
 brew "zlib"
-# Real-time type-ahead completion for Zsh
-brew "zsh-autocomplete"
-# Fish-like fast/unobtrusive autosuggestions for zsh
-brew "zsh-autosuggestions"
-# Fish shell like syntax highlighting for zsh
-brew "zsh-syntax-highlighting"
 # Android SDK component
 cask "android-platform-tools"
-# Electronics prototyping platform
-cask "arduino-ide"
 # Utility improving 3rd party mouse performance and functionalities
 cask "bettermouse"
 # Web security testing toolkit
@@ -185,8 +139,6 @@ cask "diffmerge"
 cask "figma"
 # Web browser
 cask "firefox"
-# 3D parametric modeller
-cask "freecad"
 # Web browser
 cask "google-chrome"
 # Hex editor for reverse engineers
@@ -234,8 +186,6 @@ cask "slack"
 cask "spotify"
 # Mesh VPN based on WireGuard
 cask "tailscale-app"
-# JDK from the Eclipse Foundation (Adoptium)
-cask "temurin@8"
 # LaTeX editor
 cask "texifier"
 # Customizable email client
