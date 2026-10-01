@@ -22,5 +22,4 @@ with pkgs;
   tailscale-gui
   thunderbird
   wireshark
-  zotero
 ]

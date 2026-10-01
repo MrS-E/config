@@ -12,7 +12,7 @@ This document records the package-by-package comparison of the reduced `setup/ma
 | Brewfile entries | Total | Nixpkgs mappings | Current migration result |
 |---|---:|---:|---:|
 | Formulae | 60 | 57 | 55 usable; 2 unsupported; 3 without a usable mapping |
-| Casks | 37 | 31 | 21 selected; 10 excluded or unusable; 6 without a mapping |
+| Casks | 37 | 31 | 20 selected; 11 excluded or unusable; 6 without a mapping |
 | VS Code extensions | 40 | Historical 21/19 catalog | Excluded from Nix |
 
 ## Found or mapped in Nixpkgs
@@ -25,11 +25,11 @@ This document records the package-by-package comparison of the reduced `setup/ma
 
 `afl++` → `aflplusplus` and `mbpoll` → `mbpoll` both have Nixpkgs attributes, but neither supports Darwin. The other retained formulae without a usable Nixpkgs mapping are listed below. The retained `gradle` attribute is version 8.14.4; `mariadb.client` is 11.4.12 and is not Oracle MySQL. The reduced Brewfile no longer contains the former version-pinned formulae or either FFmpeg entry.
 
-### Casks (31/37 mappings; 21 selected)
+### Casks (31/37 mappings; 20 selected)
 
 - `android-platform-tools` → `android-tools` (**selected**); `burp-suite` → `burpsuite` (**not usable: its FHS environment pulls Linux-only glibc**); `figma` → `figma-linux` (**unofficial, Linux-only**); `firefox` (**selected**); `google-chrome` (**selected**); `imhex` (**selected**); `jetbrains-toolbox` (**selected**); `kitty` (**selected**).
 - `mactex` → `texliveFull` (**selected; TeX Live, not the MacTeX GUI bundle**); `meshlab` (**selected**); `mqtt-explorer` (**selected**); `nextcloud-vfs` → `nextcloud-client` (**Linux-only; no macOS VFS equivalent**); `nordic-nrf-command-line-tools` → `nrf-command-line-tools` (**Linux-only**); `obsidian` (**selected**); `postman` (**selected**); `proton-mail-bridge` → `protonmail-bridge` (**selected**); `protonvpn` → `proton-vpn` (**selected**); `proxyman` (**selected**).
-- `prusaslicer` → `prusa-slicer` (**excluded: its WebKitGTK dependency is marked broken**); `raspberry-pi-imager` → `rpi-imager` (**no Darwin support**); `raycast` (**selected**); `segger-jlink` (**excluded: Nix requires explicit acceptance of SEGGER's non-free license**); `segger-ozone` (**Linux-only**); `slack` (**selected**); `spotify` (**selected**); `tailscale-app` → `tailscale-gui` (**selected**); `thunderbird` (**selected**); `vlc` (**Linux-only**); `vscodium` (**available but explicitly excluded from this migration**); `wireshark-app` → `wireshark` (**selected**); `zotero` (**selected**).
+- `prusaslicer` → `prusa-slicer` (**excluded: its WebKitGTK dependency is marked broken**); `raspberry-pi-imager` → `rpi-imager` (**no Darwin support**); `raycast` (**selected**); `segger-jlink` (**excluded: Nix requires explicit acceptance of SEGGER's non-free license**); `segger-ozone` (**Linux-only**); `slack` (**selected**); `spotify` (**selected**); `tailscale-app` → `tailscale-gui` (**selected**); `thunderbird` (**selected**); `vlc` (**Linux-only**); `vscodium` (**available but explicitly excluded from this migration**); `wireshark-app` → `wireshark` (**selected**); `zotero` (**available but temporarily excluded: the pinned `10.0.2` build fails its `AboutTranslations` source check**).
 
 ### VS Code extensions (21/40)
 
@@ -60,15 +60,15 @@ Nixpkgs has `ms-vscode-remote.remote-ssh` as an alternative to `jeanp413.open-re
 
 ### Evaluated Home Manager profile
 
-The inventory and selection counts above describe only entries in the reduced Brewfile. Evaluation of the `aarch64-darwin` Home Manager profile in `nix/flake.nix` includes all 55 usable formula mappings and 21 selected cask mappings from that inventory, plus four packages that are not in the reduced Brewfile:
+The inventory and selection counts above describe only entries in the reduced Brewfile. Evaluation of the `aarch64-darwin` Home Manager profile in `nix/flake.nix` includes all 55 usable formula mappings and 20 selected cask mappings from that inventory, plus four packages that are not in the reduced Brewfile:
 
 - Formula additions declared in `nix/packages/common.nix`: `pkgconf`, `ffmpeg`, and `podman`.
 - Cask addition declared in `nix/packages/aarch64-darwin.nix`: `openscad`.
 
-The evaluated profile therefore contains 58 formula packages, 22 cask packages, and the three Zsh plugins; Home Manager's generated support entries are not included in those counts. The package declarations are intentionally left as-is; this audit distinguishes profile-only additions from Brewfile-derived replacements.
+The evaluated profile therefore contains 58 formula packages, 21 cask packages, and the three Zsh plugins; Home Manager's generated support entries are not included in those counts. Zotero is temporarily omitted because the pinned `10.0.2` build fails to find its expected `AboutTranslations` block in `ActorManagerParent.sys.mjs`. This audit distinguishes profile-only additions from Brewfile-derived replacements.
 
 - The reduced Brewfile contains seven taps: `can1357/tap`, `finestructure/tap`, `grishka/grishka`, `homebrew-ffmpeg/ffmpeg`, `jetbrains/junie`, `jundot/omlx`, and `nikitabobko/tap`. Taps are package sources rather than package entries, so they are not included in the counts above; their other contents were not audited. The FFmpeg tap remains listed, but the reduced Brewfile has no FFmpeg formula entry.
-- `nix/packages/common.nix` contains 57 formula packages (54 Brewfile-derived plus the three profile-only additions) and the three Nix-managed Zsh plugins; `darwin.nix` adds Brewfile-derived `ios-deploy`, for 58 formula packages total. `aarch64-darwin.nix` contains 21 Brewfile-selected casks plus profile-only `openscad`, for 22 casks total. The reduced Brewfile retains `podman-compose` but not `podman`; the evaluated Nix profile supplies the Podman CLI, though a machine/socket still needs to be configured and running. No Fedora or Intel Darwin output is defined.
+- `nix/packages/common.nix` contains 57 formula packages (54 Brewfile-derived plus the three profile-only additions) and the three Nix-managed Zsh plugins; `darwin.nix` adds Brewfile-derived `ios-deploy`, for 58 formula packages total. `aarch64-darwin.nix` contains 20 Brewfile-selected casks plus profile-only `openscad`, for 21 casks total. The reduced Brewfile retains `podman-compose` but not `podman`; the evaluated Nix profile supplies the Podman CLI, though a machine/socket still needs to be configured and running. No Fedora or Intel Darwin output is defined.
 - The locked Nixpkgs revision does not advertise `x86_64-darwin` as a supported system. Adding Intel macOS later will require a compatible Nixpkgs revision and a fresh platform audit; the architecture-specific module keeps that extension point separate.
 - The Home Manager configuration allows unfree packages only by predicate for `google-chrome`, `jetbrains-toolbox`, `mqtt-explorer`, `obsidian`, `postman`, `proxyman`, `raycast`, `slack`, `spotify`, and `tailscale-gui`. No formulae are unfree.
 - `burpsuite` cannot evaluate for Darwin because its FHS environment needs Linux `glibc`; `prusa-slicer` pulls a broken WebKitGTK dependency. Both remain manual/vendor exceptions. `segger-jlink` is excluded until its SEGGER license terms are explicitly accepted; no acceptance flag is set.
