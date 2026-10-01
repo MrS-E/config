@@ -532,6 +532,7 @@ if (( $+commands[brew] )); then
         shift
         local brewfile="${1:-Brewfile}"
         local backup="${brewfile}.old"
+        local dump leaves
         if [[ -f "$brewfile" ]]; then
           if [[ -f "$backup" ]]; then
             mv "$brewfile" "${backup}.$(date +%Y%m%d%H%M%S)"
@@ -539,7 +540,53 @@ if (( $+commands[brew] )); then
             mv "$brewfile" "$backup"
           fi
         fi
-        command brew bundle dump --file="$brewfile" --describe --force
+
+        dump="$(mktemp -t brewfile-dump)"
+        leaves="$(mktemp -t brewfile-leaves)"
+        brew leaves --installed-on-request > "$leaves"
+
+        brew bundle dump --file="$dump" --force
+
+        awk '
+        NR == FNR {
+          keep[$1] = 1
+          next
+        }
+
+        # Buffer comments and blank lines. They may describe the next entry.
+        /^[[:space:]]*(#.*)?$/ {
+          pending = pending $0 "\n"
+          next
+        }
+
+        /^brew "/ {
+          formula = $0
+          sub(/^brew "/, "", formula)
+          sub(/".*$/, "", formula)
+
+          if (formula in keep) {
+            printf "%s", pending
+            print
+          }
+
+          # Discard comments if this formula is a dependency.
+          pending = ""
+          next
+        }
+
+        # Preserve comments/blank lines before taps, casks, etc.
+        {
+          printf "%s", pending
+          pending = ""
+          print
+        }
+
+        END {
+          printf "%s", pending
+        }
+        ' "$leaves" "$dump" > "$brewfile"
+
+        rm -f "$dump" "$leaves"
         ;;
       *)
         command brew "$@"
