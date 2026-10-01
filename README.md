@@ -286,6 +286,11 @@ For example, `NIX_DARWIN_CONFIG_DIR="$PWD/nix"` selects this repository's
 Apple Silicon configuration. Run it from the repository checkout with
 `./scripts/migrate-macos-brew-to-nix.sh`.
 
+The script locates Homebrew through `PATH` or the standard locations:
+`/opt/homebrew/bin/brew` on Apple Silicon and `/usr/local/bin/brew` on Intel.
+This does not require Homebrew initialization in `zshrc`. For a custom install,
+set `MIGRATION_BREW_BIN` to the executable path.
+
 The backup is a package inventory, not a copy of applications, service state,
 settings, or application data. In particular, an installed VSCodium cask is
 removed; its settings and extensions are not backed up or managed by Nix. The

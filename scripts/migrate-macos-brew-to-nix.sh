@@ -39,6 +39,8 @@ Options:
   --help            Show this help
 
 The generated Brewfile.backup-* file is never overwritten or deleted.
+Homebrew is searched for in PATH and its standard macOS locations; set
+MIGRATION_BREW_BIN to an executable path to use a custom installation.
 If ~/nix-darwin-config/flake.nix exists, set NIX_DARWIN_CONFIG_DIR explicitly
 to choose the configuration that the regular setup should activate.
 EOF
@@ -46,6 +48,43 @@ EOF
 
 require_command() {
   command -v "$1" >/dev/null 2>&1 || migration_die "required command not found: $1"
+}
+
+resolve_brew_bin() {
+  local candidate architecture
+  local -a candidates=()
+
+  if [[ -n "${MIGRATION_BREW_BIN:-}" ]]; then
+    [[ -f "$MIGRATION_BREW_BIN" && -x "$MIGRATION_BREW_BIN" ]] \
+      || migration_die "MIGRATION_BREW_BIN is not an executable file: $MIGRATION_BREW_BIN"
+    BREW_BIN="$MIGRATION_BREW_BIN"
+    return
+  fi
+
+  candidate="$(command -v brew 2>/dev/null || true)"
+  [[ -n "$candidate" ]] && candidates+=("$candidate")
+
+  architecture="$(uname -m)" || migration_die "could not determine macOS architecture"
+  case "$architecture" in
+    arm64|aarch64)
+      candidates+=(/opt/homebrew/bin/brew /usr/local/bin/brew)
+      ;;
+    x86_64|amd64)
+      candidates+=(/usr/local/bin/brew /opt/homebrew/bin/brew)
+      ;;
+    *)
+      candidates+=(/opt/homebrew/bin/brew /usr/local/bin/brew)
+      ;;
+  esac
+
+  for candidate in "${candidates[@]}"; do
+    if [[ -f "$candidate" && -x "$candidate" ]]; then
+      BREW_BIN="$candidate"
+      return
+    fi
+  done
+
+  migration_die "Homebrew executable not found in PATH or its standard macOS locations; set MIGRATION_BREW_BIN to its path"
 }
 
 check_nix_darwin_configuration() {
@@ -90,7 +129,6 @@ preflight() {
 
   [[ -n "${HOME:-}" ]] || migration_die "HOME is not set"
   require_command uname
-  require_command brew
   require_command curl
   require_command sudo
   require_command hostname
@@ -107,7 +145,7 @@ preflight() {
 
   check_nix_darwin_configuration
 
-  BREW_BIN="$(command -v brew)"
+  resolve_brew_bin
   CURL_BIN="$(command -v curl)"
   BREW_PREFIX="$("$BREW_BIN" --prefix)" \
     || migration_die "could not determine the Homebrew prefix"
@@ -259,8 +297,8 @@ uninstall_homebrew() {
   migration_log "Running Homebrew's official uninstaller..."
   "$CURL_BIN" --proto '=https' --tlsv1.2 -fsSL "$HOMEBREW_UNINSTALLER_URL" \
     | /bin/bash -s -- --force
-  if command -v brew >/dev/null 2>&1; then
-    migration_die "Homebrew's uninstaller returned, but brew is still on PATH"
+  if [[ -e "$BREW_BIN" || -L "$BREW_BIN" ]] || command -v brew >/dev/null 2>&1; then
+    migration_die "Homebrew's uninstaller returned, but its executable remains at $BREW_BIN or brew is still on PATH"
   fi
 }
 

@@ -10,6 +10,7 @@ source "$REPO_DIR/scripts/migrate-macos-brew-to-nix.sh"
 
 setup() {
   require_os macos
+  unset MIGRATION_BREW_BIN
 }
 
 create_migration_mocks() {
@@ -104,6 +105,38 @@ create_migration_mocks() {
   after_uninstaller="${log_contents#*official-uninstaller --force}"
   [[ "$before_uninstaller" == *"brew uninstall --cask --force cask-one"* ]]
   [[ "$after_uninstaller" == *"normal setup"* ]]
+}
+
+@test "migration uses an explicit Homebrew executable when brew is not on PATH" {
+  local mock_bin="$BATS_TEST_TMPDIR/mock-bin"
+  local path_bin="$BATS_TEST_TMPDIR/path-bin"
+  local backup_dir="$BATS_TEST_TMPDIR/brew-backups"
+  local log_file="$BATS_TEST_TMPDIR/migration.log"
+
+  export MIGRATION_TEST_LOG="$log_file"
+  export MIGRATION_MOCK_BREW_PREFIX="$BATS_TEST_TMPDIR/homebrew-prefix"
+  export MIGRATION_MOCK_BREW="$mock_bin/brew"
+  export MIGRATION_BREW_BIN="$MIGRATION_MOCK_BREW"
+  export NIX_DARWIN_CONFIG_DIR="$REPO_DIR/nix"
+  export NIX_DARWIN_HOSTNAME=""
+  create_migration_mocks "$mock_bin"
+  mkdir -p "$path_bin"
+  ln -s "$mock_bin/uname" "$path_bin/uname"
+  ln -s "$mock_bin/hostname" "$path_bin/hostname"
+  ln -s "$mock_bin/curl" "$path_bin/curl"
+  export PATH="$path_bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+  run_normal_setup() {
+    printf '%s\n' 'normal setup' >> "$MIGRATION_TEST_LOG"
+  }
+
+  main --yes --backup-dir "$backup_dir"
+
+  assert [ -f "$MIGRATION_BACKUP_FILE" ]
+  assert [ ! -e "$MIGRATION_MOCK_BREW" ]
+  [[ "$(<"$log_file")" == *"brew --prefix"* ]]
+  [[ "$(<"$log_file")" == *"brew uninstall --formula --force --ignore-dependencies formula-one"* ]]
+  [[ "$(<"$log_file")" == *"normal setup"* ]]
 }
 
 @test "migration refuses non-interactive removal without explicit confirmation" {
