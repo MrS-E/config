@@ -11,5 +11,15 @@
   "fasterModel": {
     "id": "deepseek/deepseek-v4.1-flash",
     "temperature": 0
+  },
+  "extraBody": {
+    "provider": {
+      "sort": "throughput",
+      "max_price": {
+        "prompt": 0.5,
+        "completion": 0.8
+      },
+      "allow_fallbacks": true
+    }
   }
 }
