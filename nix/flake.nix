@@ -18,9 +18,10 @@
     bettermouse.url = "path:../custom-flakes/bettermouse";
     figma.url = "path:../custom-flakes/figma";
     proton-drive.url = "path:../custom-flakes/proton-drive";
+    proton-mail-bridge.url = "path:../custom-flakes/proton-mail-bridge";
   };
 
-  outputs = { nix-darwin, home-manager, nextcloud-vfs, bettermouse, figma, proton-drive, ... }:
+  outputs = { nix-darwin, home-manager, nextcloud-vfs, bettermouse, figma, proton-drive, proton-mail-bridge, ... }:
     let
       system = "aarch64-darwin";
     in {
@@ -66,6 +67,7 @@
               betterMouse = bettermouse.packages.${system}.bettermouse;
               figma = figma.packages.${system}.figma;
               protonDrive = proton-drive.packages.${system}.proton-drive;
+              protonMailBridge = proton-mail-bridge.packages.${system}.proton-mail-bridge;
             };
             home-manager.users."simeon.stix" = {
               imports = [
