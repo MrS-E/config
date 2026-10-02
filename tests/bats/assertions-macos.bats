@@ -121,11 +121,11 @@ setup() {
     '[[ "${1:-}" == "--extra-experimental-features" ]]' \
     '[[ "${2:-}" == "nix-command flakes" ]]' \
     '[[ "${3:-}" == run ]]' \
-    '[[ "${4:-}" == "path:$REPO_DIR?dir=nix#darwin-rebuild" ]]' \
+    '[[ "${4:-}" == "git+file://$REPO_DIR?dir=nix#darwin-rebuild" ]]' \
     '[[ "${5:-}" == "--" ]]' \
     '[[ "${6:-}" == switch ]]' \
     '[[ "${7:-}" == "--flake" ]]' \
-    '[[ "${8:-}" == "path:$REPO_DIR?dir=nix#aarch64-darwin" ]]' \
+    '[[ "${8:-}" == "git+file://$REPO_DIR?dir=nix#aarch64-darwin" ]]' \
     '[[ "${9:-}" == "--no-write-lock-file" ]]' \
     'printf "%s\\n" "$*" >> "$HOME/nix-darwin-nix-args"' \
     > "$mock_bin/nix"
@@ -171,7 +171,7 @@ setup() {
   run grep -Fc -- 'darwinConfigurations."aarch64-darwin"' "$REPO_DIR/nix/flake.nix"
   assert_success
   assert_output "1"
-  run grep -Fxc -- "--extra-experimental-features nix-command flakes run path:$REPO_DIR?dir=nix#darwin-rebuild -- switch --flake path:$REPO_DIR?dir=nix#aarch64-darwin --no-write-lock-file" \
+  run grep -Fxc -- "--extra-experimental-features nix-command flakes run git+file://$REPO_DIR?dir=nix#darwin-rebuild -- switch --flake git+file://$REPO_DIR?dir=nix#aarch64-darwin --no-write-lock-file" \
     "$nix_home/nix-darwin-nix-args"
   assert_success
   assert_output "2"

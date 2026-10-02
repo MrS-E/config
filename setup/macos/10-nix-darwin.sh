@@ -167,7 +167,7 @@ run() {
   [[ "$configuration" =~ ^[A-Za-z0-9._-]+$ ]] \
     || die "invalid nix-darwin configuration name: $configuration"
   if [[ "$NIX_DARWIN_CONFIG_DIR" == "$repo_dir/nix" ]]; then
-    flake_ref="path:$repo_dir?dir=nix"
+    flake_ref="git+file://$repo_dir?dir=nix"
   else
     flake_ref="path:$NIX_DARWIN_CONFIG_DIR"
   fi
@@ -176,7 +176,7 @@ run() {
   backup_unmanaged_etc_files
 
   log "Activating nix-darwin configuration..."
-  run_nix_as_root run "path:$repo_dir?dir=nix#darwin-rebuild" -- switch \
+  run_nix_as_root run "git+file://$repo_dir?dir=nix#darwin-rebuild" -- switch \
     --flake "$flake_ref#$configuration" --no-write-lock-file
   log "nix-darwin activated. Reapply with darwin-rebuild switch --flake $flake_ref#$configuration."
 }

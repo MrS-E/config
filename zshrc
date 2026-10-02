@@ -152,7 +152,7 @@ if [[ "$OS" = "macos" ]]; then
     local activation_package
 
     if [[ "${config_dir:A}" == "$CONFIG_DIR/nix" ]]; then
-      flake_ref="path:$CONFIG_DIR?dir=nix"
+      flake_ref="git+file://$CONFIG_DIR?dir=nix"
     else
       flake_ref="path:$config_dir"
     fi
