@@ -192,6 +192,20 @@
       },
       "parent": []
     },
+    "proton-mail-bridge": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_6"
+      },
+      "locked": {
+        "path": "../custom-flakes/proton-mail-bridge",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/proton-mail-bridge",
+        "type": "path"
+      },
+      "parent": []
+    },
     "root": {
       "inputs": {
         "bettermouse": "bettermouse",
@@ -201,6 +215,7 @@
         "nix-darwin": "nix-darwin",
         "nixpkgs": "nixpkgs_4",
         "proton-drive": "proton-drive",
+        "proton-mail-bridge": "proton-mail-bridge",
         "texifier": "texifier"
       }
     },

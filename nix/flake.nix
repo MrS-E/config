@@ -19,9 +19,10 @@
     figma.url = "path:../custom-flakes/figma";
     texifier.url = "path:../custom-flakes/texifier";
     proton-drive.url = "path:../custom-flakes/proton-drive";
+    proton-mail-bridge.url = "path:../custom-flakes/proton-mail-bridge";
   };
 
-  outputs = { nix-darwin, home-manager, nextcloud-vfs, bettermouse, figma, texifier, proton-drive, ... }:
+  outputs = { nix-darwin, home-manager, nextcloud-vfs, bettermouse, figma, texifier, proton-drive, proton-mail-bridge, ... }:
     let
       system = "aarch64-darwin";
     in {
@@ -68,6 +69,7 @@
               figma = figma.packages.${system}.figma;
               texifier = texifier.packages.${system}.texifier;
               protonDrive = proton-drive.packages.${system}.proton-drive;
+              protonMailBridge = proton-mail-bridge.packages.${system}.proton-mail-bridge;
             };
             home-manager.users."simeon.stix" = {
               imports = [
