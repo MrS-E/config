@@ -10,15 +10,17 @@ also defines the Intel download URL and checksum, which this flake uses for
 
 The cask currently packages Burp Suite Community Edition `2026.8`. Its
 Apple-Silicon and Intel DMGs contain the `Burp Suite.app` bundle on an HFS+
-disk image. The derivation uses Nixpkgs' `p7zip` to extract the image. Since
-`p7zip` emits HFS+ symbolic-link targets as regular text files, the build reads
-the archive's Unix mode metadata and recreates the links inside the app before
-copying it into `Applications/Burp Suite.app` in the Nix output. This preserves
-the vendor signature, verified for the pinned release with `codesign`. The
-derivation does not run Homebrew's uninstall or cleanup actions, install the
-app under `/Applications`, or configure Burp Suite. This repository's `nix/`
-configuration adds it to the selected user's Home Manager profile, which
-links it under `~/Applications/Home Manager Apps/Burp Suite.app`.
+disk image. The derivation uses Nixpkgs' `p7zip` to extract the image. Because
+`p7zip` emits HFS+ symbolic-link targets as regular text files and does not
+preserve all executable modes, the build reads the DMG's Unix mode metadata,
+recreates symlinks, and restores file permissions. It then copies the bundle
+without dereferencing links. These steps keep `JavaApplicationStub` executable
+and preserve the signed resource tree; verify the pinned app with
+`codesign --verify --deep --strict`. The derivation does not run Homebrew's
+uninstall or cleanup actions, install the app under `/Applications`, or
+configure Burp Suite. This repository's `nix/` configuration adds it to the
+selected user's Home Manager profile, which links it under
+`~/Applications/Home Manager Apps/Burp Suite.app`.
 
 Build the package from this directory with:
 

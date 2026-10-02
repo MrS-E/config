@@ -66,7 +66,16 @@
               mkdir extracted
               ${pkgs.p7zip}/bin/7z x -snl -y "$src" -oextracted
               ${pkgs.p7zip}/bin/7z l -slt "$src" > archive-listing.txt
+              : > symlink-paths.txt
+              : > permission-modes.tsv
               ${pkgs.gawk}/bin/awk '
+                function permission_digit(bits, value) {
+                  value = 0;
+                  if (substr(bits, 1, 1) == "r") value += 4;
+                  if (substr(bits, 2, 1) == "w") value += 2;
+                  if (substr(bits, 3, 1) == "x" || substr(bits, 3, 1) == "s" || substr(bits, 3, 1) == "t") value += 1;
+                  return value;
+                }
                 BEGIN { RS = ""; FS = "\n" }
                 {
                   path = "";
@@ -75,11 +84,23 @@
                     if ($i ~ /^Path = /) path = substr($i, 8);
                     if ($i ~ /^Mode = /) mode = substr($i, 8);
                   }
-                  if (mode ~ /^l/) print path;
+                  if (mode ~ /^l/) {
+                    print path >> "symlink-paths.txt";
+                  } else if (mode ~ /^[-d]/) {
+                    permissions = substr(mode, 2, 9);
+                    printf "%s\t%o%o%o\n", path,
+                      permission_digit(substr(permissions, 1, 3)),
+                      permission_digit(substr(permissions, 4, 3)),
+                      permission_digit(substr(permissions, 7, 3)) >> "permission-modes.tsv";
+                  }
                 }
-              ' archive-listing.txt > symlink-paths.txt
+              ' archive-listing.txt
               if [ ! -s symlink-paths.txt ]; then
                 echo "No symbolic links found in the Burp Suite DMG listing" >&2
+                exit 1
+              fi
+              if [ ! -s permission-modes.tsv ]; then
+                echo "No file permission metadata found in the Burp Suite DMG listing" >&2
                 exit 1
               fi
 
@@ -126,8 +147,69 @@
                 exit 1
               fi
 
+              restored_modes=0
+              while IFS="$(printf '\t')" read -r archive_path mode || [ -n "$archive_path" ]; do
+                case "$archive_path" in
+                  /*|..|../*|*/../*|*/..)
+                    echo "Unsafe file path in Burp Suite DMG: $archive_path" >&2
+                    exit 1
+                    ;;
+                esac
+
+                mode_path="extracted/$archive_path"
+                case "$mode_path" in
+                  "$app_path"/*) ;;
+                  *) continue ;;
+                esac
+
+                if [ ! -e "$mode_path" ] || [ -L "$mode_path" ]; then
+                  echo "Could not restore permissions for $archive_path" >&2
+                  exit 1
+                fi
+
+                chmod "$mode" "$mode_path"
+                restored_modes=$((restored_modes + 1))
+              done < permission-modes.tsv
+              if [ "$restored_modes" -eq 0 ]; then
+                echo "No app file permissions restored from the Burp Suite DMG" >&2
+                exit 1
+              fi
+
               mkdir -p "$out/Applications"
-              cp -R "$app_path" "$out/Applications/"
+              cp -R -P "$app_path" "$out/Applications/"
+
+              app_output="$out/Applications/${cask.app}"
+              if [ ! -x "$app_output/Contents/MacOS/JavaApplicationStub" ]; then
+                echo "Burp Suite launcher is not executable after packaging" >&2
+                exit 1
+              fi
+
+              preserved_symlinks=0
+              while IFS= read -r archive_path || [ -n "$archive_path" ]; do
+                case "$archive_path" in
+                  /*|..|../*|*/../*|*/..)
+                    echo "Unsafe symlink path in Burp Suite DMG: $archive_path" >&2
+                    exit 1
+                    ;;
+                esac
+
+                link_path="extracted/$archive_path"
+                case "$link_path" in
+                  "$app_path"/*)
+                    relative_path="''${link_path#"$app_path"/}"
+                    if [ ! -L "$app_output/$relative_path" ]; then
+                      echo "App symlink was not preserved: $archive_path" >&2
+                      exit 1
+                    fi
+                    preserved_symlinks=$((preserved_symlinks + 1))
+                    ;;
+                  *) continue ;;
+                esac
+              done < symlink-paths.txt
+              if [ "$preserved_symlinks" -eq 0 ]; then
+                echo "No app symlinks preserved in the Burp Suite package" >&2
+                exit 1
+              fi
             '';
 
             passthru = { inherit cask; };
