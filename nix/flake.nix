@@ -17,11 +17,12 @@
     nextcloud-vfs.url = "path:../custom-flakes/nextcloud-vfs";
     bettermouse.url = "path:../custom-flakes/bettermouse";
     figma.url = "path:../custom-flakes/figma";
+    texifier.url = "path:../custom-flakes/texifier";
     proton-drive.url = "path:../custom-flakes/proton-drive";
     proton-mail-bridge.url = "path:../custom-flakes/proton-mail-bridge";
   };
 
-  outputs = { nix-darwin, home-manager, nextcloud-vfs, bettermouse, figma, proton-drive, proton-mail-bridge, ... }:
+  outputs = { nix-darwin, home-manager, nextcloud-vfs, bettermouse, figma, texifier, proton-drive, proton-mail-bridge, ... }:
     let
       system = "aarch64-darwin";
     in {
@@ -66,6 +67,7 @@
             home-manager.extraSpecialArgs = {
               betterMouse = bettermouse.packages.${system}.bettermouse;
               figma = figma.packages.${system}.figma;
+              texifier = texifier.packages.${system}.texifier;
               protonDrive = proton-drive.packages.${system}.proton-drive;
               protonMailBridge = proton-mail-bridge.packages.${system}.proton-mail-bridge;
             };

@@ -215,8 +215,23 @@
         "nix-darwin": "nix-darwin",
         "nixpkgs": "nixpkgs_4",
         "proton-drive": "proton-drive",
-        "proton-mail-bridge": "proton-mail-bridge"
+        "proton-mail-bridge": "proton-mail-bridge",
+        "texifier": "texifier"
       }
+    },
+    "texifier": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_6"
+      },
+      "locked": {
+        "path": "../custom-flakes/texifier",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/texifier",
+        "type": "path"
+      },
+      "parent": []
     }
   },
   "root": "root",
