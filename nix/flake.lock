@@ -1,5 +1,19 @@
 {
   "nodes": {
+    "bettermouse": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "path": "../custom-flakes/bettermouse",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/bettermouse",
+        "type": "path"
+      },
+      "parent": []
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -22,7 +36,7 @@
     },
     "nextcloud-vfs": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs_2"
       },
       "locked": {
         "path": "../custom-flakes/nextcloud-vfs",
@@ -72,6 +86,22 @@
     },
     "nixpkgs_2": {
       "locked": {
+        "lastModified": 1790692979,
+        "narHash": "sha256-m/h8WyGFpj34/AvKpxfZFG98Alm2sh/p9gq+IGH066c=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "68e5b9f7e82a76a5171d10b5d316e0ae5e1df6e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_3": {
+      "locked": {
         "lastModified": 1790652569,
         "narHash": "sha256-641r7xrlSOHYoktL9/aArPIYNgZJ9eM5URzSEOtPJDY=",
         "owner": "NixOS",
@@ -88,10 +118,11 @@
     },
     "root": {
       "inputs": {
+        "bettermouse": "bettermouse",
         "home-manager": "home-manager",
         "nextcloud-vfs": "nextcloud-vfs",
         "nix-darwin": "nix-darwin",
-        "nixpkgs": "nixpkgs_2"
+        "nixpkgs": "nixpkgs_3"
       }
     }
   },

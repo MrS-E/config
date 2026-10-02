@@ -15,9 +15,10 @@
     };
 
     nextcloud-vfs.url = "path:../custom-flakes/nextcloud-vfs";
+    bettermouse.url = "path:../custom-flakes/bettermouse";
   };
 
-  outputs = { nix-darwin, home-manager, nextcloud-vfs, ... }:
+  outputs = { nix-darwin, home-manager, nextcloud-vfs, bettermouse, ... }:
     let
       system = "aarch64-darwin";
     in {
@@ -59,6 +60,9 @@
             };
 
             home-manager.useGlobalPkgs = true;
+            home-manager.extraSpecialArgs = {
+              betterMouse = bettermouse.packages.${system}.bettermouse;
+            };
             home-manager.users."simeon.stix" = {
               imports = [
                 ./home-manager/packages.nix
