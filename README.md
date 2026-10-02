@@ -265,14 +265,14 @@ OS-agnostic steps that run first on every platform:
 `nix-darwin` handles macOS activation and system settings; Home Manager is
 integrated only for the selected user package profile and GUI app links. The
 app bundles are linked under `~/Applications/Home Manager Apps`.
-The profile includes the Nextcloud VFS, BetterMouse, Figma, Texifier, and Proton
-Drive apps defined in `custom-flakes/nextcloud-vfs`,
+The profile includes the Nextcloud VFS, BetterMouse, Figma, Texifier, Proton
+Drive, and Creality Print apps defined in `custom-flakes/nextcloud-vfs`,
 `custom-flakes/bettermouse`, `custom-flakes/figma`, `custom-flakes/texifier`,
-and `custom-flakes/proton-drive`; Home Manager exposes them through those
-user-level links. Nextcloud Finder Sync registration runs during Home Manager
-activation. BetterMouse's and Figma's first-run setup, Texifier's and Proton
-Drive's additional first-launch setup (if needed), and macOS privacy permissions
-remain manual.
+`custom-flakes/proton-drive`, and `custom-flakes/creality-print`; Home Manager
+exposes them through those user-level links. Nextcloud Finder Sync registration
+runs during Home Manager activation. BetterMouse's and Figma's first-run setup,
+Texifier's and Proton Drive's additional first-launch setup (if needed), and
+macOS privacy permissions remain manual.
 The checked-in `nix/flake.nix` pins Nixpkgs, nix-darwin, and Home Manager, and
 currently defines only `aarch64-darwin`. It does not manage dotfiles,
 `~/.config`, VSCodium, or editor settings/extensions. See the
