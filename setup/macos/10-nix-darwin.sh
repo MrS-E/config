@@ -12,7 +12,11 @@ source "$SCRIPT_DIR/common.bash"
 # nix-darwin is the macOS system manager for launchd daemons.
 NIX_DEFAULT_PROFILE="/nix/var/nix/profiles/default/bin/nix"
 NIX_USER_PROFILE="$HOME/.nix-profile/bin/nix"
-NIX_DARWIN_CONFIG_DIR="${NIX_DARWIN_CONFIG_DIR:-$REPO_DIR/nix-darwin}"
+NIX_DARWIN_CONFIG_DIR_EXPLICIT=0
+if [[ -n "${NIX_DARWIN_CONFIG_DIR:-}" ]]; then
+  NIX_DARWIN_CONFIG_DIR_EXPLICIT=1
+fi
+NIX_DARWIN_CONFIG_DIR="${NIX_DARWIN_CONFIG_DIR:-$REPO_DIR/nix}"
 NIX_DARWIN_HOSTNAME="${NIX_DARWIN_HOSTNAME:-}"
 NIX_DARWIN_ETC_DIR="${NIX_DARWIN_ETC_DIR:-/etc}"
 NIX_EXPERIMENTAL_FEATURES=(--extra-experimental-features "nix-command flakes")
@@ -26,12 +30,12 @@ presteps() {
 
 help() {
   cat <<'EOF'
-Bootstrap an optional nix-darwin configuration in the config repository's
-nix-darwin/ directory. The generated flake is adapted to the current hostname
-and macOS architecture, then configured with Nix flakes and activated as root.
-Existing installer-managed /etc files are preserved with
-*.before-nix-darwin backups. Skip this step with
---exclude macos/10-nix-darwin.sh if needed.
+Activate this repository's pinned nix-darwin configuration. Set
+NIX_DARWIN_CONFIG_DIR to select an external flake; set NIX_DARWIN_HOSTNAME to
+select its darwinConfigurations output. Flakes are never initialized, edited,
+or locked by this step. An existing ~/nix-darwin-config/flake.nix must be
+selected explicitly. Existing unmanaged /etc files are backed up before
+activation; skip this step with --exclude macos/10-nix-darwin.sh if needed.
 EOF
 }
 
@@ -93,61 +97,25 @@ flake_file() {
   printf '%s\n' "$NIX_DARWIN_CONFIG_DIR/flake.nix"
 }
 
-rename_simple_configuration() {
-  local flake="$1"
-  local host="$2"
-  local tmp
+flake_configuration() {
+  local platform="$1"
 
-  grep -qF 'darwinConfigurations."simple"' "$flake" || return 0
-
-  tmp="$(mktemp "${flake}.tmp.XXXXXX")"
-  sed "s/darwinConfigurations\.\"simple\"/darwinConfigurations.\"$host\"/g" \
-    "$flake" > "$tmp"
-  mv "$tmp" "$flake"
-}
-
-add_configuration_options() {
-  local flake="$1"
-  local platform="$2"
-  local tmp add_platform=1 add_nix_settings=1
-
-  grep -Eq '^[[:space:]]*nixpkgs\.hostPlatform[[:space:]]*=' "$flake" \
-    && add_platform=0
-  grep -Eq '^[[:space:]]*nix\.settings\.experimental-features[[:space:]]*=' "$flake" \
-    && add_nix_settings=0
-
-  (( add_platform || add_nix_settings )) || return 0
-
-  tmp="$(mktemp "${flake}.tmp.XXXXXX")"
-  if ! awk -v platform="$platform" '
-    !inserted && /configuration[[:space:]]*=[[:space:]]*[{][^}]*}[[:space:]]*:[[:space:]]*[{]/ {
-      print
-      if (add_platform) {
-        printf "      nixpkgs.hostPlatform = \"%s\";\n", platform
-      }
-      if (add_nix_settings) {
-        printf "      nix.settings.experimental-features = \"nix-command flakes\";\n"
-      }
-      inserted = 1
-      next
-    }
-    { print }
-    END { if (!inserted) exit 1 }
-  ' add_platform="$add_platform" add_nix_settings="$add_nix_settings" \
-    "$flake" > "$tmp"; then
-    rm -f "$tmp"
-    die "could not find the generated nix-darwin configuration in $flake"
+  if [[ "$NIX_DARWIN_CONFIG_DIR" == "$REPO_DIR/nix" ]]; then
+    printf '%s\n' "$platform"
+  elif [[ -n "$NIX_DARWIN_HOSTNAME" ]]; then
+    printf '%s\n' "$NIX_DARWIN_HOSTNAME"
+  else
+    darwin_hostname
   fi
-  mv "$tmp" "$flake"
 }
 
-configure_flake() {
-  local flake="$1"
-  local host="$2"
-  local platform="$3"
+refuse_implicit_legacy_flake() {
+  local legacy_flake="$HOME/nix-darwin-config/flake.nix"
 
-  rename_simple_configuration "$flake" "$host"
-  add_configuration_options "$flake" "$platform"
+  [[ "$NIX_DARWIN_CONFIG_DIR_EXPLICIT" == 1 ]] && return 0
+  [[ -f "$legacy_flake" ]] || return 0
+
+  die "existing nix-darwin flake found at $legacy_flake; set NIX_DARWIN_CONFIG_DIR explicitly to select that flake or $REPO_DIR/nix"
 }
 
 nix_darwin_etc_files() {
@@ -178,47 +146,33 @@ backup_unmanaged_etc_files() {
   done < <(nix_darwin_etc_files)
 }
 
-prepare_flake_lock() {
-  local lock="$NIX_DARWIN_CONFIG_DIR/flake.lock"
-
-  if [[ -e "$lock" && ! -w "$lock" ]]; then
-    log "Restoring user ownership of $lock..."
-    sudo chown "$(id -u):$(id -g)" "$lock"
-  fi
-
-  log "Resolving nix-darwin flake inputs as the current user..."
-  run_nix flake lock "path:$NIX_DARWIN_CONFIG_DIR"
-}
-
 run() {
-  local flake host platform
-  flake="$(flake_file)"
+  local flake configuration platform
 
-  ensure_dir "$NIX_DARWIN_CONFIG_DIR"
-  if [[ -f "$flake" ]]; then
-    log "Using existing nix-darwin flake: $flake"
-  else
-    log "Initializing nix-darwin flake in $NIX_DARWIN_CONFIG_DIR..."
-    (
-      cd "$NIX_DARWIN_CONFIG_DIR"
-      run_nix flake init -t nix-darwin
-    )
+  if [[ -d "$NIX_DARWIN_CONFIG_DIR" ]]; then
+    NIX_DARWIN_CONFIG_DIR="$(cd "$NIX_DARWIN_CONFIG_DIR" && pwd -P)"
   fi
 
-  [[ -f "$flake" ]] || die "nix flake init did not create $flake"
+  refuse_implicit_legacy_flake
+  flake="$(flake_file)"
+  [[ -f "$flake" ]] || die "nix-darwin flake not found: $flake"
 
-  host="$(darwin_hostname)"
   platform="$(darwin_host_platform)"
-  configure_flake "$flake" "$host" "$platform"
-  log "Configured nix-darwin for $host ($platform)."
+  if [[ "$NIX_DARWIN_CONFIG_DIR" == "$REPO_DIR/nix" && "$platform" != "aarch64-darwin" ]]; then
+    die "the repository flake currently supports aarch64-darwin; set NIX_DARWIN_CONFIG_DIR to an external flake for $platform"
+  fi
 
-  prepare_flake_lock
+  configuration="$(flake_configuration "$platform")"
+  [[ "$configuration" =~ ^[A-Za-z0-9._-]+$ ]] \
+    || die "invalid nix-darwin configuration name: $configuration"
+  log "Using nix-darwin configuration $configuration ($platform) from $NIX_DARWIN_CONFIG_DIR."
+
   backup_unmanaged_etc_files
 
   log "Activating nix-darwin configuration..."
-  run_nix_as_root run nix-darwin -- switch \
-    --flake "path:$NIX_DARWIN_CONFIG_DIR" --no-write-lock-file
-  log "nix-darwin activated. Use sudo darwin-rebuild switch --flake 'path:$NIX_DARWIN_CONFIG_DIR' for later changes."
+  run_nix_as_root run "path:$REPO_DIR/nix#darwin-rebuild" -- switch \
+    --flake "path:$NIX_DARWIN_CONFIG_DIR#$configuration" --no-write-lock-file
+  log "nix-darwin activated. Use NIX_DARWIN_CONFIG_DIR=$NIX_DARWIN_CONFIG_DIR darwin-rebuild switch --flake $NIX_DARWIN_CONFIG_DIR#$configuration for later changes."
 }
 
 case "${1:-}" in

@@ -4,6 +4,8 @@
 export EDITOR=vim
 export VISUAL=vim
 export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+mkdir -p "$XDG_DATA_HOME/zsh"
 
 if [[ -d "$HOME/Library/Android/sdk" ]]; then
   export ANDROID_HOME="$HOME/Library/Android/sdk"
@@ -35,6 +37,9 @@ case "$(uname -s)" in
     # nix-darwin system
     if [[ -d /run/current-system/sw/bin ]] && [[ ":$PATH:" != *":/run/current-system/sw/bin:"* ]]; then
       export PATH="/run/current-system/sw/bin:$PATH"
+    fi
+    if [[ -d "$HOME/.nix-profile/bin" ]] && [[ ":$PATH:" != *":$HOME/.nix-profile/bin:"* ]]; then
+      export PATH="$HOME/.nix-profile/bin:$PATH"
     fi
     ;;
   Linux)
@@ -137,6 +142,22 @@ o() {
 # nix-darwin (macOS system manager for launchd daemons)
 if [[ "$OS" = "macos" ]]; then
   alias nix-system-reload='sudo darwin-rebuild switch --flake "path:$HOME/config/nix-darwin"'
+
+  # Rebuild and activate Home Manager without nix-darwin system activation.
+  nix-system-update() {
+    local config_dir="${NIX_DARWIN_CONFIG_DIR:-$CONFIG_DIR/nix}"
+    local configuration="${NIX_DARWIN_HOSTNAME:-aarch64-darwin}"
+    local username
+    local activation_package
+
+    username="$(id -un)" || return
+    activation_package="$(nix --extra-experimental-features 'nix-command flakes' build \
+      --no-link \
+      --no-write-lock-file \
+      --print-out-paths \
+      "path:$config_dir#darwinConfigurations.$configuration.config.home-manager.users.\"$username\".home.activationPackage")" || return
+    "$activation_package/activate"
+  }
 fi
 
 # Grep
@@ -217,6 +238,13 @@ alias hosts='vim $HOME/.ssh/known_hosts'
 ##########
 autoload -Uz compinit
 zmodload zsh/complist
+
+if [[ -d /usr/share/zsh/site-functions ]]; then
+  FPATH="/usr/share/zsh/site-functions:$FPATH"
+fi
+if [[ -d "$HOME/.nix-profile/share/zsh/site-functions" ]]; then
+  FPATH="$HOME/.nix-profile/share/zsh/site-functions:$FPATH"
+fi
 compinit
 
 # bash completions into zsh
@@ -253,12 +281,6 @@ if [[ -d /usr/share/bash-completion/completions ]]; then
   done
 fi
 
-if [[ -d /usr/share/zsh/site-functions ]]; then
-  FPATH="/usr/share/zsh/site-functions:$FPATH"
-elif command -v brew >/dev/null 2>&1; then
-  FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
-fi
-
 ##########
 # Keybinds
 ##########
@@ -291,25 +313,30 @@ if [[ "$OS" = "macos" ]]; then
 fi
 
 ##########
-# Homebrew
+# Jetbrains Junie
 ##########
-if ! command -v brew >/dev/null 2>&1; then
-  [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)" 
-  [[ -x /usr/local/bin/brew ]] && eval "$(/usr/local/bin/brew shellenv)"
+export PATH="$PATH:$HOME/.local/bin"
+
+##########
+# Prompt
+##########
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+else
+  precmd_functions=(render_prompt)
+
+  function render_prompt {
+    PROMPT=""
+    PROMPT+="%(1j.%B%%%b .)"
+    PROMPT+="%~ "
+    PROMPT+="%(?.%F{green}.%F{red})%B$%b%f "
+    RPROMPT="%(?..%F{red}[%?]%f)"
+  }
 fi
-[[ -x /opt/homebrew/bin/brew ]] && export PATH="/opt/homebrew/sbin:/opt/homebrew/bin:$PATH"
-# TODO add brew paths for intel mac
 
 ##########
 # FZF
 ##########
-
-if (( $+commands[brew] )); then
-  BREW_PREFIX="$(brew --prefix 2>/dev/null)"
-  if [[ -n "$BREW_PREFIX" && -d "$BREW_PREFIX/opt/fzf/bin" && ":$PATH:" != *":$BREW_PREFIX/opt/fzf/bin:"* ]]; then
-    export PATH="$BREW_PREFIX/opt/fzf/bin:$PATH"
-  fi
-fi
 
 if (( $+commands[fzf] )); then
   source <(fzf --zsh)
@@ -320,12 +347,6 @@ fi
 ##########
 
 export PATH="$PATH:/usr/local/bin"
-
-##########
-# Jetbrains Junie
-##########
-
-export PATH="$PATH:$HOME/.local/bin"
 
 ##########
 # Zephyr-SDK
@@ -345,16 +366,10 @@ if [[ -s "/home/sstix/.bun/_bun" ]]; then
 fi
 
 ##########
-# GNU grep (Homebrew)
-##########
-if command -v brew >/dev/null 2>&1; then
-  export PATH="$(brew --prefix)/opt/grep/libexec/gnubin:$PATH"
-fi
-
-##########
 # Tailscale
 ##########
-if command -v tailscale >/dev/null 2>&1; then
+# The macOS tailscale-gui package exposes its app binary, not the CLI.
+if [[ "$OS" != "macos" ]] && command -v tailscale >/dev/null 2>&1; then
   source <(tailscale completion zsh)
 fi
 
@@ -369,39 +384,24 @@ fi
 # ZSH Plugins
 ##########
 
-# Prefer local clones if present
-if [[ -f "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+# Prefer Nix-managed plugins when present; use Git clones as a fallback.
+if [[ -f "$HOME/.nix-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+  source "$HOME/.nix-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+elif [[ -f "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
   source "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh"
-elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
-  source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 fi
 
-if [[ -f "$HOME/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
+if [[ -f "$HOME/.nix-profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
+  source "$HOME/.nix-profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
+elif [[ -f "$HOME/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
   source "$HOME/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
 fi
 
 # Syntax highlighting should be last
-if [[ -f "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+if [[ -f "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+  source "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+elif [[ -f "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
   source "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-  source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-fi
-
-##########
-# Prompt
-##########
-if command -v starship >/dev/null 2>&1; then
-  eval "$(starship init zsh)"
-else
-  precmd_functions=(render_prompt)
-
-  function render_prompt {
-    PROMPT=""
-    PROMPT+="%(1j.%B%%%b .)"
-    PROMPT+="%~ "
-    PROMPT+="%(?.%F{green}.%F{red})%B$%b%f "
-    RPROMPT="%(?..%F{red}[%?]%f)"
-  }
 fi
 
 ##########
@@ -481,80 +481,6 @@ git() {
       ;;
   esac
 }
-
-# Homebrew
-if (( $+commands[brew] )); then
-  brew() {
-    case "$1" in
-      fullupgrade)
-        command brew update && command brew upgrade && command brew cleanup -s
-        ;;
-      file)
-        shift
-        local brewfile="${1:-Brewfile}"
-        local backup="${brewfile}.old"
-        local dump leaves
-        if [[ -f "$brewfile" ]]; then
-          if [[ -f "$backup" ]]; then
-            mv "$brewfile" "${backup}.$(date +%Y%m%d%H%M%S)"
-          else
-            mv "$brewfile" "$backup"
-          fi
-        fi
-
-        dump="$(mktemp -t brewfile-dump)"
-        leaves="$(mktemp -t brewfile-leaves)"
-        command brew leaves --installed-on-request > "$leaves"
-
-        command brew bundle dump --file="$dump" --force
-
-        awk '
-        NR == FNR {
-          keep[$1] = 1
-          next
-        }
-
-        # Buffer comments and blank lines. They may describe the next entry.
-        /^[[:space:]]*(#.*)?$/ {
-          pending = pending $0 "\n"
-          next
-        }
-
-        /^brew "/ {
-          formula = $0
-          sub(/^brew "/, "", formula)
-          sub(/".*$/, "", formula)
-
-          if (formula in keep) {
-            printf "%s", pending
-            print
-          }
-
-          # Discard comments if this formula is a dependency.
-          pending = ""
-          next
-        }
-
-        # Preserve comments/blank lines before taps, casks, etc.
-        {
-          printf "%s", pending
-          pending = ""
-          print
-        }
-
-        END {
-          printf "%s", pending
-        }
-        ' "$leaves" "$dump" > "$brewfile"
-
-        rm -f "$dump" "$leaves"
-        ;;
-      *)
-        command brew "$@"
-        ;;
-    esac
-  }
-fi 
 
 # Custom Utility
 local CUSTOM_SCRIPTS="$CONFIG_DIR/scripts"

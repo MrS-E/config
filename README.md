@@ -26,7 +26,7 @@ Cross-platform dotfiles repository supporting **macOS**, **Fedora**, **Fedora At
 
 | OS | Step Directory | Package Managers | Status |
 |---|---|---|---|
-| **macOS** | `setup/macos/` | Homebrew | ✅ Active |
+| **macOS** | `setup/macos/` | Nix (Home Manager + nix-darwin) | ✅ Active |
 | **Fedora** | `setup/fedora/` | dnf, COPR, Flatpak | ✅ Active |
 | **Fedora Atomic** | `setup/fedora-atomic/` | rpm-ostree, Flatpak, Toolbx | ✅ Tested (only Test Suit) |
 | **Manjaro** | `setup/manjaro/` | pacman, AUR (yay) | ✅ Tested (only Test Suit) |
@@ -46,11 +46,11 @@ config/
 │   │   ├── 01-symlinks.sh
 │   │   ├── 02-git-filters.sh
 │   │   └── 03-vim-base.sh
-│   ├── macos/                  # macOS steps + Brewfile
+│   ├── macos/                  # macOS steps + Brewfile audit inventory
 │   ├── fedora/                 # Fedora steps + dnf/flatpak/copr manifests
 │   ├── fedora-atomic/          # Fedora Atomic steps + rpm-ostree/toolbox manifests
 │   └── manjaro/                # Manjaro steps + pacman/aur manifests
-├── nix-darwin/                 # nix-darwin flake for declarative macOS settings
+├── nix/                        # Pinned macOS package flake and reusable modules
 ├── tests/                      # Podman + bats-core test matrix
 ├── zshrc                       # ZSH shell configuration
 ├── gitconfig                   # Git global configuration
@@ -72,7 +72,7 @@ config/
 | `setup.sh` | Orchestration-only runner. Detects OS, discovers numbered step scripts under `setup/general/` and `setup/<os>/`, applies selection filters (`--all`, `--only`, `--exclude`, `--interactive`), and runs each step as a separate process via `presteps` then `run`. No setup logic lives here. |
 | `setup/general/` | OS-agnostic steps that run first on every platform: symlink dotfiles, register git filters, create shared editor directories. `common.bash` provides platform-neutral primitives (logging, symlink helpers, git clone guards, manifest parsing). |
 | `setup/<os>/` | Platform-specific numbered steps with companion manifests and a `common.bash` helper library. Steps are idempotent — safe to run repeatedly. |
-| `nix-darwin/` | nix-darwin flake and lock file for declarative macOS system settings and launchd services. |
+| `nix/` | Pinned Nix flake: nix-darwin activates the Apple Silicon host, and Home Manager manages only the selected package profile. |
 | `zshrc` | ZSH config: OS/hardware detection, history settings, aliases, platform-aware clip/clippaste helpers, completion system, Starship prompt with custom fallback, version managers (bun), ZSH plugins, custom script shell-integration. |
 | `gitconfig` | Git config: GPG SSH signing, codium/vscode as difftool/mergetool, LFS, pull rebase, credential cache. |
 | `vimrc` | Vim config: persistent undo, custom theme, indentation, whitespace display, statusline. |
@@ -127,8 +127,8 @@ rewrites provider paths on commit/checkout.
    no hosts:
    ```
    # providers.mac
-   YKCS11=/opt/homebrew/lib/libykcs11.dylib
-   OPENSC=/opt/homebrew/lib/opensc-pkcs11.so
+   YKCS11=/Users/simeon.stix/.nix-profile/lib/libykcs11.dylib
+   OPENSC=/Users/simeon.stix/.nix-profile/lib/opensc-pkcs11.so
    ```
    ```
    # providers.fedora
@@ -146,7 +146,7 @@ rewrites provider paths on commit/checkout.
   `s|<real path>|@VAR@|g` rules (one per `VAR=path` line, comments/blank lines
   skipped).
 - Pipes the file through that sed. So
-  `/opt/homebrew/lib/libykcs11.dylib` becomes `@YKCS11@`, and any Fedora path
+  `/Users/simeon.stix/.nix-profile/lib/libykcs11.dylib` becomes `@YKCS11@`, and any Fedora path
   (once filled in) would also collapse to `@YKCS11@`.
 - Result: the committed blob contains only portable `@YKCS11@` / `@OPENSC@`
   tokens, regardless of which platform last edited it.
@@ -158,8 +158,9 @@ real paths.
 - Sources that file to get `YKCS11` / `OPENSC`, then runs
   `sed -e "s|@YKCS11@|$YKCS11|g" -e "s|@OPENSC@|$OPENSC|g"`.
 - Fallback: if the providers file isn't present yet (fresh-clone race where the
-  filter runs before the file is checked out), it hardcodes the macOS Homebrew
-  paths on Darwin, and on any other OS passes content through unchanged.
+  filter runs before the file is checked out), it uses the current macOS user's
+  Home Manager profile paths on Darwin, and on any other OS passes content
+  through unchanged.
 - Result: the file on disk has real, SSH-usable paths for whatever machine you're
   on.
 
@@ -250,45 +251,73 @@ OS-agnostic steps that run first on every platform:
 
 | Step | Description |
 |---|---|
-| `01-homebrew.sh` | Install Homebrew if not present |
-| `02-brew-bundle.sh` | Install packages from `setup/macos/Brewfile` via `brew bundle` |
 | `03-ssh-agent.sh` | Start ssh-agent if not running |
 | `04-ssh-keychain.sh` | Add SSH keys to Apple keychain |
 | `05-vim-theme.sh` | Clone Dracula vim theme |
 | `06-junie.sh` | Install Junie CLI |
-| `07-waveforms.sh` | Download and install Digilent WaveForms from the official `.dmg` (not in Brewfile; falls back to the browser if Cloudflare blocks `curl`) |
+| `07-waveforms.sh` | Download and install Digilent WaveForms from the official `.dmg` as a separate vendor installer (falls back to the browser if Cloudflare blocks `curl`) |
 | `08-kitty-permissions.sh` | Open macOS Privacy & Security settings for Kitty permissions |
 | `09-nix.sh` | Install Nix using the official installer and enable `nix-command` + flakes |
-| `10-nix-darwin.sh` | Bootstrap nix-darwin from this repository's `nix-darwin/` directory for declarative macOS settings and launchd daemons |
+| `10-nix-darwin.sh` | Activate the pinned repository flake in `nix/`; supports an explicit external flake override |
 
-`nix-darwin` is the macOS system manager for launchd daemons.
-`10-nix-darwin.sh` uses the repository's `nix-darwin/` flake, initializing it
-from the nix-darwin template if `flake.nix` is absent. It sets
-`nixpkgs.hostPlatform` to the detected Darwin platform (including
-`aarch64-darwin` on Apple Silicon), renames the generated `simple`
-configuration to the local hostname, enables
-`nix.settings.experimental-features = "nix-command flakes"`, and runs the
-root activation. Tailscale and other optional services are not enabled by this
-step; add them to the flake when needed. The step passes the required
-experimental-feature flags to both user and root Nix commands, so it also works
-when `sudo` cannot read `~/.config/nix/nix.conf`.
-It does not overwrite an existing `flake.nix`; use
-`--exclude macos/10-nix-darwin.sh` when the optional bootstrap is not wanted.
-Before activation, it resolves `flake.lock` as the regular user and passes
-`--no-write-lock-file` to the root activation, preventing `sudo` from leaving a
-root-owned lock file in the config repository. If a previous failed bootstrap
-did leave that lock file root-owned, the step repairs ownership of that one file.
-Known conflicting files at `/etc/nix/nix.conf`, `/etc/bashrc`, and `/etc/zshrc`
-are moved to matching `.before-nix-darwin` backups before nix-darwin takes
-ownership; inspect those backups before deleting them. After activation,
-declare additional launchd daemons in the flake and apply later changes with
-`sudo darwin-rebuild switch --flake "path:$HOME/config/nix-darwin"`.
-If the pinned tool needs to be bootstrapped directly, use
-`sudo nix run nix-darwin/master#darwin-rebuild -- switch`.
-Open a new shell after activation; `zshrc` adds `/run/current-system/sw/bin`
-when it exists so `darwin-rebuild` is available without an absolute path.
-The `nix-system-reload` zsh alias targets the same repository flake from any
-working directory, applying changes and reloading managed daemons.
+`nix-darwin` handles macOS activation and system settings; Home Manager is
+integrated only for the selected user package profile and GUI app links. The
+app bundles are linked under `~/Applications/Home Manager Apps`.
+The checked-in `nix/flake.nix` pins Nixpkgs, nix-darwin, and Home Manager, and
+currently defines only `aarch64-darwin`. It does not manage dotfiles,
+`~/.config`, VSCodium, or editor settings/extensions. See the
+[Brewfile-to-Nixpkgs audit](setup/macos/nixpkgs-audit.md) for selected
+replacements and manual/vendor exceptions.
+
+Since `brew bundle` is retired, clean setup no longer installs VSCodium or its
+extensions; they remain outside this migration.
+
+For a Mac that still has Homebrew installed, the opt-in one-shot migration is
+`scripts/migrate-macos-brew-to-nix.sh`. It writes a unique, persistent
+`Brewfile.backup-*` under `~/` by default (or in a directory selected with
+`--backup-dir`), verifies the installed formula/cask counts, removes every
+formula and cask reported as installed by Homebrew, runs Homebrew's official
+uninstaller, and then runs the normal `setup.sh` flow, including Nix bootstrap
+and nix-darwin activation. It is not part of automatic setup. The script asks
+you to type `REMOVE HOMEBREW`; use `--yes` only when explicitly authorizing a
+non-interactive run. If `~/nix-darwin-config/flake.nix` exists, set
+`NIX_DARWIN_CONFIG_DIR` explicitly so the migration knows which flake to use.
+For example, `NIX_DARWIN_CONFIG_DIR="$PWD/nix"` selects this repository's
+Apple Silicon configuration. Run it from the repository checkout with
+`./scripts/migrate-macos-brew-to-nix.sh`.
+
+The script locates Homebrew through `PATH` or the standard locations:
+`/opt/homebrew/bin/brew` on Apple Silicon and `/usr/local/bin/brew` on Intel.
+This does not require Homebrew initialization in `zshrc`. For a custom install,
+set `MIGRATION_BREW_BIN` to the executable path.
+
+The backup is a package inventory, not a copy of applications, service state,
+settings, or application data. In particular, an installed VSCodium cask is
+removed; its settings and extensions are not backed up or managed by Nix. The
+migration script never overwrites or deletes the backup; keep it. If you later
+choose to restore Homebrew, reinstall Homebrew and use
+`brew bundle --file /path/to/Brewfile.backup-<timestamp>` to attempt to
+reinstall the recorded bundle. The backup directory must be outside the
+Homebrew prefix so the official uninstaller cannot remove it.
+
+`setup/macos/10-nix-darwin.sh` activates the repository flake by default. Set
+`NIX_DARWIN_CONFIG_DIR` explicitly to use an external flake, and optionally set
+`NIX_DARWIN_HOSTNAME` to choose its `darwinConfigurations` output. The step
+never initializes, edits, or locks an external configuration. If
+`~/nix-darwin-config/flake.nix` already exists and no override is selected, the
+step stops with instructions rather than silently abandoning it. The reduced
+`setup/macos/Brewfile` remains only as audit inventory; setup no longer installs
+Homebrew or runs `brew bundle`.
+
+The step passes the required Nix feature flags to user and root commands. Known
+conflicting files at `/etc/nix/nix.conf`, `/etc/bashrc`, and `/etc/zshrc` are
+moved to matching `.before-nix-darwin` backups before activation; inspect those
+backups before deleting them. Tailscale and other optional services are not
+enabled automatically. After activation, apply repository-flake changes with
+`sudo darwin-rebuild switch --flake "$HOME/config/nix#aarch64-darwin"`.
+Open a new shell after activation; `zshrc` adds
+`/run/current-system/sw/bin` and `~/.nix-profile/bin` when they exist, exposing
+system commands and Home Manager packages.
 
 ### Runtime Versions (`nixvm`)
 
@@ -379,11 +408,11 @@ longer have other references.
 
 ### Package Manifests
 
-Each platform's manifests live alongside their step scripts in `setup/<os>/`.
+Fedora and Manjaro manifests live alongside their step scripts; the macOS package profile is defined in `nix/`.
 
 | Manifest | Format | Export command |
 |---|---|---|
-| `setup/macos/Brewfile` | Homebrew Bundle | `brew bundle dump --file=setup/macos/Brewfile --force` |
+| `nix/flake.nix` and `nix/packages/*.nix` | Pinned Nix flake and package modules | `nix flake check path:./nix` |
 | `setup/fedora/dnf.txt` | One package per line | `dnf repoquery --userinstalled --qf "%{name}\n" \| sort` |
 | `setup/fedora/copr.txt` | One COPR repo per line | (manual) |
 | `setup/fedora/flatpak.txt` | One app ID per line | `flatpak list --app --columns=application \| sort` |
@@ -393,6 +422,9 @@ Each platform's manifests live alongside their step scripts in `setup/<os>/`.
 | `setup/fedora-atomic/toolboxes/*.txt` | Per-toolbox dnf packages | (manual per toolbox) |
 | `setup/manjaro/pacman.txt` | One package per line | `pacman -Qqen \| sort` |
 | `setup/manjaro/aur.txt` | One package per line | `pacman -Qqem \| sort` |
+
+`setup/macos/Brewfile` is retained only as the source inventory for the
+[Nixpkgs audit](setup/macos/nixpkgs-audit.md); the setup runner does not read it.
 
 ### Test Harness
 
@@ -412,7 +444,7 @@ The `zshrc` is the most complex config file. It handles:
 
 - Detects **OS**: `Darwin` (macOS) vs `Linux`
 - Detects **CPU architecture**: Intel vs ARM (sets `$ARCH` to `arm64` or `x86_64`)
-- Sets platform-specific environment variables (`$HOMEBREW_PREFIX`, `$ANDROID_HOME`, etc.)
+- Sets platform-specific environment variables (`$ANDROID_HOME`, etc.)
 - Detects **hardware model** on macOS (sets `$HARDWARE_MODEL` based on `sysctl hw.model`)
 
 ### History
@@ -437,14 +469,13 @@ The `zshrc` is the most complex config file. It handles:
 
 - **`adb`**: wraps Android Debug Bridge with `adb -H` for wireless, auto-starts adb server
 - **`code` / `codium`**: wraps VSCodium, managing base+overlay settings via `export`/`import`
-- **`brew`**: wraps Homebrew with automatic Brewfile update after `brew install`/`remove`
 - **`git`**: extends git with additional aliases (see gitconfig section)
 - **`idf.py`**: ESP-IDF wrapper with automatic environment setup
 
 ### Completion System
 
 - Modern completion system with `menu select` and `list-colors`
-- Auto-loads completions for: git, brew, docker, kubectl, pip, npm, cargo, rustup
+- Auto-loads completions for: git, docker, kubectl, pip, npm, cargo, rustup
 
 ### Prompt
 
@@ -465,12 +496,13 @@ Loaded via native zsh `source` (no plugin manager):
 - **zsh-autosuggestions**: fish-style autosuggestions as you type
 - **zsh-syntax-highlighting**: real-time command syntax coloring
 - **zsh-autocomplete**: type-ahead completion in all contexts
+- macOS sources the Nix profile packages when available; Fedora continues to install these plugins as Git clones under `~/.zsh`
 
 ### Additional Integrations
 
-- **Homebrew**: shellenv + completions on macOS
+- **Home Manager package profile**: provides the selected macOS packages without managing dotfiles or editor settings
 - **FZF**: fuzzy finder with fd integration, `Ctrl+T` / `Ctrl+R` / `Alt+C` bindings
-- **Tailscale**: completions
+- **Tailscale**: CLI completions outside macOS (the macOS GUI app is not invoked as a CLI)
 - **TheFuck**: auto-correction tool (`eval $(thefuck --alias)`)
 - **1Password CLI**: completions
 
@@ -734,9 +766,12 @@ Both scripts are auto-loaded by `zshrc` via shell integration, so their commands
 ### Adding Packages
 
 1. Identify the correct platform manifest (see [Package Manifests](#package-manifests) table above).
-2. Add the package name to the appropriate text file (one per line).
-3. After installing on the target machine, run the export command to keep the manifest in sync:
-   - macOS: `brew bundle dump --file=setup/macos/Brewfile --force`
+2. For macOS, add a verified package attribute to the appropriate module in
+   `nix/packages/` (`common.nix`, `darwin.nix`, or `aarch64-darwin.nix`) and
+   update the [Nixpkgs audit](setup/macos/nixpkgs-audit.md). The reduced
+   `Brewfile` remains an audit inventory and is not consumed by setup.
+3. For Fedora, Flatpak, and Manjaro, add the package/app ID to the appropriate
+   text file (one per line). After installing, use the platform export command:
    - Fedora: `dnf repoquery --userinstalled --qf "%{name}\n" | sort > setup/fedora/dnf.txt`
    - Fedora Flatpak: `flatpak list --app --columns=application | sort > setup/fedora/flatpak.txt`
    - Manjaro: `pacman -Qqen | sort > setup/manjaro/pacman.txt` (official) and `pacman -Qqem | sort > setup/manjaro/aur.txt` (AUR)
@@ -777,7 +812,7 @@ Both scripts are auto-loaded by `zshrc` via shell integration, so their commands
 
 1. Add aliases and functions to `zshrc`.
 2. For platform-specific aliases: guard with `if [[ "$OS" = "Darwin" ]]` / `elif [[ "$OS" = "Linux" ]]`.
-3. Consider whether a wrapper function is needed (like `code`/`codium` or `brew`) — these are for commands that need pre/post hooks.
+3. Consider whether a wrapper function is needed (like `code`/`codium`) — wrappers are for commands that need pre/post hooks.
 4. If the function is substantial, consider moving it to `scripts/` and using `--shell-integration`.
 
 ### Adding Custom Scripts
