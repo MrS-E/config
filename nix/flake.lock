@@ -126,6 +126,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_10": {
+      "locked": {
+        "lastModified": 1790692979,
+        "narHash": "sha256-m/h8WyGFpj34/AvKpxfZFG98Alm2sh/p9gq+IGH066c=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "68e5b9f7e82a76a5171d10b5d316e0ae5e1df6e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1790692979,
@@ -282,6 +298,20 @@
       },
       "parent": []
     },
+    "raspberry-pi-imager": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_9"
+      },
+      "locked": {
+        "path": "../custom-flakes/raspberry-pi-imager",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/raspberry-pi-imager",
+        "type": "path"
+      },
+      "parent": []
+    },
     "root": {
       "inputs": {
         "bettermouse": "bettermouse",
@@ -294,12 +324,13 @@
         "nixpkgs": "nixpkgs_6",
         "proton-drive": "proton-drive",
         "proton-mail-bridge": "proton-mail-bridge",
+        "raspberry-pi-imager": "raspberry-pi-imager",
         "texifier": "texifier"
       }
     },
     "texifier": {
       "inputs": {
-        "nixpkgs": "nixpkgs_9"
+        "nixpkgs": "nixpkgs_10"
       },
       "locked": {
         "path": "../custom-flakes/texifier",

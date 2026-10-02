@@ -22,6 +22,7 @@
     burp-suite.url = "path:../custom-flakes/burp-suite";
     creality-print.url = "path:../custom-flakes/creality-print";
     proton-mail-bridge.url = "path:../custom-flakes/proton-mail-bridge";
+    raspberry-pi-imager.url = "path:../custom-flakes/raspberry-pi-imager";
   };
 
   outputs = {
@@ -35,6 +36,7 @@
     burp-suite,
     creality-print,
     proton-mail-bridge,
+    raspberry-pi-imager,
     ...
   }:
     let
@@ -86,6 +88,7 @@
               burpSuite = burp-suite.packages.${system}.burp-suite;
               crealityPrint = creality-print.packages.${system}.creality-print;
               protonMailBridge = proton-mail-bridge.packages.${system}.proton-mail-bridge;
+              raspberryPiImager = raspberry-pi-imager.packages.${system}.raspberry-pi-imager;
             };
             home-manager.users."simeon.stix" = {
               imports = [
