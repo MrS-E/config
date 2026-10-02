@@ -19,9 +19,10 @@ uses the pinned upstream 7-Zip 26.03 macOS console binary to read the APFS
 image without mounting it, then copies the unchanged app bundle to
 `Applications/Proton Drive.app` in the Nix output. The 7-Zip archive URL and
 SHA-256 are also pinned in `flake.nix`. The package does not run Homebrew's
-uninstall or cleanup actions, place the app in `/Applications`, or add it to
-this repository's Home Manager profile. macOS may require additional setup
-when Proton Drive is first launched.
+uninstall or cleanup actions or install the app under `/Applications`. This
+repository's `nix/` configuration adds it to the selected user's Home Manager
+profile, which links it under `~/Applications/Home Manager Apps/Proton Drive.app`.
+macOS may require additional setup when Proton Drive is first launched.
 
 ## Updating to a new release
 
