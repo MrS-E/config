@@ -24,6 +24,21 @@ repository's `nix/` configuration adds it to the selected user's Home Manager
 profile, which links it under `~/Applications/Home Manager Apps/Proton Drive.app`.
 macOS may require additional setup when Proton Drive is first launched.
 
+## Troubleshooting: sync stuck at 0 bytes
+
+Finder can show Proton Drive's cloud directory even when its File Provider
+extension is not running correctly. In this setup, sync stayed at 0 bytes and
+launching the app could report that it must be run from `/Applications`. The
+cause was a stale macOS File Provider registration referring to
+`/Applications/Proton Drive.app`, rather than the app bundle installed by Nix.
+
+Re-register Proton Drive's File Provider extension from the signed app bundle
+at `~/Applications/Home Manager Apps/Proton Drive.app`. This restored syncing;
+there is no need to move the app into `/Applications` or delete either
+CloudStorage folder. If macOS continues to report the stale `/Applications`
+service path after re-registering, restart macOS to refresh its cached
+registration.
+
 ## Updating to a new release
 
 Check the [Homebrew cask API JSON](https://formulae.brew.sh/api/cask/proton-drive.json)
