@@ -266,12 +266,13 @@ OS-agnostic steps that run first on every platform:
 integrated only for the selected user package profile and GUI app links. The
 app bundles are linked under `~/Applications/Home Manager Apps`.
 The profile includes the Nextcloud VFS, BetterMouse, Figma, Texifier, Proton
-Drive, Burp Suite Community Edition, Creality Print, and Proton Mail Bridge apps defined in
+Drive, Burp Suite Community Edition, Creality Print, and Proton Mail Bridge
+apps defined in
 `custom-flakes/nextcloud-vfs`, `custom-flakes/bettermouse`,
 `custom-flakes/figma`, `custom-flakes/texifier`, `custom-flakes/proton-drive`,
 `custom-flakes/burp-suite`, `custom-flakes/creality-print`, and
-`custom-flakes/proton-mail-bridge`; Home Manager
-exposes them through those user-level links. Nextcloud Finder Sync registration
+`custom-flakes/proton-mail-bridge`; Home Manager exposes them through those
+user-level links. Nextcloud Finder Sync registration
 runs during Home Manager activation. BetterMouse's and Figma's first-run setup,
 Texifier's and Proton Drive's additional first-launch setup (if needed), Burp
 Suite configuration, Proton Mail Bridge setup, and macOS privacy permissions
