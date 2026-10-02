@@ -16,9 +16,10 @@
 
     nextcloud-vfs.url = "path:../custom-flakes/nextcloud-vfs";
     bettermouse.url = "path:../custom-flakes/bettermouse";
+    proton-drive.url = "path:../custom-flakes/proton-drive";
   };
 
-  outputs = { nix-darwin, home-manager, nextcloud-vfs, bettermouse, ... }:
+  outputs = { nix-darwin, home-manager, nextcloud-vfs, bettermouse, proton-drive, ... }:
     let
       system = "aarch64-darwin";
     in {
@@ -62,6 +63,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.extraSpecialArgs = {
               betterMouse = bettermouse.packages.${system}.bettermouse;
+              protonDrive = proton-drive.packages.${system}.proton-drive;
             };
             home-manager.users."simeon.stix" = {
               imports = [
