@@ -42,6 +42,11 @@
                 "tailscale-gui"
               ];
             nix.settings.experimental-features = "nix-command flakes";
+            # Don't forward macOS-specific LC_* values to remote hosts.
+            programs.ssh.extraConfig = ''
+              Host *
+                SendEnv -LC_*
+            '';
             ids.gids.nixbld = 350;
             system.stateVersion = 4;
 
