@@ -13,9 +13,11 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nextcloud-vfs.url = "path:../custom-flakes/nextcloud-vfs";
   };
 
-  outputs = { nix-darwin, home-manager, ... }:
+  outputs = { nix-darwin, home-manager, nextcloud-vfs, ... }:
     let
       system = "aarch64-darwin";
     in {
@@ -58,7 +60,11 @@
 
             home-manager.useGlobalPkgs = true;
             home-manager.users."simeon.stix" = {
-              imports = [ ./home-manager/packages.nix ];
+              imports = [
+                ./home-manager/packages.nix
+                nextcloud-vfs.homeManagerModules.default
+              ];
+              programs.nextcloud-vfs.enable = true;
               targets.darwin.copyApps.enable = false;
             };
           }

@@ -112,7 +112,11 @@ EOF
       source "$REPO_DIR/zshrc"
       nix-system-update
       [[ -f "$NIX_TEST_ACTIVATION_MARKER" ]] || exit 1
-      command grep -Fq -- "path:$REPO_DIR/nix#darwinConfigurations.aarch64-darwin.config.home-manager.users.\"$(id -un)\".home.activationPackage" "$NIX_TEST_ARGUMENTS" || exit 1
+      command grep -Fq -- "git+file://$REPO_DIR?dir=nix#darwinConfigurations.aarch64-darwin.config.home-manager.users.\"$(id -un)\".home.activationPackage" "$NIX_TEST_ARGUMENTS" || exit 1
+      mkdir -p "$HOME/external-flake"
+      NIX_DARWIN_CONFIG_DIR="$HOME/external-flake"
+      nix-system-update
+      command grep -Fq -- "path:$HOME/external-flake#darwinConfigurations.aarch64-darwin.config.home-manager.users.\"$(id -un)\".home.activationPackage" "$NIX_TEST_ARGUMENTS" || exit 1
       ! command grep -Fq -- "darwin-rebuild" "$NIX_TEST_ARGUMENTS"
     '
 

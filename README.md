@@ -51,6 +51,7 @@ config/
 │   ├── fedora-atomic/          # Fedora Atomic steps + rpm-ostree/toolbox manifests
 │   └── manjaro/                # Manjaro steps + pacman/aur manifests
 ├── nix/                        # Pinned macOS package flake and reusable modules
+├── custom-flakes/              # Standalone custom Nix flakes
 ├── tests/                      # Podman + bats-core test matrix
 ├── zshrc                       # ZSH shell configuration
 ├── gitconfig                   # Git global configuration
@@ -73,6 +74,7 @@ config/
 | `setup/general/` | OS-agnostic steps that run first on every platform: symlink dotfiles, register git filters, create shared editor directories. `common.bash` provides platform-neutral primitives (logging, symlink helpers, git clone guards, manifest parsing). |
 | `setup/<os>/` | Platform-specific numbered steps with companion manifests and a `common.bash` helper library. Steps are idempotent — safe to run repeatedly. |
 | `nix/` | Pinned Nix flake: nix-darwin activates the Apple Silicon host, and Home Manager manages only the selected package profile. |
+| `custom-flakes/` | Standalone custom Nix flakes, kept separate from the system package flake. |
 | `zshrc` | ZSH config: OS/hardware detection, history settings, aliases, platform-aware clip/clippaste helpers, completion system, Starship prompt with custom fallback, version managers (bun), ZSH plugins, custom script shell-integration. |
 | `gitconfig` | Git config: GPG SSH signing, codium/vscode as difftool/mergetool, LFS, pull rebase, credential cache. |
 | `vimrc` | Vim config: persistent undo, custom theme, indentation, whitespace display, statusline. |
@@ -314,7 +316,7 @@ conflicting files at `/etc/nix/nix.conf`, `/etc/bashrc`, and `/etc/zshrc` are
 moved to matching `.before-nix-darwin` backups before activation; inspect those
 backups before deleting them. Tailscale and other optional services are not
 enabled automatically. After activation, apply repository-flake changes with
-`sudo darwin-rebuild switch --flake "$HOME/config/nix#aarch64-darwin"`.
+`sudo darwin-rebuild switch --flake "git+file://$HOME/config?dir=nix#aarch64-darwin"`.
 Open a new shell after activation; `zshrc` adds
 `/run/current-system/sw/bin` and `~/.nix-profile/bin` when they exist, exposing
 system commands and Home Manager packages.
