@@ -1,9 +1,9 @@
 {
-  description = "Nextcloud Virtual Files installer based on the Homebrew cask";
+  description = "Nextcloud Virtual Files macOS application based on the Homebrew cask";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-26.05-darwin";
 
-  outputs = { nixpkgs, ... }:
+  outputs = { self, nixpkgs, ... }:
     let
       darwinSystems = [ "aarch64-darwin" "x86_64-darwin" ];
       forAllSystems = nixpkgs.lib.genAttrs darwinSystems;
@@ -50,12 +50,26 @@
               inherit (cask) url sha256;
             };
 
+            nativeBuildInputs = with pkgs; [ cpio gzip xar ];
+
             dontUnpack = true;
             dontBuild = true;
+            dontFixup = true;
 
             installPhase = ''
-              mkdir -p "$out"
-              cp "$src" "$out/${pkgFile}"
+              mkdir extracted
+              ${pkgs.xar}/bin/xar -xf "$src" -C extracted
+
+              mkdir payload
+              (
+                cd payload
+                ${pkgs.gzip}/bin/gzip -dc ../extracted/Nextcloud.pkg/Payload \
+                  | ${pkgs.cpio}/bin/cpio --extract --make-directories \
+                    --preserve-modification-time --no-absolute-filenames
+              )
+
+              mkdir -p "$out/Applications"
+              cp -R payload/Applications/Nextcloud.app "$out/Applications/"
             '';
 
             passthru = { inherit cask; };
@@ -64,12 +78,14 @@
               description = cask.desc;
               homepage = cask.homepage;
               license = pkgs.lib.licenses.unfree;
-              platforms = pkgs.lib.platforms.darwin;
+              platforms = darwinSystems;
             };
           };
         in {
           default = nextcloudVfs;
           nextcloud-vfs = nextcloudVfs;
         });
+
+      homeManagerModules.default = import ./home-manager-module.nix self;
     };
 }

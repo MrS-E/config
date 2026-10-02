@@ -59,11 +59,12 @@
             };
 
             home-manager.useGlobalPkgs = true;
-            home-manager.extraSpecialArgs = {
-              nextcloudVfs = nextcloud-vfs.packages.${system}.nextcloud-vfs;
-            };
             home-manager.users."simeon.stix" = {
-              imports = [ ./home-manager/packages.nix ];
+              imports = [
+                ./home-manager/packages.nix
+                nextcloud-vfs.homeManagerModules.default
+              ];
+              programs.nextcloud-vfs.enable = true;
               targets.darwin.copyApps.enable = false;
             };
           }
