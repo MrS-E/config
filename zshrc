@@ -146,16 +146,23 @@ if [[ "$OS" = "macos" ]]; then
   # Rebuild and activate Home Manager without nix-darwin system activation.
   nix-system-update() {
     local config_dir="${NIX_DARWIN_CONFIG_DIR:-$CONFIG_DIR/nix}"
+    local flake_ref
     local configuration="${NIX_DARWIN_HOSTNAME:-aarch64-darwin}"
     local username
     local activation_package
+
+    if [[ "${config_dir:A}" == "$CONFIG_DIR/nix" ]]; then
+      flake_ref="path:$CONFIG_DIR?dir=nix"
+    else
+      flake_ref="path:$config_dir"
+    fi
 
     username="$(id -un)" || return
     activation_package="$(nix --extra-experimental-features 'nix-command flakes' build \
       --no-link \
       --no-write-lock-file \
       --print-out-paths \
-      "path:$config_dir#darwinConfigurations.$configuration.config.home-manager.users.\"$username\".home.activationPackage")" || return
+      "$flake_ref#darwinConfigurations.$configuration.config.home-manager.users.\"$username\".home.activationPackage")" || return
     "$activation_package/activate"
   }
 fi

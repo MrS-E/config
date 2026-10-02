@@ -147,11 +147,12 @@ backup_unmanaged_etc_files() {
 }
 
 run() {
-  local flake configuration platform
+  local flake flake_ref configuration platform repo_dir
 
   if [[ -d "$NIX_DARWIN_CONFIG_DIR" ]]; then
     NIX_DARWIN_CONFIG_DIR="$(cd "$NIX_DARWIN_CONFIG_DIR" && pwd -P)"
   fi
+  repo_dir="$(cd "$REPO_DIR" && pwd -P)"
 
   refuse_implicit_legacy_flake
   flake="$(flake_file)"
@@ -165,14 +166,19 @@ run() {
   configuration="$(flake_configuration "$platform")"
   [[ "$configuration" =~ ^[A-Za-z0-9._-]+$ ]] \
     || die "invalid nix-darwin configuration name: $configuration"
+  if [[ "$NIX_DARWIN_CONFIG_DIR" == "$repo_dir/nix" ]]; then
+    flake_ref="path:$repo_dir?dir=nix"
+  else
+    flake_ref="path:$NIX_DARWIN_CONFIG_DIR"
+  fi
   log "Using nix-darwin configuration $configuration ($platform) from $NIX_DARWIN_CONFIG_DIR."
 
   backup_unmanaged_etc_files
 
   log "Activating nix-darwin configuration..."
-  run_nix_as_root run "path:$REPO_DIR/nix#darwin-rebuild" -- switch \
-    --flake "path:$NIX_DARWIN_CONFIG_DIR#$configuration" --no-write-lock-file
-  log "nix-darwin activated. Use NIX_DARWIN_CONFIG_DIR=$NIX_DARWIN_CONFIG_DIR darwin-rebuild switch --flake $NIX_DARWIN_CONFIG_DIR#$configuration for later changes."
+  run_nix_as_root run "path:$repo_dir?dir=nix#darwin-rebuild" -- switch \
+    --flake "$flake_ref#$configuration" --no-write-lock-file
+  log "nix-darwin activated. Reapply with darwin-rebuild switch --flake $flake_ref#$configuration."
 }
 
 case "${1:-}" in

@@ -316,7 +316,7 @@ conflicting files at `/etc/nix/nix.conf`, `/etc/bashrc`, and `/etc/zshrc` are
 moved to matching `.before-nix-darwin` backups before activation; inspect those
 backups before deleting them. Tailscale and other optional services are not
 enabled automatically. After activation, apply repository-flake changes with
-`sudo darwin-rebuild switch --flake "$HOME/config/nix#aarch64-darwin"`.
+`sudo darwin-rebuild switch --flake "path:$HOME/config?dir=nix#aarch64-darwin"`.
 Open a new shell after activation; `zshrc` adds
 `/run/current-system/sw/bin` and `~/.nix-profile/bin` when they exist, exposing
 system commands and Home Manager packages.
