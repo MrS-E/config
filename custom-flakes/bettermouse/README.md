@@ -12,8 +12,11 @@ until its metadata is updated.
 
 The derivation extracts the ZIP and places the unchanged app bundle at
 `Applications/BetterMouse.app` in the Nix output. It does not run the cask's
-install, uninstall, or cleanup actions, link the app into `/Applications`, or
-configure BetterMouse permissions. Build it from this directory with:
+install, uninstall, or cleanup actions, or link the app into `/Applications`.
+This repository's `nix/` configuration adds the package to the selected user's
+Home Manager profile, which links it under
+`~/Applications/Home Manager Apps/BetterMouse.app`; any macOS privacy
+permissions remain manual. Build it from this directory with:
 
 ```sh
 nix build .#bettermouse

@@ -265,6 +265,11 @@ OS-agnostic steps that run first on every platform:
 `nix-darwin` handles macOS activation and system settings; Home Manager is
 integrated only for the selected user package profile and GUI app links. The
 app bundles are linked under `~/Applications/Home Manager Apps`.
+The profile includes the Nextcloud VFS and BetterMouse apps defined in
+`custom-flakes/nextcloud-vfs` and `custom-flakes/bettermouse`; Home Manager
+exposes both through those user-level links. Nextcloud Finder Sync registration
+runs during Home Manager activation; BetterMouse's first-run setup and any
+macOS privacy permissions remain manual.
 The checked-in `nix/flake.nix` pins Nixpkgs, nix-darwin, and Home Manager, and
 currently defines only `aarch64-darwin`. It does not manage dotfiles,
 `~/.config`, VSCodium, or editor settings/extensions. See the
