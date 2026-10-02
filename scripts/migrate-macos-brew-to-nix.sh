@@ -32,7 +32,10 @@ Usage: scripts/migrate-macos-brew-to-nix.sh [--yes] [--backup-dir DIR]
 
 Save the installed Homebrew inventory, remove all installed Homebrew formulae
 and casks, uninstall Homebrew with its official uninstaller, then run the
-regular setup.sh flow to install/activate Nix and nix-darwin.
+regular setup.sh flow to install Nix and activate nix-darwin. When using this
+repository's flake, setup bootstraps Homebrew again if needed so nix-darwin can
+apply its four declared casks; it does not restore the saved inventory with
+brew bundle.
 
 Options:
   --backup-dir DIR  Store the persistent Brewfile backup in DIR (default: $HOME)

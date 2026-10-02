@@ -12,6 +12,7 @@ source "$SCRIPT_DIR/common.bash"
 # nix-darwin is the macOS system manager for launchd daemons.
 NIX_DEFAULT_PROFILE="/nix/var/nix/profiles/default/bin/nix"
 NIX_USER_PROFILE="$HOME/.nix-profile/bin/nix"
+HOMEBREW_INSTALLER_URL="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
 NIX_DARWIN_CONFIG_DIR_EXPLICIT=0
 if [[ -n "${NIX_DARWIN_CONFIG_DIR:-}" ]]; then
   NIX_DARWIN_CONFIG_DIR_EXPLICIT=1
@@ -32,10 +33,13 @@ help() {
   cat <<'EOF'
 Activate this repository's pinned nix-darwin configuration. Set
 NIX_DARWIN_CONFIG_DIR to select an external flake; set NIX_DARWIN_HOSTNAME to
-select its darwinConfigurations output. Flakes are never initialized, edited,
-or locked by this step. An existing ~/nix-darwin-config/flake.nix must be
-selected explicitly. Existing unmanaged /etc files are backed up before
-activation; skip this step with --exclude macos/10-nix-darwin.sh if needed.
+select its darwinConfigurations output. When this repository's flake is
+selected, Homebrew is installed with its official non-interactive installer
+only if missing, before nix-darwin applies its declared casks. Flakes are never
+initialized, edited, or locked by this step. An existing
+~/nix-darwin-config/flake.nix must be selected explicitly. Existing unmanaged
+/etc files are backed up before activation; skip this step with
+--exclude macos/10-nix-darwin.sh if needed.
 EOF
 }
 
@@ -57,6 +61,32 @@ nix_binary() {
 
 nix_available() {
   nix_binary >/dev/null 2>&1
+}
+
+homebrew_available() {
+  command_exists brew && return 0
+  [[ -x /opt/homebrew/bin/brew || -x /usr/local/bin/brew ]]
+}
+
+ensure_homebrew() {
+  local installer
+
+  if homebrew_available; then
+    log "Homebrew already installed; skipping bootstrap."
+    return 0
+  fi
+
+  require_command curl
+  log "Homebrew not found; installing with the official installer..."
+  if ! installer="$(curl -fsSL "$HOMEBREW_INSTALLER_URL")"; then
+    die "could not download the Homebrew installer"
+  fi
+  if ! NONINTERACTIVE=1 /bin/bash -c "$installer"; then
+    die "Homebrew installer failed"
+  fi
+  homebrew_available \
+    || die "Homebrew installer completed, but brew was not found on PATH or in the standard macOS locations"
+  log "Homebrew installation verified."
 }
 
 run_nix() {
@@ -166,6 +196,10 @@ run() {
   [[ "$configuration" =~ ^[A-Za-z0-9._-]+$ ]] \
     || die "invalid nix-darwin configuration name: $configuration"
   log "Using nix-darwin configuration $configuration ($platform) from $NIX_DARWIN_CONFIG_DIR."
+
+  if [[ "$NIX_DARWIN_CONFIG_DIR" == "$REPO_DIR/nix" ]]; then
+    ensure_homebrew
+  fi
 
   backup_unmanaged_etc_files
 

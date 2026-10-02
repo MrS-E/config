@@ -46,7 +46,7 @@ config/
 │   │   ├── 01-symlinks.sh
 │   │   ├── 02-git-filters.sh
 │   │   └── 03-vim-base.sh
-│   ├── macos/                  # macOS steps + Brewfile audit inventory
+│   ├── macos/                  # macOS steps and Nixpkgs audit
 │   ├── fedora/                 # Fedora steps + dnf/flatpak/copr manifests
 │   ├── fedora-atomic/          # Fedora Atomic steps + rpm-ostree/toolbox manifests
 │   └── manjaro/                # Manjaro steps + pacman/aur manifests
@@ -258,7 +258,7 @@ OS-agnostic steps that run first on every platform:
 | `07-waveforms.sh` | Download and install Digilent WaveForms from the official `.dmg` as a separate vendor installer (falls back to the browser if Cloudflare blocks `curl`) |
 | `08-kitty-permissions.sh` | Open macOS Privacy & Security settings for Kitty permissions |
 | `09-nix.sh` | Install Nix using the official installer and enable `nix-command` + flakes |
-| `10-nix-darwin.sh` | Activate the pinned repository flake in `nix/`; supports an explicit external flake override |
+| `10-nix-darwin.sh` | Bootstrap Homebrew if needed for repository-flake casks, then activate the pinned flake; supports an explicit external flake override |
 
 `nix-darwin` handles macOS activation and system settings; Home Manager is
 integrated only for the selected user package profile and GUI app links. The
@@ -266,22 +266,33 @@ app bundles are linked under `~/Applications/Home Manager Apps`.
 The checked-in `nix/flake.nix` pins Nixpkgs, nix-darwin, and Home Manager, and
 currently defines only `aarch64-darwin`. It does not manage dotfiles,
 `~/.config`, VSCodium, or editor settings/extensions. See the
-[Brewfile-to-Nixpkgs audit](setup/macos/nixpkgs-audit.md) for selected
+[Homebrew inventory-to-Nixpkgs audit](setup/macos/nixpkgs-audit.md) for selected
 replacements and manual/vendor exceptions.
 
-Since `brew bundle` is retired, clean setup no longer installs VSCodium or its
-extensions; they remain outside this migration.
+Homebrew remains the cask backend for four apps without usable macOS Nixpkgs
+packages: `macdroid`, `nextcloud-vfs`, `proton-drive`, and `bettermouse`. Clean
+setup bootstraps Homebrew with its official non-interactive installer only if
+it is missing, then nix-darwin applies these declared casks. The activation
+policy disables automatic updates and cleanup, preserving undeclared Homebrew
+packages.
+
+This is separate from `brew bundle`: clean setup does not run `brew bundle` or
+use a checked-in Homebrew manifest. VSCodium and its extensions remain outside
+this setup.
 
 For a Mac that still has Homebrew installed, the opt-in one-shot migration is
 `scripts/migrate-macos-brew-to-nix.sh`. It writes a unique, persistent
 `Brewfile.backup-*` under `~/` by default (or in a directory selected with
 `--backup-dir`), verifies the installed formula/cask counts, removes every
 formula and cask reported as installed by Homebrew, runs Homebrew's official
-uninstaller, and then runs the normal `setup.sh` flow, including Nix bootstrap
-and nix-darwin activation. It is not part of automatic setup. The script asks
-you to type `REMOVE HOMEBREW`; use `--yes` only when explicitly authorizing a
-non-interactive run. If `~/nix-darwin-config/flake.nix` exists, set
-`NIX_DARWIN_CONFIG_DIR` explicitly so the migration knows which flake to use.
+uninstaller, and then runs the normal `setup.sh` flow. Setup bootstraps Nix and,
+when activating this repository's flake, installs Homebrew again if needed so
+nix-darwin can apply its four declared casks. It does not restore the saved
+inventory with `brew bundle`. The migration is not part of automatic setup.
+The script asks you to type `REMOVE HOMEBREW`; use `--yes` only when explicitly
+authorizing a non-interactive run. If `~/nix-darwin-config/flake.nix` exists,
+set `NIX_DARWIN_CONFIG_DIR` explicitly so the migration knows which flake to
+use.
 For example, `NIX_DARWIN_CONFIG_DIR="$PWD/nix"` selects this repository's
 Apple Silicon configuration. Run it from the repository checkout with
 `./scripts/migrate-macos-brew-to-nix.sh`.
@@ -294,20 +305,23 @@ set `MIGRATION_BREW_BIN` to the executable path.
 The backup is a package inventory, not a copy of applications, service state,
 settings, or application data. In particular, an installed VSCodium cask is
 removed; its settings and extensions are not backed up or managed by Nix. The
-migration script never overwrites or deletes the backup; keep it. If you later
-choose to restore Homebrew, reinstall Homebrew and use
-`brew bundle --file /path/to/Brewfile.backup-<timestamp>` to attempt to
-reinstall the recorded bundle. The backup directory must be outside the
-Homebrew prefix so the official uninstaller cannot remove it.
+migration script never overwrites or deletes the backup; keep it. Normal setup
+restores only the four declared casks, not the rest of the saved inventory. To
+attempt a full bundle restore, run
+`brew bundle --file /path/to/Brewfile.backup-<timestamp>` after Homebrew is
+available. The backup directory must be outside the Homebrew prefix so the
+official uninstaller cannot remove it.
 
 `setup/macos/10-nix-darwin.sh` activates the repository flake by default. Set
 `NIX_DARWIN_CONFIG_DIR` explicitly to use an external flake, and optionally set
 `NIX_DARWIN_HOSTNAME` to choose its `darwinConfigurations` output. The step
 never initializes, edits, or locks an external configuration. If
 `~/nix-darwin-config/flake.nix` already exists and no override is selected, the
-step stops with instructions rather than silently abandoning it. The reduced
-`setup/macos/Brewfile` remains only as audit inventory; setup no longer installs
-Homebrew or runs `brew bundle`.
+step stops with instructions rather than silently abandoning it. When the
+repository flake is selected, this step bootstraps Homebrew only if it is
+missing; an explicit external flake retains its existing behavior. The step
+never runs `brew bundle`. No source `setup/macos/Brewfile` is maintained; the
+Nixpkgs audit retains historical inventory and mapping data only.
 
 The step passes the required Nix feature flags to user and root commands. Known
 conflicting files at `/etc/nix/nix.conf`, `/etc/bashrc`, and `/etc/zshrc` are
@@ -423,8 +437,9 @@ Fedora and Manjaro manifests live alongside their step scripts; the macOS packag
 | `setup/manjaro/pacman.txt` | One package per line | `pacman -Qqen \| sort` |
 | `setup/manjaro/aur.txt` | One package per line | `pacman -Qqem \| sort` |
 
-`setup/macos/Brewfile` is retained only as the source inventory for the
-[Nixpkgs audit](setup/macos/nixpkgs-audit.md); the setup runner does not read it.
+No source `setup/macos/Brewfile` is maintained. The
+[Nixpkgs audit](setup/macos/nixpkgs-audit.md) retains historical inventory and
+mapping data; setup does not run `brew bundle`.
 
 ### Test Harness
 
@@ -766,10 +781,13 @@ Both scripts are auto-loaded by `zshrc` via shell integration, so their commands
 ### Adding Packages
 
 1. Identify the correct platform manifest (see [Package Manifests](#package-manifests) table above).
-2. For macOS, add a verified package attribute to the appropriate module in
-   `nix/packages/` (`common.nix`, `darwin.nix`, or `aarch64-darwin.nix`) and
-   update the [Nixpkgs audit](setup/macos/nixpkgs-audit.md). The reduced
-   `Brewfile` remains an audit inventory and is not consumed by setup.
+2. For macOS, add a verified Nixpkgs package attribute to the appropriate
+   module in `nix/packages/` (`common.nix`, `darwin.nix`, or
+   `aarch64-darwin.nix`) and update the [Nixpkgs audit](setup/macos/nixpkgs-audit.md).
+   For apps without a usable macOS Nixpkgs package that should be installed as
+   casks, declare their IDs in `homebrew.casks` in `nix/flake.nix`; setup
+   bootstraps Homebrew as needed for this repository's flake. No source
+   `Brewfile` is maintained or consumed by setup.
 3. For Fedora, Flatpak, and Manjaro, add the package/app ID to the appropriate
    text file (one per line). After installing, use the platform export command:
    - Fedora: `dnf repoquery --userinstalled --qf "%{name}\n" | sort > setup/fedora/dnf.txt`

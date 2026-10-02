@@ -42,7 +42,21 @@
                 "tailscale-gui"
               ];
             nix.settings.experimental-features = "nix-command flakes";
+            homebrew = {
+              enable = true;
+              casks = [
+                "macdroid"
+                "nextcloud-vfs"
+                "proton-drive"
+                "bettermouse"
+              ];
+              onActivation = {
+                autoUpdate = false;
+                cleanup = "none";
+              };
+            };
             ids.gids.nixbld = 350;
+            system.primaryUser = "simeon.stix";
             system.stateVersion = 4;
 
             # Home Manager needs user metadata; leave this account out of users.knownUsers.
