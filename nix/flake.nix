@@ -20,6 +20,7 @@
     texifier.url = "path:../custom-flakes/texifier";
     proton-drive.url = "path:../custom-flakes/proton-drive";
     burp-suite.url = "path:../custom-flakes/burp-suite";
+    creality-print.url = "path:../custom-flakes/creality-print";
     proton-mail-bridge.url = "path:../custom-flakes/proton-mail-bridge";
   };
 
@@ -32,6 +33,7 @@
     texifier,
     proton-drive,
     burp-suite,
+    creality-print,
     proton-mail-bridge,
     ...
   }:
@@ -82,6 +84,7 @@
               texifier = texifier.packages.${system}.texifier;
               protonDrive = proton-drive.packages.${system}.proton-drive;
               burpSuite = burp-suite.packages.${system}.burp-suite;
+              crealityPrint = creality-print.packages.${system}.creality-print;
               protonMailBridge = proton-mail-bridge.packages.${system}.proton-mail-bridge;
             };
             home-manager.users."simeon.stix" = {
