@@ -273,8 +273,9 @@ Proton Mail Bridge apps defined in
 `custom-flakes/raspberry-pi-imager`, `custom-flakes/burp-suite`,
 `custom-flakes/creality-print`, and `custom-flakes/proton-mail-bridge`; Home
 Manager exposes them through those user-level links. The standalone
-`custom-flakes/aflplusplus` package is also added to `home.packages`, making its
-command-line tools available in `PATH` without shell configuration changes.
+`custom-flakes/aflplusplus` and `custom-flakes/mbpoll` packages are also added
+to `home.packages`, making their command-line tools available in the managed
+user `PATH` without shell configuration changes.
 Nextcloud Finder Sync registration runs during Home Manager activation.
 BetterMouse's and Figma's first-run setup, Texifier's and Proton Drive's
 additional first-launch setup

@@ -24,6 +24,7 @@
     proton-mail-bridge.url = "path:../custom-flakes/proton-mail-bridge";
     raspberry-pi-imager.url = "path:../custom-flakes/raspberry-pi-imager";
     aflplusplus.url = "path:../custom-flakes/aflplusplus";
+    mbpoll.url = "path:../custom-flakes/mbpoll";
   };
 
   outputs = {
@@ -39,6 +40,7 @@
     proton-mail-bridge,
     raspberry-pi-imager,
     aflplusplus,
+    mbpoll,
     ...
   }:
     let
@@ -92,6 +94,7 @@
               protonMailBridge = proton-mail-bridge.packages.${system}.proton-mail-bridge;
               raspberryPiImager = raspberry-pi-imager.packages.${system}.raspberry-pi-imager;
               aflPlusPlus = aflplusplus.packages.${system}.aflplusplus;
+              mbpoll = mbpoll.packages.${system}.mbpoll;
             };
             home-manager.users."simeon.stix" = {
               imports = [
