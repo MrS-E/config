@@ -272,9 +272,12 @@ Proton Mail Bridge apps defined in
 `custom-flakes/figma`, `custom-flakes/texifier`, `custom-flakes/proton-drive`,
 `custom-flakes/raspberry-pi-imager`, `custom-flakes/burp-suite`,
 `custom-flakes/creality-print`, and `custom-flakes/proton-mail-bridge`; Home
-Manager exposes them through those user-level links. Nextcloud Finder Sync
-registration runs during Home Manager activation. BetterMouse's and Figma's
-first-run setup, Texifier's and Proton Drive's additional first-launch setup
+Manager exposes them through those user-level links. The standalone
+`custom-flakes/aflplusplus` package is also added to `home.packages`, making its
+command-line tools available in `PATH` without shell configuration changes.
+Nextcloud Finder Sync registration runs during Home Manager activation.
+BetterMouse's and Figma's first-run setup, Texifier's and Proton Drive's
+additional first-launch setup
 (if needed), Burp Suite configuration, Proton Mail Bridge setup, and macOS
 privacy permissions remain manual.
 The checked-in `nix/flake.nix` pins Nixpkgs, nix-darwin, and Home Manager, and
