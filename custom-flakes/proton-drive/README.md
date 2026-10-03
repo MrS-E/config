@@ -21,8 +21,10 @@ image without mounting it, then copies the unchanged app bundle to
 SHA-256 are also pinned in `flake.nix`. The package does not run Homebrew's
 uninstall or cleanup actions or install the app under `/Applications`. This
 repository's `nix/` configuration adds it to the selected user's Home Manager
-profile, which links it under `~/Applications/Home Manager Apps/Proton Drive.app`.
-macOS may require additional setup when Proton Drive is first launched.
+profile, which links it under `~/Applications/Home Manager Apps/Proton Drive.app`
+and exposes it through a Finder alias at `~/Applications/Proton Drive.app` for
+app discovery. macOS may require additional setup when Proton Drive is first
+launched.
 
 ## Troubleshooting: sync stuck at 0 bytes
 

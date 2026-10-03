@@ -264,19 +264,35 @@ OS-agnostic steps that run first on every platform:
 
 `nix-darwin` handles macOS activation and system settings; Home Manager is
 integrated only for the selected user package profile and GUI app links. The
-app bundles are linked under `~/Applications/Home Manager Apps`.
+app bundles are linked under `~/Applications/Home Manager Apps`; activation
+also creates collision-safe Finder aliases directly under `~/Applications`
+and registers them with macOS LaunchServices for app search tools such as
+Spotlight and Raycast. Existing applications are not replaced, and aliases
+are refreshed when their managed Nix-store app target changes.
 The profile includes the Nextcloud VFS, BetterMouse, Figma, Texifier, Proton
-Drive, Burp Suite Community Edition, Creality Print, and Proton Mail Bridge
-apps defined in
+Drive, Raspberry Pi Imager, Burp Suite Community Edition, Creality Print,
+Proton Mail Bridge, Zotero, and PrusaSlicer; their DMG versions and checksums
+come from the official Homebrew cask metadata for
+[Zotero](https://formulae.brew.sh/api/cask/zotero.json) and
+[PrusaSlicer](https://formulae.brew.sh/api/cask/prusaslicer.json).
+The apps are defined in
 `custom-flakes/nextcloud-vfs`, `custom-flakes/bettermouse`,
 `custom-flakes/figma`, `custom-flakes/texifier`, `custom-flakes/proton-drive`,
-`custom-flakes/burp-suite`, `custom-flakes/creality-print`, and
-`custom-flakes/proton-mail-bridge`; Home Manager exposes them through those
-user-level links. Nextcloud Finder Sync registration
-runs during Home Manager activation. BetterMouse's and Figma's first-run setup,
-Texifier's and Proton Drive's additional first-launch setup (if needed), Burp
-Suite configuration, Proton Mail Bridge setup, and macOS privacy permissions
-remain manual.
+`custom-flakes/raspberry-pi-imager`, `custom-flakes/burp-suite`,
+`custom-flakes/creality-print`, `custom-flakes/proton-mail-bridge`,
+`custom-flakes/zotero`, and `custom-flakes/prusa-slicer`; Home Manager exposes
+them through those user-level links. The standalone
+`custom-flakes/aflplusplus`, `custom-flakes/mbpoll`, and
+`custom-flakes/nordic-nrf-command-line-tools` packages are also added to
+`home.packages`, making their command-line tools available in the managed user
+`PATH` without shell configuration changes. The Nordic cask contains installer
+packages rather than an `.app`; Home Manager also installs the separately
+licensed SEGGER J-Link package required for programming with `nrfjprog`.
+Nextcloud Finder Sync registration runs during Home Manager activation.
+BetterMouse's and Figma's first-run setup, Texifier's and Proton Drive's
+additional first-launch setup
+(if needed), Burp Suite configuration, Proton Mail Bridge setup, and macOS
+privacy permissions remain manual.
 The checked-in `nix/flake.nix` pins Nixpkgs, nix-darwin, and Home Manager, and
 currently defines only `aarch64-darwin`. It does not manage dotfiles,
 `~/.config`, VSCodium, or editor settings/extensions. See the

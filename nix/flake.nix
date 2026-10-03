@@ -22,6 +22,18 @@
     burp-suite.url = "path:../custom-flakes/burp-suite";
     creality-print.url = "path:../custom-flakes/creality-print";
     proton-mail-bridge.url = "path:../custom-flakes/proton-mail-bridge";
+    raspberry-pi-imager.url = "path:../custom-flakes/raspberry-pi-imager";
+    nordic-nrf-command-line-tools.url = "path:../custom-flakes/nordic-nrf-command-line-tools";
+    aflplusplus.url = "path:../custom-flakes/aflplusplus";
+    mbpoll.url = "path:../custom-flakes/mbpoll";
+    zotero = {
+      url = "path:../custom-flakes/zotero";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    prusa-slicer = {
+      url = "path:../custom-flakes/prusa-slicer";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -35,6 +47,12 @@
     burp-suite,
     creality-print,
     proton-mail-bridge,
+    raspberry-pi-imager,
+    nordic-nrf-command-line-tools,
+    aflplusplus,
+    mbpoll,
+    zotero,
+    prusa-slicer,
     ...
   }:
     let
@@ -58,10 +76,12 @@
                 "postman"
                 "proxyman"
                 "raycast"
+                "segger-jlink"
                 "slack"
                 "spotify"
                 "tailscale-gui"
               ];
+            nixpkgs.config.segger-jlink.acceptLicense = true;
             nix.settings.experimental-features = "nix-command flakes";
             # Don't forward macOS-specific LC_* values to remote hosts.
             programs.ssh.extraConfig = ''
@@ -86,6 +106,12 @@
               burpSuite = burp-suite.packages.${system}.burp-suite;
               crealityPrint = creality-print.packages.${system}.creality-print;
               protonMailBridge = proton-mail-bridge.packages.${system}.proton-mail-bridge;
+              raspberryPiImager = raspberry-pi-imager.packages.${system}.raspberry-pi-imager;
+              nordicNrfCommandLineTools = nordic-nrf-command-line-tools.packages.${system}.nordic-nrf-command-line-tools;
+              aflPlusPlus = aflplusplus.packages.${system}.aflplusplus;
+              mbpoll = mbpoll.packages.${system}.mbpoll;
+              zoteroPackage = zotero.packages.${system}.zotero;
+              prusaSlicer = prusa-slicer.packages.${system}.prusa-slicer;
             };
             home-manager.users."simeon.stix" = {
               imports = [
