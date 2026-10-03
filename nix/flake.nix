@@ -30,6 +30,10 @@
       url = "path:../custom-flakes/zotero";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    prusa-slicer = {
+      url = "path:../custom-flakes/prusa-slicer";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -48,6 +52,7 @@
     aflplusplus,
     mbpoll,
     zotero,
+    prusa-slicer,
     ...
   }:
     let
@@ -106,6 +111,7 @@
               aflPlusPlus = aflplusplus.packages.${system}.aflplusplus;
               mbpoll = mbpoll.packages.${system}.mbpoll;
               zoteroPackage = zotero.packages.${system}.zotero;
+              prusaSlicer = prusa-slicer.packages.${system}.prusa-slicer;
             };
             home-manager.users."simeon.stix" = {
               imports = [

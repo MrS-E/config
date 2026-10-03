@@ -388,6 +388,22 @@
       },
       "parent": []
     },
+    "prusa-slicer": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "../custom-flakes/prusa-slicer",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/prusa-slicer",
+        "type": "path"
+      },
+      "parent": []
+    },
     "raspberry-pi-imager": {
       "inputs": {
         "nixpkgs": "nixpkgs_12"
@@ -417,6 +433,7 @@
         "nordic-nrf-command-line-tools": "nordic-nrf-command-line-tools",
         "proton-drive": "proton-drive",
         "proton-mail-bridge": "proton-mail-bridge",
+        "prusa-slicer": "prusa-slicer",
         "raspberry-pi-imager": "raspberry-pi-imager",
         "texifier": "texifier",
         "zotero": "zotero"

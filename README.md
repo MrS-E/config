@@ -267,15 +267,17 @@ integrated only for the selected user package profile and GUI app links. The
 app bundles are linked under `~/Applications/Home Manager Apps`.
 The profile includes the Nextcloud VFS, BetterMouse, Figma, Texifier, Proton
 Drive, Raspberry Pi Imager, Burp Suite Community Edition, Creality Print,
-Proton Mail Bridge, and Zotero; Zotero's DMG version and checksum come from the
-[official Homebrew cask metadata](https://formulae.brew.sh/api/cask/zotero.json).
+Proton Mail Bridge, Zotero, and PrusaSlicer; their DMG versions and checksums
+come from the official Homebrew cask metadata for
+[Zotero](https://formulae.brew.sh/api/cask/zotero.json) and
+[PrusaSlicer](https://formulae.brew.sh/api/cask/prusaslicer.json).
 The apps are defined in
 `custom-flakes/nextcloud-vfs`, `custom-flakes/bettermouse`,
 `custom-flakes/figma`, `custom-flakes/texifier`, `custom-flakes/proton-drive`,
 `custom-flakes/raspberry-pi-imager`, `custom-flakes/burp-suite`,
-`custom-flakes/creality-print`, `custom-flakes/proton-mail-bridge`, and
-`custom-flakes/zotero`; Home Manager exposes them through those user-level
-links. The standalone
+`custom-flakes/creality-print`, `custom-flakes/proton-mail-bridge`,
+`custom-flakes/zotero`, and `custom-flakes/prusa-slicer`; Home Manager exposes
+them through those user-level links. The standalone
 `custom-flakes/aflplusplus`, `custom-flakes/mbpoll`, and
 `custom-flakes/nordic-nrf-command-line-tools` packages are also added to
 `home.packages`, making their command-line tools available in the managed user

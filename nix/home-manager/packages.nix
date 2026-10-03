@@ -1,4 +1,4 @@
-{ config, lib, pkgs, betterMouse, figma, texifier, protonDrive, burpSuite, crealityPrint, protonMailBridge, raspberryPiImager, nordicNrfCommandLineTools, aflPlusPlus, mbpoll, zoteroPackage, ... }:
+{ config, lib, pkgs, betterMouse, figma, texifier, protonDrive, burpSuite, crealityPrint, prusaSlicer, protonMailBridge, raspberryPiImager, nordicNrfCommandLineTools, aflPlusPlus, mbpoll, zoteroPackage, ... }:
 {
   home.stateVersion = "26.05";
   targets.darwin.linkApps.enable = true;
@@ -19,6 +19,7 @@
       protonDrive
       burpSuite
       crealityPrint
+      prusaSlicer
       protonMailBridge
       raspberryPiImager
       nordicNrfCommandLineTools
