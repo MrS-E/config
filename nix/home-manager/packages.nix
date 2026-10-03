@@ -1,4 +1,4 @@
-{ pkgs, betterMouse, figma, texifier, protonDrive, burpSuite, crealityPrint, protonMailBridge, raspberryPiImager, aflPlusPlus, mbpoll, ... }:
+{ pkgs, betterMouse, figma, texifier, protonDrive, burpSuite, crealityPrint, protonMailBridge, raspberryPiImager, nordicNrfCommandLineTools, aflPlusPlus, mbpoll, ... }:
 {
   home.stateVersion = "26.05";
   targets.darwin.linkApps.enable = true;
@@ -7,5 +7,5 @@
     (import ../packages/common.nix { inherit pkgs; })
     ++ (import ../packages/darwin.nix { inherit pkgs; })
     ++ (import ../packages/aarch64-darwin.nix { inherit pkgs; })
-    ++ [ betterMouse figma texifier protonDrive burpSuite crealityPrint protonMailBridge raspberryPiImager aflPlusPlus mbpoll ];
+    ++ [ betterMouse figma texifier protonDrive burpSuite crealityPrint protonMailBridge raspberryPiImager nordicNrfCommandLineTools aflPlusPlus mbpoll ];
 }

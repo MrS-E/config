@@ -202,6 +202,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_13": {
+      "locked": {
+        "lastModified": 1790692979,
+        "narHash": "sha256-m/h8WyGFpj34/AvKpxfZFG98Alm2sh/p9gq+IGH066c=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "68e5b9f7e82a76a5171d10b5d316e0ae5e1df6e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1790692979,
@@ -316,11 +332,11 @@
     },
     "nixpkgs_9": {
       "locked": {
-        "lastModified": 1790692979,
-        "narHash": "sha256-m/h8WyGFpj34/AvKpxfZFG98Alm2sh/p9gq+IGH066c=",
+        "lastModified": 1790772421,
+        "narHash": "sha256-754eQtr0m8xKtNnKYhX7ukI7XaA7oeiQpui1LiEuhyU=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "68e5b9f7e82a76a5171d10b5d316e0ae5e1df6e9",
+        "rev": "e49322d1ec25b45f7c587c5fd69ac826d1a57dbc",
         "type": "github"
       },
       "original": {
@@ -330,9 +346,23 @@
         "type": "github"
       }
     },
-    "proton-drive": {
+    "nordic-nrf-command-line-tools": {
       "inputs": {
         "nixpkgs": "nixpkgs_9"
+      },
+      "locked": {
+        "path": "../custom-flakes/nordic-nrf-command-line-tools",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/nordic-nrf-command-line-tools",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "proton-drive": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_10"
       },
       "locked": {
         "path": "../custom-flakes/proton-drive",
@@ -346,7 +376,7 @@
     },
     "proton-mail-bridge": {
       "inputs": {
-        "nixpkgs": "nixpkgs_10"
+        "nixpkgs": "nixpkgs_11"
       },
       "locked": {
         "path": "../custom-flakes/proton-mail-bridge",
@@ -360,7 +390,7 @@
     },
     "raspberry-pi-imager": {
       "inputs": {
-        "nixpkgs": "nixpkgs_11"
+        "nixpkgs": "nixpkgs_12"
       },
       "locked": {
         "path": "../custom-flakes/raspberry-pi-imager",
@@ -384,6 +414,7 @@
         "nextcloud-vfs": "nextcloud-vfs",
         "nix-darwin": "nix-darwin",
         "nixpkgs": "nixpkgs_8",
+        "nordic-nrf-command-line-tools": "nordic-nrf-command-line-tools",
         "proton-drive": "proton-drive",
         "proton-mail-bridge": "proton-mail-bridge",
         "raspberry-pi-imager": "raspberry-pi-imager",
@@ -392,7 +423,7 @@
     },
     "texifier": {
       "inputs": {
-        "nixpkgs": "nixpkgs_12"
+        "nixpkgs": "nixpkgs_13"
       },
       "locked": {
         "path": "../custom-flakes/texifier",

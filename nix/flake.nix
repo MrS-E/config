@@ -23,6 +23,7 @@
     creality-print.url = "path:../custom-flakes/creality-print";
     proton-mail-bridge.url = "path:../custom-flakes/proton-mail-bridge";
     raspberry-pi-imager.url = "path:../custom-flakes/raspberry-pi-imager";
+    nordic-nrf-command-line-tools.url = "path:../custom-flakes/nordic-nrf-command-line-tools";
     aflplusplus.url = "path:../custom-flakes/aflplusplus";
     mbpoll.url = "path:../custom-flakes/mbpoll";
   };
@@ -39,6 +40,7 @@
     creality-print,
     proton-mail-bridge,
     raspberry-pi-imager,
+    nordic-nrf-command-line-tools,
     aflplusplus,
     mbpoll,
     ...
@@ -93,6 +95,7 @@
               crealityPrint = creality-print.packages.${system}.creality-print;
               protonMailBridge = proton-mail-bridge.packages.${system}.proton-mail-bridge;
               raspberryPiImager = raspberry-pi-imager.packages.${system}.raspberry-pi-imager;
+              nordicNrfCommandLineTools = nordic-nrf-command-line-tools.packages.${system}.nordic-nrf-command-line-tools;
               aflPlusPlus = aflplusplus.packages.${system}.aflplusplus;
               mbpoll = mbpoll.packages.${system}.mbpoll;
             };
