@@ -264,9 +264,10 @@ OS-agnostic steps that run first on every platform:
 
 `nix-darwin` handles macOS activation and system settings; Home Manager is
 integrated only for the selected user package profile and GUI app links. The
-app bundles are linked under `~/Applications/Home Manager Apps`.
-Home Manager activation registers those bundles with macOS LaunchServices so
-they are discoverable in app search tools such as Spotlight and Raycast.
+app bundles are linked under `~/Applications/Home Manager Apps`; activation
+also adds collision-safe links directly under `~/Applications` and registers
+them with macOS LaunchServices for app search tools such as Spotlight and
+Raycast. Existing applications are not replaced.
 The profile includes the Nextcloud VFS, BetterMouse, Figma, Texifier, Proton
 Drive, Raspberry Pi Imager, Burp Suite Community Edition, Creality Print,
 Proton Mail Bridge, Zotero, and PrusaSlicer; their DMG versions and checksums
