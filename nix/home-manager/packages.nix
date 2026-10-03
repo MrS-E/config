@@ -7,6 +7,15 @@
     paths = config.home.packages;
     pathsToLink = [ "/Applications" ];
   }}/Applications";
+  home.activation.registerHomeManagerApps = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    apps_dir="$HOME/Applications/Home Manager Apps"
+    lsregister="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+
+    if [ -d "$apps_dir" ]; then
+      ${pkgs.findutils}/bin/find -L "$apps_dir" -mindepth 1 -maxdepth 1 -type d -name '*.app' \
+        -exec "$lsregister" -f {} \;
+    fi
+  '';
 
   home.packages =
     (import ../packages/common.nix { inherit pkgs; })
