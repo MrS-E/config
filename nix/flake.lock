@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "adb-enhanced": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "../custom-flakes/adb-enhanced",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/adb-enhanced",
+        "type": "path"
+      },
+      "parent": []
+    },
     "aflplusplus": {
       "inputs": {
         "nixpkgs": "nixpkgs"
@@ -420,6 +436,7 @@
     },
     "root": {
       "inputs": {
+        "adb-enhanced": "adb-enhanced",
         "aflplusplus": "aflplusplus",
         "bettermouse": "bettermouse",
         "burp-suite": "burp-suite",

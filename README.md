@@ -282,10 +282,12 @@ The apps are defined in
 `custom-flakes/creality-print`, `custom-flakes/proton-mail-bridge`,
 `custom-flakes/zotero`, and `custom-flakes/prusa-slicer`; Home Manager exposes
 them through those user-level links. The standalone
-`custom-flakes/aflplusplus`, `custom-flakes/mbpoll`, and
-`custom-flakes/nordic-nrf-command-line-tools` packages are also added to
-`home.packages`, making their command-line tools available in the managed user
-`PATH` without shell configuration changes. The Nordic cask contains installer
+`custom-flakes/adb-enhanced`, `custom-flakes/aflplusplus`,
+`custom-flakes/mbpoll`, and `custom-flakes/nordic-nrf-command-line-tools`
+packages are also added to `home.packages`, making their command-line tools
+available in the managed user `PATH` without shell configuration changes.
+The Python `adb-enhanced` package provides the `adbe` command and uses Nixpkgs'
+Android platform tools for `adb`. The Nordic cask contains installer
 packages rather than an `.app`; Home Manager also installs the separately
 licensed SEGGER J-Link package required for programming with `nrfjprog`.
 Nextcloud Finder Sync registration runs during Home Manager activation.
