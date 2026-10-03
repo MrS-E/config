@@ -26,7 +26,7 @@ Cross-platform dotfiles repository supporting **macOS**, **Fedora**, **Fedora At
 
 | OS | Step Directory | Package Managers | Status |
 |---|---|---|---|
-| **macOS** | `setup/macos/` | Homebrew | ✅ Active |
+| **macOS** | `setup/macos/` | Nix (Home Manager + nix-darwin) | ✅ Active |
 | **Fedora** | `setup/fedora/` | dnf, COPR, Flatpak | ✅ Active |
 | **Fedora Atomic** | `setup/fedora-atomic/` | rpm-ostree, Flatpak, Toolbx | ✅ Tested (only Test Suit) |
 | **Manjaro** | `setup/manjaro/` | pacman, AUR (yay) | ✅ Tested (only Test Suit) |
@@ -46,10 +46,12 @@ config/
 │   │   ├── 01-symlinks.sh
 │   │   ├── 02-git-filters.sh
 │   │   └── 03-vim-base.sh
-│   ├── macos/                  # macOS steps + Brewfile
+│   ├── macos/                  # macOS steps + Brewfile audit inventory
 │   ├── fedora/                 # Fedora steps + dnf/flatpak/copr manifests
 │   ├── fedora-atomic/          # Fedora Atomic steps + rpm-ostree/toolbox manifests
 │   └── manjaro/                # Manjaro steps + pacman/aur manifests
+├── nix/                        # Pinned macOS package flake and reusable modules
+├── custom-flakes/              # Standalone custom Nix flakes
 ├── tests/                      # Podman + bats-core test matrix
 ├── zshrc                       # ZSH shell configuration
 ├── gitconfig                   # Git global configuration
@@ -61,7 +63,7 @@ config/
 ├── lazygit/                    # Lazygit TUI keybinding overrides
 ├── vscodium/                   # VSCodium (base+overlay settings pattern)
 ├── ssh/                        # SSH config, host stanzas, YubiKey PKCS11
-├── scripts/                    # Custom CLI tools (project, work-finder)
+├── scripts/                    # Custom CLI tools (nixvm, project, work-finder)
 ├── Nextcloud/                  # Nextcloud desktop client config
 └── junie/                      # Junie AI assistant settings
 ```
@@ -71,7 +73,9 @@ config/
 | `setup.sh` | Orchestration-only runner. Detects OS, discovers numbered step scripts under `setup/general/` and `setup/<os>/`, applies selection filters (`--all`, `--only`, `--exclude`, `--interactive`), and runs each step as a separate process via `presteps` then `run`. No setup logic lives here. |
 | `setup/general/` | OS-agnostic steps that run first on every platform: symlink dotfiles, register git filters, create shared editor directories. `common.bash` provides platform-neutral primitives (logging, symlink helpers, git clone guards, manifest parsing). |
 | `setup/<os>/` | Platform-specific numbered steps with companion manifests and a `common.bash` helper library. Steps are idempotent — safe to run repeatedly. |
-| `zshrc` | ZSH config: OS/hardware detection, history settings, aliases, platform-aware clip/clippaste helpers, completion system, Starship prompt with custom fallback, version managers (NVM, JABBA, PYENV, RBENV, bun), ZSH plugins, custom script shell-integration. |
+| `nix/` | Pinned Nix flake: nix-darwin activates the Apple Silicon host, and Home Manager manages only the selected package profile. |
+| `custom-flakes/` | Standalone custom Nix flakes, kept separate from the system package flake. |
+| `zshrc` | ZSH config: OS/hardware detection, history settings, aliases, platform-aware clip/clippaste helpers, completion system, Starship prompt with custom fallback, version managers (bun), ZSH plugins, custom script shell-integration. |
 | `gitconfig` | Git config: GPG SSH signing, codium/vscode as difftool/mergetool, LFS, pull rebase, credential cache. |
 | `vimrc` | Vim config: persistent undo, custom theme, indentation, whitespace display, statusline. |
 | `vim/` | Vim custom color scheme (`cyberpunk_scarlet_protocol_adjusted.vim`) and persistent undo directory. |
@@ -81,7 +85,7 @@ config/
 | `lazygit/` | Lazygit TUI: custom keybinding overrides. |
 | `vscodium/` | VSCodium: base+overlay settings (`settings.base.json` + platform-specific overlays), extensions list, `code export`/`code import` zsh functions. |
 | `ssh/` | SSH config: `config` entry point (Include, ControlMaster, keychain), `config.d/*` host stanzas (private, homelab, infra, zhaw), YubiKey PKCS11 provider filter. |
-| `scripts/` | Custom CLI tools: `project` (project directory switcher), `work-finder` (git/file activity scanner). Both support `--shell-integration` for zsh wrapper + completion generation. |
+| `scripts/` | Custom CLI tools: `nixvm` (Nix-backed Java, Ruby, and Python versions), `project` (project directory switcher), and `work-finder` (git/file activity scanner). They use `--shell-integration` where a Zsh wrapper is needed. |
 | `Nextcloud/` | Nextcloud desktop client config (`nextcloud.cfg`) and sync-exclude patterns (`sync-exclude.lst`). |
 | `junie/` | Junie AI assistant: `settings.json`, model configs with API key scrub filter. |
 
@@ -125,8 +129,8 @@ rewrites provider paths on commit/checkout.
    no hosts:
    ```
    # providers.mac
-   YKCS11=/opt/homebrew/lib/libykcs11.dylib
-   OPENSC=/opt/homebrew/lib/opensc-pkcs11.so
+   YKCS11=/Users/simeon.stix/.nix-profile/lib/libykcs11.dylib
+   OPENSC=/Users/simeon.stix/.nix-profile/lib/opensc-pkcs11.so
    ```
    ```
    # providers.fedora
@@ -144,7 +148,7 @@ rewrites provider paths on commit/checkout.
   `s|<real path>|@VAR@|g` rules (one per `VAR=path` line, comments/blank lines
   skipped).
 - Pipes the file through that sed. So
-  `/opt/homebrew/lib/libykcs11.dylib` becomes `@YKCS11@`, and any Fedora path
+  `/Users/simeon.stix/.nix-profile/lib/libykcs11.dylib` becomes `@YKCS11@`, and any Fedora path
   (once filled in) would also collapse to `@YKCS11@`.
 - Result: the committed blob contains only portable `@YKCS11@` / `@OPENSC@`
   tokens, regardless of which platform last edited it.
@@ -156,8 +160,9 @@ real paths.
 - Sources that file to get `YKCS11` / `OPENSC`, then runs
   `sed -e "s|@YKCS11@|$YKCS11|g" -e "s|@OPENSC@|$OPENSC|g"`.
 - Fallback: if the providers file isn't present yet (fresh-clone race where the
-  filter runs before the file is checked out), it hardcodes the macOS Homebrew
-  paths on Darwin, and on any other OS passes content through unchanged.
+  filter runs before the file is checked out), it uses the current macOS user's
+  Home Manager profile paths on Darwin, and on any other OS passes content
+  through unchanged.
 - Result: the file on disk has real, SSH-usable paths for whatever machine you're
   on.
 
@@ -248,13 +253,136 @@ OS-agnostic steps that run first on every platform:
 
 | Step | Description |
 |---|---|
-| `01-homebrew.sh` | Install Homebrew if not present |
-| `02-brew-bundle.sh` | Install packages from `setup/macos/Brewfile` via `brew bundle` |
 | `03-ssh-agent.sh` | Start ssh-agent if not running |
 | `04-ssh-keychain.sh` | Add SSH keys to Apple keychain |
 | `05-vim-theme.sh` | Clone Dracula vim theme |
 | `06-junie.sh` | Install Junie CLI |
-| `07-waveforms.sh` | Download and install Digilent WaveForms from the official `.dmg` (not in Brewfile; falls back to the browser if Cloudflare blocks `curl`) |
+| `07-waveforms.sh` | Download and install Digilent WaveForms from the official `.dmg` as a separate vendor installer (falls back to the browser if Cloudflare blocks `curl`) |
+| `08-kitty-permissions.sh` | Open macOS Privacy & Security settings for Kitty permissions |
+| `09-nix.sh` | Install Nix using the official installer and enable `nix-command` + flakes |
+| `10-nix-darwin.sh` | Activate the pinned repository flake in `nix/`; supports an explicit external flake override |
+
+`nix-darwin` handles macOS activation and system settings; Home Manager is
+integrated only for the selected user package profile and GUI app links. The
+app bundles are linked under `~/Applications/Home Manager Apps`; activation
+also creates collision-safe Finder aliases directly under `~/Applications`
+and registers them with macOS LaunchServices for app search tools such as
+Spotlight and Raycast. Existing applications are not replaced, and aliases
+are refreshed when their managed Nix-store app target changes.
+The profile includes the Nextcloud VFS, BetterMouse, Figma, Texifier, Proton
+Drive, Raspberry Pi Imager, Burp Suite Community Edition, Creality Print,
+Proton Mail Bridge, Zotero, and PrusaSlicer; their DMG versions and checksums
+come from the official Homebrew cask metadata for
+[Zotero](https://formulae.brew.sh/api/cask/zotero.json) and
+[PrusaSlicer](https://formulae.brew.sh/api/cask/prusaslicer.json).
+The apps are defined in
+`custom-flakes/nextcloud-vfs`, `custom-flakes/bettermouse`,
+`custom-flakes/figma`, `custom-flakes/texifier`, `custom-flakes/proton-drive`,
+`custom-flakes/raspberry-pi-imager`, `custom-flakes/burp-suite`,
+`custom-flakes/creality-print`, `custom-flakes/proton-mail-bridge`,
+`custom-flakes/zotero`, and `custom-flakes/prusa-slicer`; Home Manager exposes
+them through those user-level links. The standalone
+`custom-flakes/adb-enhanced`, `custom-flakes/aflplusplus`,
+`custom-flakes/mbpoll`, and `custom-flakes/nordic-nrf-command-line-tools`
+packages are also added to `home.packages`, making their command-line tools
+available in the managed user `PATH` without shell configuration changes.
+The Python `adb-enhanced` package provides the `adbe` command and uses Nixpkgs'
+Android platform tools for `adb`. The Nordic cask contains installer
+packages rather than an `.app`; Home Manager also installs the separately
+licensed SEGGER J-Link package required for programming with `nrfjprog`.
+Nextcloud Finder Sync registration runs during Home Manager activation.
+BetterMouse's and Figma's first-run setup, Texifier's and Proton Drive's
+additional first-launch setup
+(if needed), Burp Suite configuration, Proton Mail Bridge setup, and macOS
+privacy permissions remain manual.
+The checked-in `nix/flake.nix` pins Nixpkgs, nix-darwin, and Home Manager, and
+currently defines only `aarch64-darwin`. It does not manage dotfiles,
+`~/.config`, VSCodium, or editor settings/extensions. See the
+[Brewfile-to-Nixpkgs audit](setup/macos/nixpkgs-audit.md) for selected
+replacements and manual/vendor exceptions.
+
+Since `brew bundle` is retired, clean setup no longer installs VSCodium or its
+extensions; they remain outside this migration.
+
+For a Mac that still has Homebrew installed, the opt-in one-shot migration is
+`scripts/migrate-macos-brew-to-nix.sh`. It writes a unique, persistent
+`Brewfile.backup-*` under `~/` by default (or in a directory selected with
+`--backup-dir`), verifies the installed formula/cask counts, removes every
+formula and cask reported as installed by Homebrew, runs Homebrew's official
+uninstaller, and then runs the normal `setup.sh` flow, including Nix bootstrap
+and nix-darwin activation. It is not part of automatic setup. The script asks
+you to type `REMOVE HOMEBREW`; use `--yes` only when explicitly authorizing a
+non-interactive run. If `~/nix-darwin-config/flake.nix` exists, set
+`NIX_DARWIN_CONFIG_DIR` explicitly so the migration knows which flake to use.
+For example, `NIX_DARWIN_CONFIG_DIR="$PWD/nix"` selects this repository's
+Apple Silicon configuration. Run it from the repository checkout with
+`./scripts/migrate-macos-brew-to-nix.sh`.
+
+The script locates Homebrew through `PATH` or the standard locations:
+`/opt/homebrew/bin/brew` on Apple Silicon and `/usr/local/bin/brew` on Intel.
+This does not require Homebrew initialization in `zshrc`. For a custom install,
+set `MIGRATION_BREW_BIN` to the executable path.
+
+The backup is a package inventory, not a copy of applications, service state,
+settings, or application data. In particular, an installed VSCodium cask is
+removed; its settings and extensions are not backed up or managed by Nix. The
+migration script never overwrites or deletes the backup; keep it. If you later
+choose to restore Homebrew, reinstall Homebrew and use
+`brew bundle --file /path/to/Brewfile.backup-<timestamp>` to attempt to
+reinstall the recorded bundle. The backup directory must be outside the
+Homebrew prefix so the official uninstaller cannot remove it.
+
+`setup/macos/10-nix-darwin.sh` activates the repository flake by default. Set
+`NIX_DARWIN_CONFIG_DIR` explicitly to use an external flake, and optionally set
+`NIX_DARWIN_HOSTNAME` to choose its `darwinConfigurations` output. The step
+never initializes, edits, or locks an external configuration. If
+`~/nix-darwin-config/flake.nix` already exists and no override is selected, the
+step stops with instructions rather than silently abandoning it. The reduced
+`setup/macos/Brewfile` remains only as audit inventory; setup no longer installs
+Homebrew or runs `brew bundle`.
+
+The step passes the required Nix feature flags to user and root commands. Known
+conflicting files at `/etc/nix/nix.conf`, `/etc/bashrc`, and `/etc/zshrc` are
+moved to matching `.before-nix-darwin` backups before activation; inspect those
+backups before deleting them. Tailscale and other optional services are not
+enabled automatically. After activation, apply repository-flake changes with
+`sudo darwin-rebuild switch --flake "git+file://$HOME/config?dir=nix#aarch64-darwin"`.
+Open a new shell after activation; `zshrc` adds
+`/run/current-system/sw/bin` and `~/.nix-profile/bin` when they exist, exposing
+system commands and Home Manager packages.
+
+### Runtime Versions (`nixvm`)
+
+`nixvm` manages global Java JDK, Ruby, and Python selections on macOS. It
+requires Nix with the `nix-command` and `flakes` features enabled; the existing
+`setup/macos/09-nix.sh` step installs Nix and enables those features. `nixvm`
+does not bootstrap Nix or modify the nix-darwin configuration. It uses the
+configured `nixpkgs` flake to discover versioned JDK (`jdk21`), Ruby
+(`ruby_3_3`), and Python (`python312`) package attributes instead of maintaining
+a hardcoded version list. Availability follows the current Mac architecture
+and Nixpkgs revision; arbitrary upstream patch releases without a corresponding
+Nixpkgs attribute are not selectable. Run `nixvm list --available` to see the
+current choices.
+
+```bash
+nixvm list                         # installed and available versions
+nixvm list python --installed      # only installed Python versions
+nixvm list --available             # available versions for all runtimes
+nixvm install java 21
+nixvm install ruby 3.3
+nixvm install python 3.12
+nixvm use java 21
+nixvm remove python 3.12
+```
+
+The existing Zsh script loader activates the shell integration automatically:
+`use` adds the selected runtime's `bin` directory to the current shell's
+`PATH`, sets `JAVA_HOME` for Java, and persists one global selection per
+runtime for later Zsh sessions. Install references and active selections live
+under `${XDG_DATA_HOME:-$HOME/.local/share}/nixvm`. Removing a version drops only
+the manager-owned reference (and clears it if active); it does not delete a
+Nix store path directly. Nix garbage collection can reclaim outputs that no
+longer have other references.
 
 ### Fedora Steps (`setup/fedora/`)
 
@@ -290,7 +418,6 @@ OS-agnostic steps that run first on every platform:
 | `09-toolbox-packages.sh` | Install packages in each toolbox |
 | `10-toolbox-latex.sh` | Install LTEX LS in latex toolbox |
 | `11-toolbox-mobile.sh` | Install ktlint + SwiftLint in mobile toolbox |
-| `12-toolbox-cli-dev.sh` | Install Jabba, Pyenv, NVM in cli-dev toolbox |
 | `99-reboot-notice.sh` | Print reboot reminder |
 
 ### Manjaro Steps (`setup/manjaro/`)
@@ -307,18 +434,17 @@ OS-agnostic steps that run first on every platform:
 | `08-firewall.sh` | Enable nftables + ufw |
 | `09-clamav.sh` | Enable ClamAV freshclam |
 | `10-jetbrains-toolbox.sh` | Download JetBrains Toolbox |
-| `11-jabba.sh` | Install Jabba (Java version manager) |
-| `12-joplin.sh` | Install Joplin note-taking app |
-| `13-cisco-note.sh` | Cisco AnyConnect VPN note |
-| `14-celeste-note.sh` | Celeste cloud sync note |
+| `11-joplin.sh` | Install Joplin note-taking app |
+| `12-cisco-note.sh` | Cisco AnyConnect VPN note |
+| `13-celeste-note.sh` | Celeste cloud sync note |
 
 ### Package Manifests
 
-Each platform's manifests live alongside their step scripts in `setup/<os>/`.
+Fedora and Manjaro manifests live alongside their step scripts; the macOS package profile is defined in `nix/`.
 
 | Manifest | Format | Export command |
 |---|---|---|
-| `setup/macos/Brewfile` | Homebrew Bundle | `brew bundle dump --file=setup/macos/Brewfile --force` |
+| `nix/flake.nix` and `nix/packages/*.nix` | Pinned Nix flake and package modules | `nix flake check path:./nix` |
 | `setup/fedora/dnf.txt` | One package per line | `dnf repoquery --userinstalled --qf "%{name}\n" \| sort` |
 | `setup/fedora/copr.txt` | One COPR repo per line | (manual) |
 | `setup/fedora/flatpak.txt` | One app ID per line | `flatpak list --app --columns=application \| sort` |
@@ -328,6 +454,9 @@ Each platform's manifests live alongside their step scripts in `setup/<os>/`.
 | `setup/fedora-atomic/toolboxes/*.txt` | Per-toolbox dnf packages | (manual per toolbox) |
 | `setup/manjaro/pacman.txt` | One package per line | `pacman -Qqen \| sort` |
 | `setup/manjaro/aur.txt` | One package per line | `pacman -Qqem \| sort` |
+
+`setup/macos/Brewfile` is retained only as the source inventory for the
+[Nixpkgs audit](setup/macos/nixpkgs-audit.md); the setup runner does not read it.
 
 ### Test Harness
 
@@ -347,7 +476,7 @@ The `zshrc` is the most complex config file. It handles:
 
 - Detects **OS**: `Darwin` (macOS) vs `Linux`
 - Detects **CPU architecture**: Intel vs ARM (sets `$ARCH` to `arm64` or `x86_64`)
-- Sets platform-specific environment variables (`$HOMEBREW_PREFIX`, `$ANDROID_HOME`, etc.)
+- Sets platform-specific environment variables (`$ANDROID_HOME`, etc.)
 - Detects **hardware model** on macOS (sets `$HARDWARE_MODEL` based on `sysctl hw.model`)
 
 ### History
@@ -372,14 +501,13 @@ The `zshrc` is the most complex config file. It handles:
 
 - **`adb`**: wraps Android Debug Bridge with `adb -H` for wireless, auto-starts adb server
 - **`code` / `codium`**: wraps VSCodium, managing base+overlay settings via `export`/`import`
-- **`brew`**: wraps Homebrew with automatic Brewfile update after `brew install`/`remove`
 - **`git`**: extends git with additional aliases (see gitconfig section)
 - **`idf.py`**: ESP-IDF wrapper with automatic environment setup
 
 ### Completion System
 
 - Modern completion system with `menu select` and `list-colors`
-- Auto-loads completions for: git, brew, docker, kubectl, pip, npm, cargo, rustup
+- Auto-loads completions for: git, docker, kubectl, pip, npm, cargo, rustup
 
 ### Prompt
 
@@ -391,10 +519,6 @@ All version managers are loaded lazily (only when their commands are invoked):
 
 | Manager | Tool | Lazy-load Command |
 |---|---|---|
-| **NVM** | Node.js | `nvm`, `node`, `npm`, `yarn`, `pnpm` |
-| **JABBA** | Java/JDK | `jabba`, `java`, `javac` |
-| **PYENV** | Python | `pyenv`, `python`, `pip` |
-| **RBENV** | Ruby | `rbenv`, `ruby`, `gem` |
 | **bun** | JS runtime | `bun`, `bunx` |
 
 ### ZSH Plugins
@@ -404,12 +528,13 @@ Loaded via native zsh `source` (no plugin manager):
 - **zsh-autosuggestions**: fish-style autosuggestions as you type
 - **zsh-syntax-highlighting**: real-time command syntax coloring
 - **zsh-autocomplete**: type-ahead completion in all contexts
+- macOS sources the Nix profile packages when available; Fedora continues to install these plugins as Git clones under `~/.zsh`
 
 ### Additional Integrations
 
-- **Homebrew**: shellenv + completions on macOS
+- **Home Manager package profile**: provides the selected macOS packages without managing dotfiles or editor settings
 - **FZF**: fuzzy finder with fd integration, `Ctrl+T` / `Ctrl+R` / `Alt+C` bindings
-- **Tailscale**: completions
+- **Tailscale**: CLI completions outside macOS (the macOS GUI app is not invoked as a CLI)
 - **TheFuck**: auto-correction tool (`eval $(thefuck --alias)`)
 - **1Password CLI**: completions
 
@@ -673,9 +798,12 @@ Both scripts are auto-loaded by `zshrc` via shell integration, so their commands
 ### Adding Packages
 
 1. Identify the correct platform manifest (see [Package Manifests](#package-manifests) table above).
-2. Add the package name to the appropriate text file (one per line).
-3. After installing on the target machine, run the export command to keep the manifest in sync:
-   - macOS: `brew bundle dump --file=setup/macos/Brewfile --force`
+2. For macOS, add a verified package attribute to the appropriate module in
+   `nix/packages/` (`common.nix`, `darwin.nix`, or `aarch64-darwin.nix`) and
+   update the [Nixpkgs audit](setup/macos/nixpkgs-audit.md). The reduced
+   `Brewfile` remains an audit inventory and is not consumed by setup.
+3. For Fedora, Flatpak, and Manjaro, add the package/app ID to the appropriate
+   text file (one per line). After installing, use the platform export command:
    - Fedora: `dnf repoquery --userinstalled --qf "%{name}\n" | sort > setup/fedora/dnf.txt`
    - Fedora Flatpak: `flatpak list --app --columns=application | sort > setup/fedora/flatpak.txt`
    - Manjaro: `pacman -Qqen | sort > setup/manjaro/pacman.txt` (official) and `pacman -Qqem | sort > setup/manjaro/aur.txt` (AUR)
@@ -716,7 +844,7 @@ Both scripts are auto-loaded by `zshrc` via shell integration, so their commands
 
 1. Add aliases and functions to `zshrc`.
 2. For platform-specific aliases: guard with `if [[ "$OS" = "Darwin" ]]` / `elif [[ "$OS" = "Linux" ]]`.
-3. Consider whether a wrapper function is needed (like `code`/`codium` or `brew`) — these are for commands that need pre/post hooks.
+3. Consider whether a wrapper function is needed (like `code`/`codium`) — wrappers are for commands that need pre/post hooks.
 4. If the function is substantial, consider moving it to `scripts/` and using `--shell-integration`.
 
 ### Adding Custom Scripts

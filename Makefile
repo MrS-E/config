@@ -33,7 +33,7 @@ BATS_COMMON  := tests/bats/smoke.bats tests/bats/idempotency.bats tests/bats/zsh
 BATS_FEDORA  := $(BATS_COMMON) tests/bats/assertions-fedora.bats tests/bats/ssh-pkcs11-fedora.bats
 BATS_MANJARO := $(BATS_COMMON) tests/bats/assertions-manjaro.bats
 BATS_ATOMIC  := $(BATS_COMMON) tests/bats/assertions-fedora-atomic.bats
-BATS_MACOS   := $(BATS_COMMON) tests/bats/assertions-macos.bats
+BATS_MACOS   := $(BATS_COMMON) tests/bats/assertions-macos.bats tests/bats/nixvm.bats tests/bats/migrate-brew-to-nix.bats
 
 OS_LIST := fedora manjaro fedora-atomic macos
 
@@ -67,6 +67,7 @@ define run_bats
 		-v $(WORKSPACE_MOUNT) \
 		-e HOME=/home/tester \
 		-e TEST_OS=$(1) \
+		-e REPO_DIR=$(WORKSPACE) \
 		--user tester \
 		-w $(WORKSPACE) \
 		$(IMAGE_PREFIX)/$(1) \
