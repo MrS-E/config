@@ -66,6 +66,7 @@
                 "postman"
                 "proxyman"
                 "raycast"
+                "segger-jlink"
                 "slack"
                 "spotify"
                 "tailscale-gui"

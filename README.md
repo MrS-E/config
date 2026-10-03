@@ -277,8 +277,8 @@ Manager exposes them through those user-level links. The standalone
 `custom-flakes/nordic-nrf-command-line-tools` packages are also added to
 `home.packages`, making their command-line tools available in the managed user
 `PATH` without shell configuration changes. The Nordic cask contains installer
-packages rather than an `.app`; programming with `nrfjprog` still requires the
-separately licensed SEGGER J-Link package.
+packages rather than an `.app`; Home Manager also installs the separately
+licensed SEGGER J-Link package required for programming with `nrfjprog`.
 Nextcloud Finder Sync registration runs during Home Manager activation.
 BetterMouse's and Figma's first-run setup, Texifier's and Proton Drive's
 additional first-launch setup
