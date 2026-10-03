@@ -71,6 +71,7 @@
                 "spotify"
                 "tailscale-gui"
               ];
+            nixpkgs.config.segger-jlink.acceptLicense = true;
             nix.settings.experimental-features = "nix-command flakes";
             # Don't forward macOS-specific LC_* values to remote hosts.
             programs.ssh.extraConfig = ''
