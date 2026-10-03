@@ -26,6 +26,10 @@
     nordic-nrf-command-line-tools.url = "path:../custom-flakes/nordic-nrf-command-line-tools";
     aflplusplus.url = "path:../custom-flakes/aflplusplus";
     mbpoll.url = "path:../custom-flakes/mbpoll";
+    zotero = {
+      url = "path:../custom-flakes/zotero";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -43,6 +47,7 @@
     nordic-nrf-command-line-tools,
     aflplusplus,
     mbpoll,
+    zotero,
     ...
   }:
     let
@@ -100,6 +105,7 @@
               nordicNrfCommandLineTools = nordic-nrf-command-line-tools.packages.${system}.nordic-nrf-command-line-tools;
               aflPlusPlus = aflplusplus.packages.${system}.aflplusplus;
               mbpoll = mbpoll.packages.${system}.mbpoll;
+              zoteroPackage = zotero.packages.${system}.zotero;
             };
             home-manager.users."simeon.stix" = {
               imports = [

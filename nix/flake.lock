@@ -418,7 +418,8 @@
         "proton-drive": "proton-drive",
         "proton-mail-bridge": "proton-mail-bridge",
         "raspberry-pi-imager": "raspberry-pi-imager",
-        "texifier": "texifier"
+        "texifier": "texifier",
+        "zotero": "zotero"
       }
     },
     "texifier": {
@@ -431,6 +432,22 @@
       },
       "original": {
         "path": "../custom-flakes/texifier",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "zotero": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "../custom-flakes/zotero",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/zotero",
         "type": "path"
       },
       "parent": []

@@ -266,13 +266,14 @@ OS-agnostic steps that run first on every platform:
 integrated only for the selected user package profile and GUI app links. The
 app bundles are linked under `~/Applications/Home Manager Apps`.
 The profile includes the Nextcloud VFS, BetterMouse, Figma, Texifier, Proton
-Drive, Raspberry Pi Imager, Burp Suite Community Edition, Creality Print, and
-Proton Mail Bridge apps defined in
+Drive, Raspberry Pi Imager, Burp Suite Community Edition, Creality Print,
+Proton Mail Bridge, and Zotero apps defined in
 `custom-flakes/nextcloud-vfs`, `custom-flakes/bettermouse`,
 `custom-flakes/figma`, `custom-flakes/texifier`, `custom-flakes/proton-drive`,
 `custom-flakes/raspberry-pi-imager`, `custom-flakes/burp-suite`,
-`custom-flakes/creality-print`, and `custom-flakes/proton-mail-bridge`; Home
-Manager exposes them through those user-level links. The standalone
+`custom-flakes/creality-print`, `custom-flakes/proton-mail-bridge`, and
+`custom-flakes/zotero`; Home Manager exposes them through those user-level
+links. The standalone
 `custom-flakes/aflplusplus`, `custom-flakes/mbpoll`, and
 `custom-flakes/nordic-nrf-command-line-tools` packages are also added to
 `home.packages`, making their command-line tools available in the managed user
