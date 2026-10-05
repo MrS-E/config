@@ -81,7 +81,7 @@ config/
 | `lazygit/` | Lazygit TUI: custom keybinding overrides. |
 | `vscodium/` | VSCodium: base+overlay settings (`settings.base.json` + platform-specific overlays), extensions list, `code export`/`code import` zsh functions. |
 | `ssh/` | SSH config: `config` entry point (Include, ControlMaster, keychain), `config.d/*` host stanzas (private, homelab, infra, zhaw), YubiKey PKCS11 provider filter. |
-| `scripts/` | Custom CLI tools: `project` (project directory switcher), `work-finder` (git/file activity scanner), `fedora-rpm-dependency-graph.py` (export user-installed Fedora RPM dependency closures), and `fedora-rpm-dependency-graph-viewer.html` (local interactive graph viewer). `project` and `work-finder` support `--shell-integration` for zsh wrappers and completions. |
+| `scripts/` | Custom CLI tools: `project` (project directory switcher), `work-finder` (git/file activity scanner), `fedora-rpm-dependency-graph.py` (export user-installed Fedora RPM dependency closures), `fedora-rpm-dependency-graph-viewer.html` (local interactive graph viewer), and `fedora-rpm-manifest-dependencies.py` (annotate in-manifest dependencies). `project` and `work-finder` support `--shell-integration` for zsh wrappers and completions. |
 | `Nextcloud/` | Nextcloud desktop client config (`nextcloud.cfg`) and sync-exclude patterns (`sync-exclude.lst`). |
 | `junie/` | Junie AI assistant: `settings.json`, model configs with API key scrub filter. |
 
@@ -356,6 +356,26 @@ file locally and makes no network requests. It accepts only schema-version-1
 graph output: top-level `schema_version: 1`, a `nodes` array with `id`, `name`,
 `version`, `architectures`, and `reason` fields, and an `edges` array with
 `from` and `to`. Each edge points from a requiring package to its dependency.
+
+To create a second copy of a package manifest with direct dependencies between
+listed packages marked, first export the graph as JSON and then pass it together
+with the manifest to `scripts/fedora-rpm-manifest-dependencies.py`:
+
+```bash
+python3 scripts/fedora-rpm-dependency-graph.py \
+  --json ~/fedora-rpm-dependencies.json
+python3 scripts/fedora-rpm-manifest-dependencies.py \
+  --graph-json ~/fedora-rpm-dependencies.json \
+  --manifest setup/fedora/dnf.txt \
+  --output ~/fedora-dnf-annotated.txt
+```
+
+The output preserves package order and existing comments, adding a separate
+`# Required by manifest packages: ...` line after a package only when another
+distinct package in the manifest has a direct edge to it. Full-line comments
+are ignored by the Fedora manifest installer, so the generated copy remains
+install-compatible. Packages missing from the graph are left unchanged and
+reported to stderr; the original manifest and graph export are not modified.
 
 Use `--fixture-json PATH` to export normalized package data without querying the
 host, for example in tests. A fixture contains `user_installed` package keys
