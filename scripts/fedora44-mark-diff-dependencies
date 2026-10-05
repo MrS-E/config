@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+DIFF_FILE="$REPO_DIR/setup/fedora/depts.diff"
+BASE_FILE="$REPO_DIR/setup/fedora/fedora44-gnome-base.txt"
+
+usage() {
+  cat <<'EOF'
+Usage: scripts/fedora44-mark-diff-dependencies [--dry-run]
+
+Mark packages removed in setup/fedora/depts.diff as DNF dependencies,
+excluding packages listed in setup/fedora/fedora44-gnome-base.txt.
+Only packages currently reported as user-installed by DNF are changed.
+The default action changes install reasons only; it does not remove packages.
+Use --dry-run to preview the packages without changing the system.
+EOF
+}
+
+die() {
+  printf 'error: %s\n' "$*" >&2
+  exit 1
+}
+
+main() {
+  if (( $# > 1 )); then
+    usage >&2
+    return 2
+  fi
+
+  local dry_run=0
+  case "${1:-}" in
+    "") ;;
+    --dry-run) dry_run=1 ;;
+    -h|--help)
+      usage
+      return 0
+      ;;
+    *)
+      usage >&2
+      return 2
+      ;;
+  esac
+
+  [[ -r "$DIFF_FILE" ]] || die "cannot read package diff: $DIFF_FILE"
+  [[ -r "$BASE_FILE" ]] || die "cannot read Fedora base manifest: $BASE_FILE"
+  command -v dnf >/dev/null 2>&1 || die "dnf not found"
+
+  if (( ! dry_run )); then
+    [[ -f /etc/fedora-release ]] || die "this utility requires Fedora"
+    command -v sudo >/dev/null 2>&1 || die "sudo not found"
+  fi
+
+  declare -A base_packages=()
+  local package
+  while IFS= read -r package || [[ -n "$package" ]]; do
+    package="${package%$'\r'}"
+    [[ -z "$package" || "$package" =~ ^[[:space:]]*# ]] && continue
+    [[ "$package" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]*$ ]] || \
+      die "invalid package name in $BASE_FILE: $package"
+    base_packages["$package"]=1
+  done < "$BASE_FILE"
+
+  (( ${#base_packages[@]} > 0 )) || die "Fedora base manifest is empty"
+
+  local installed_output
+  if ! installed_output="$(dnf repoquery --userinstalled --qf '%{name}\n')"; then
+    die "could not query DNF user-installed packages"
+  fi
+
+  declare -A user_installed=()
+  while IFS= read -r package || [[ -n "$package" ]]; do
+    package="${package%$'\r'}"
+    if [[ "$package" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]*$ ]]; then
+      user_installed["$package"]=1
+    fi
+  done <<< "$installed_output"
+
+  declare -A seen=()
+  declare -a packages=()
+  local line protected_count=0 skipped_count=0
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    case "$line" in
+      ---*) continue ;;
+      -*) package="${line#-}" ;;
+      *) continue ;;
+    esac
+
+    package="${package%$'\r'}"
+    [[ -z "$package" || "$package" == \#* ]] && continue
+    [[ "$package" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]*$ ]] || \
+      die "unexpected removed entry in $DIFF_FILE: $line"
+
+    if [[ -n "${seen[$package]+present}" ]]; then
+      continue
+    fi
+    seen["$package"]=1
+
+    if [[ -n "${base_packages[$package]+present}" ]]; then
+      protected_count=$((protected_count + 1))
+      continue
+    fi
+    if [[ -z "${user_installed[$package]+present}" ]]; then
+      skipped_count=$((skipped_count + 1))
+      continue
+    fi
+
+    packages+=("$package")
+  done < "$DIFF_FILE"
+
+  (( ${#seen[@]} > 0 )) || die "no removed package entries found in $DIFF_FILE"
+  printf 'Excluded %d Fedora base package(s); skipped %d package(s) not currently user-installed.\n' \
+    "$protected_count" "$skipped_count"
+
+  if (( ${#packages[@]} == 0 )); then
+    printf 'No packages need to be marked as dependencies.\n'
+    return 0
+  fi
+
+  if (( dry_run )); then
+    printf 'Dry run: would mark %d package(s) as dependencies:\n' "${#packages[@]}"
+    printf '  %s\n' "${packages[@]}"
+    return 0
+  fi
+
+  printf 'Marking %d package(s) as dependencies.\n' "${#packages[@]}"
+  sudo dnf mark dependency "${packages[@]}"
+}
+
+main "$@"
