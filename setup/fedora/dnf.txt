@@ -1,12 +1,7 @@
 # Description: A Better CD Encoder
 abcde
-# Description: Virtual package to make easy default installation on desktop environments
-abrt-desktop
-# Description: Command-line ACPI client
-acpi
 # Description: Android platform tools(adb, fastboot)
 android-tools
-# Required by manifest packages: scrcpy
 # Description: Fast and lightweight package manager originally for Alpine
 apk-tools
 # Description: Multitrack audio editor
@@ -17,8 +12,6 @@ bats
 bcc-tools
 # Description: Berkeley Yacc, a parser generator
 byacc
-# Description: Development files for cairo-gobject
-cairo-gobject-devel
 # Description: C/C++ compiler cache
 ccache
 # Description: End-user tools for the Clam Antivirus scanner
@@ -33,16 +26,12 @@ cmake
 cmake-srpm-macros
 # Description: Code editing. Redefined.
 codium
-# Description: LLVM "compiler-rt" runtime libraries
-compiler-rt20
-# Description: Cross-platform, Python-agnostic binary package manager
-conda
+    # Description: LLVM "compiler-rt" runtime libraries
+    compiler-rt20
 # Description: Tool for static C/C++ code analysis
 cppcheck
 # Description: C source code tree search and browse tool
 cscope
-# Description: D&D Beyond Adventure Muncher for Foundry Virtual Tabletop
-ddb-adventure-muncher
 # Description: Provides the ISC DHCP client daemon and dhclient-script
 dhcp-client
 # Description: A utility which provides statistics based on the output of diff
@@ -59,55 +48,40 @@ exif
 ffmpeg
 # Description: FTP, FTPS and SFTP client
 filezilla
-# Description: An encoder/decoder for the Free Lossless Audio Codec
-flac
-# Description: Freeglut developmental libraries and header files
-freeglut-devel
-# Description: Free implementation of the Remote Desktop Protocol (RDP)
-freerdp
-# Description: File System in Userspace (FUSE) v2 libraries
-fuse-libs
+    # Description: An encoder/decoder for the Free Lossless Audio Codec
+    flac
+    # Description: Free implementation of the Remote Desktop Protocol (RDP)
+    freerdp
+    # Description: File System in Userspace (FUSE) v2 libraries
+    fuse-libs
 # Description: A command-line fuzzy finder written in Go
 fzf
-# Description: Various compilers (C, C++, Objective-C, ...)
-gcc
-# Required by manifest packages: gcc-c++, kernel-devel, libtool, luarocks
-# Description: C++ support for GCC
-gcc-c++
-# Required by manifest packages: clang
-# Description: Matting Levin foreground select plugin for gegl04
-gegl04-matting-levin
 # Description: GNU Image Manipulation Program
 gimp
 # Description: Quickly rewrite git repository history (git-filter-branch replacement)
 git-filter-repo
 # Description: Git extension for versioning large files
 git-lfs
-# Description: Libraries and header files for glib development
-glib-devel
-# Description: A command line compiler for GLSL/HLSL to SPIR-V
-glslc
 # Description: Manage GNOME Shell extensions
 gnome-extensions-app
-# Description: Helper SRPM macros common across GNOME hosted projects
-gnome-srpm-macros
-# Description: GnuPG tool for managing encrypted file system containers
-gnupg2-g13
-# Description: GnuPG SmartCard daemon
-gnupg2-scdaemon
-# Description: GnuPG utilities
-gnupg2-utils
-# Description: GnuPG Web Key Service client and server
-gnupg2-wks
+    # Description: Helper SRPM macros common across GNOME hosted projects
+    gnome-srpm-macros
+    # Description: GnuPG tool for managing encrypted file system containers
+    gnupg2-g13
+    # Description: GnuPG SmartCard daemon
+    gnupg2-scdaemon
+    # Description: GnuPG utilities
+    gnupg2-utils
+    # Description: GnuPG Web Key Service client and server
+    gnupg2-wks
 # Description: Google Chrome
 google-chrome-stable
 # Description: Clipboard management system
 gpaste
-# Required by manifest packages: gpaste-ui
 # Description: Graphical interface for GPaste
 gpaste-ui
-# Description: System utility designed to stress and monitoring various hardware components
-gst
+    # Description: System utility designed to stress and monitoring various hardware components
+    gst
 # Description: HPLIP graphical tools
 hplip-gui
 # Description: Interactive process viewer
@@ -116,54 +90,40 @@ htop
 imhex
 # Description: A GNU program for formatting C code
 indent
-# Description: OpenJDK 21 Development Environment
-java-21-openjdk-devel
-# Description: Development package for building kernel modules to match the kernel
-kernel-devel
+    # Description: Development package for building kernel modules to match the kernel
+    kernel-devel
 # Description: Cross-platform, fast, feature full, GPU based terminal emulator
 kitty
-# Description: Free MP3 audio compressor
-lame
+    # Description: Free MP3 audio compressor
+    lame
 # Description: Simple terminal UI for git commands
 lazygit
 # Description: The GNU Portable Library Tool
 libtool
-# Description: X.Org X11 libXi development package
-libXi-devel
-# Description: X.Org X11 libXmu development package
-libXmu-devel
+    # Description: X.Org X11 libXi development package
+    libXi-devel
+    # Description: X.Org X11 libXmu development package
+    libXmu-devel
 # Description: Tracks runtime library calls from dynamically linked executables
 ltrace
 # Description: A deployment and management system for Lua modules
 luarocks
-# Description: Install and play any video game easily
-lutris
-# Description: A GNU tool which simplifies the build process for users
-make
-# Required by manifest packages: cmake, gcc, kernel-devel
-# Description: Java project management and project comprehension tool
-maven
-# Description: A text-based modem control and terminal emulation program
-minicom
+    # Description: A text-based modem control and terminal emulation program
+    minicom
 # Description: Make and install locally trusted development certificates
 mkcert
-# Description: Collections of brushes for MyPaint
-mypaint2-brushes
 # Description: A portable x86 assembler which uses Intel-like syntax
 nasm
 # Description: Vim-fork focused on extensibility and agility
 neovim
 # Description: The Nextcloud Client
 nextcloud-client
-# Required by manifest packages: nextcloud-client-nautilus
 # Description: nextcloud client nautilus extension
 nextcloud-client-nautilus
 # Description: Small build system with a focus on speed
 ninja-build
 # Description: A document viewer
 okular
-# Description: Get up and running AI LLMs
-ollama
 # Description: The Programmers Solid 3D CAD Modeller
 openscad
 # Description: Markup conversion between documentation formats
@@ -188,30 +148,28 @@ proton-vpn-gnome-desktop
 protonvpn-stable-release
 # Description: A tool for monitoring the progress of data through a pipeline
 pv
-# Description: Metapackage for python3-aiohttp: speedups extras
-python3-aiohttp+speedups
-# Description: Libraries and header files needed for Python development
-python3-devel
-# Description: Shell completion support for the keyring command
-python3-keyring+completion
+    # Description: Metapackage for python3-aiohttp: speedups extras
+    python3-aiohttp+speedups
+    # Description: Libraries and header files needed for Python development
+    python3-devel
+    # Description: Shell completion support for the keyring command
+    python3-keyring+completion
 # Description: A tool for installing and managing Python3 packages
 python3-pip
 # Description: Tool to create isolated Python environments
 python3-virtualenv
-# Description: Qt decoration plugin implementing Adwaita-like client-side decorations
-qadwaitadecorations-qt5
-# Description: A Bittorrent Client
-qbittorrent
+    # Description: Qt decoration plugin implementing Adwaita-like client-side decorations
+    qadwaitadecorations-qt5
 # Description: QEMU user mode emulation of qemu targets static build
 qemu-user-static
 # Description: Command-line tools and library for transforming PDF files
 qpdf
-# Description: Development files for qt5-qtbase
-qt5-qtbase-devel
-# Description: Qt5 - QtDeclarative component
-qt5-qtxmlpatterns
-# Description: Common files for Qt
-qt-common
+    # Description: Development files for qt5-qtbase
+    qt5-qtbase-devel
+    # Description: Qt5 - QtDeclarative component
+    qt5-qtxmlpatterns
+    # Description: Common files for Qt
+    qt-common
 # Description: Rsync for cloud storage
 rclone
 # Description: Program that finds duplicate files
@@ -231,28 +189,20 @@ rpi-imager
 rpmfusion-free-release
 # Description: RPM Fusion (nonfree) Repository Configuration
 rpmfusion-nonfree-release
-# Description: SceneBuilder
-scenebuilder
 # Description: Display and control your Android device
 scrcpy
 # Description: A GNOME application for managing encryption keys
 seahorse
 # Description: Helps troubleshoot SELinux problems
 setroubleshoot
-# Description: Shell script compiler
-shc
 # Description: Bidirectional data relay between two data channels ('netcat++')
 socat
-# Description: Clean and lean CD ripper
-sound-juicer
 # Description: Library that implements an embeddable SQL database engine
 sqlite
-# Description: Installer for the Steam software distribution service
-steam
 # Description: Tracks and displays system calls associated with a running process
 strace
-# Description: A Modern Concurrent Version Control System
-subversion
+    # Description: A Modern Concurrent Version Control System
+    subversion
 # Description: A graphical interface for modifying the system language
 system-config-language
 # Description: Programmable system-wide instrumentation system
@@ -275,20 +225,14 @@ texlive-tocbibind
 texstudio
 # Description: Mozilla Thunderbird mail/newsgroup client
 thunderbird
-# Description: Totem video thumbnailer
-totem-video-thumbnailer
-# Description: The Official Unity Hub
-unityhub
+    # Description: Totem video thumbnailer
+    totem-video-thumbnailer
 # Description: Dynamic analysis tools to detect memory or thread bugs and profile
 valgrind
 # Description: A version of the VIM editor which includes recent enhancements
 vim-enhanced
 # Description: The cross-platform open-source multimedia framework, player and server
 vlc
-# Description: A compatibility layer for windows applications
-wine
-# Description: Work around common problems in Wine
-winetricks
 # Description: Network traffic analyzer
 wireshark
 # Description: Command line clipboard grabber
