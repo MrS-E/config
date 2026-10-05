@@ -87,10 +87,14 @@ config/
 
 ## Git Filters
 
-This repo uses two git clean/smudge filters, registered by `setup/general/02-git-filters.sh`:
+This repo uses four git clean/smudge filters, registered by `setup/general/02-git-filters.sh`:
 
 - **`scrub-apikey`** — redacts API keys in `junie/models/*.json` on commit (clean only; smudge passes through unchanged).
+- **`junie-settings`** — stores only `stepsLimit`, `shareAnonymousStatistics`, `subagentsMode`, `diffViewMode`, and `toolbarVisibility` from `junie/settings.json`; other settings are cached locally under `.git` and restored on checkout.
+- **`junie-mcp`** — omits each server's `enabled` key from the Git version of `junie/mcp/mcp.json`; local values are cached under `.git` and restored on checkout.
 - **`pkcs11-provider`** — tokenizes PKCS#11 provider paths in `ssh/config.d/*` on commit (`@YKCS11@`, `@OPENSC@`) and resolves them to the current platform's real paths on checkout. Provider paths are defined in `ssh/providers.mac` and `ssh/providers.fedora`.
+
+The Junie JSON filters use Python 3. After enabling them, run `git add --renormalize junie/settings.json junie/mcp/mcp.json` once to normalize the existing index contents and seed the local caches. Git may still show these paths as modified in `git status` after local-only edits; `git diff` and committed content use the normalized filters. Running `git add` on these paths refreshes their filtered index state and saves current local-only values.
 
 ### PKCS#11 Provider Filter
 
@@ -632,13 +636,12 @@ Uses a **base + overlay** pattern to keep settings DRY across platforms:
 
 ### ZSH Integration
 
-The `zshrc` provides two functions for managing settings:
+The `zshrc` provides two functions for managing settings and extensions. Run them from the repository root:
 
-- **`code export`**: writes current VSCodium settings back to the repo:
-  - Shared settings → `settings.base.json`
-  - Platform-specific settings → `settings.macos.json` / `settings.linux.json`
-- **`code import`**: merges repo settings into VSCodium:
-  - Symlinks `settings.base.json` + platform overlay → VSCodium user settings
+1. After changing VSCodium settings or extensions, run `code export vscodium`. This saves a full settings backup, splits shared and platform-specific settings into the base and OS overlay files, and exports the installed extension list.
+2. On another machine, run `code import vscodium` to merge the base and current OS overlay into VSCodium's user settings and install the extensions listed in `vscodium/extensions`.
+
+Both commands require the `codium` CLI; exporting and importing the base/overlay settings also requires `jq`.
 
 ### Extensions
 
@@ -655,7 +658,8 @@ cat vscodium/extensions | xargs -L1 codium --install-extension
 
 ## Junie Configuration
 
-- **`settings.json`**: Junie AI assistant settings (local-only; not tracked by git — each machine keeps its own copy)
+- **`settings.json`**: Junie AI assistant settings; only the five shared keys listed above are tracked, while other keys are held in the per-clone cache under `.git`
+- **`mcp/mcp.json`**: MCP server configuration; `enabled` keys are omitted from Git, with local values held in the per-clone cache under `.git`
 - **Model configs**: API keys in `junie/models/*.json` are protected by the `scrub-apikey` git filter — they never appear in commits (redacted to `REDACTED`)
 - **Logs excluded** from repo (gitignored)
 
@@ -749,82 +753,3 @@ Both scripts are auto-loaded by `zshrc` via shell integration, so their commands
 | **Git filters for platform values** | Use clean/smudge filters (`pkcs11-provider` pattern) to keep platform-specific paths tokenized in commits, resolved in working trees |
 | **Base + overlay settings** | `vscodium/` uses shared `settings.base.json` + platform-specific overlays |
 | **Provider path tables** | `ssh/providers.mac` / `ssh/providers.fedora` hold only key=value pairs, never hosts |
-
-## Recommendations
-
-These are concrete suggestions to improve the config over time. None are blockers — just ideas worth pursuing.
-
-### High Priority
-
-- **Verify Fedora provider paths**: `ssh/providers.fedora` has `TODO_VERIFY_*` placeholders. Verify `/usr/lib64/pkcs11/libykcs11.so` and `/usr/lib64/pkcs11/opensc-pkcs11.so` on real Fedora hardware with the `ykcs11` and `opensc` packages installed.
-- **Populate `settings.linux.json`**: `vscodium/settings.linux.json` is empty `{}`. Add Linux-specific VSCodium settings (e.g. paths, terminal profiles).
-- **Resolve `VISUAL=3` in zshrc**: The env var `VISUAL=3` is set in `zshrc` — the value `3` is unclear. Either document what it does or fix it (likely meant to be `VISUAL=nvim` or similar).
-
-### Medium Priority
-
-- **Add shellcheck CI**: All setup scripts are shell (`sh`/`bash`). A pre-commit hook or CI step running `shellcheck` would catch common issues.
-- **Untrack `known_hosts.old` and `.netrwhist`**: These auto-generated files are tracked in git but are ephemeral data, not config. Consider removing from tracking or adding to `.gitignore`.
-- **Document `code export`/`code import` workflow**: The VSCodium settings sync flow is powerful but not obvious. Consider a dedicated section showing end-to-end usage.
-
-## TODO
-
-### Mac
-
-- [x] setup script (tested on M1/M2)
-- [x] dependency install (Homebrew)
-- [x] dependency list (Brewfile)
-- [x] ssh config (including PKCS11 filter)
-- [x] git config (GPG SSH signing)
-- [x] zsh config (starship prompt)
-- [x] vim config (cyberpunk theme)
-- [x] terminal config (ghostty)
-- [x] vscode(ium) config (base + overlay)
-- [x] neovim (lazy.nvim, 27 plugins)
-- [ ] Nordic Connect Desktop setup (`setup/macos/08-nrf-connect.sh`)
-- [ ] Xcode Additional Tools setup (`setup/macos/11-xcode-additional-tools.sh`)
-- [ ] Segger SystemView setup
-- [ ] Nordic SDK directories
-
-### Linux
-
-#### Fedora
-
-- [x] setup script (untested on hardware)
-- [x] dependency install (dnf + Flatpak + COPR)
-- [x] dependency list
-- [x] ssh config (PKCS11 filter)
-- [x] git config
-- [x] zsh config
-- [x] vim config
-- [ ] terminal config (ghostty Linux path)
-- [x] vscode(ium) config
-- [ ] verify PKCS11 provider paths (`providers.fedora`)
-- [x] neovim config
-
-#### Fedora Atomic (Tested in containers)
-
-- [x] setup script (untested on hardware)
-- [x] dependency install (rpm-ostree + Flatpak + Toolbx)
-- [x] dependency list
-- [x] ssh config (PKCS11 filter)
-- [x] git config
-- [x] zsh config
-- [x] vim config
-- [ ] terminal config (ghostty Linux path)
-- [x] vscode(ium) config
-- [ ] verify PKCS11 provider paths (`providers.fedora`)
-- [x] neovim config
-
-#### Manjaro (Tested in containers)
-
-- [x] setup script (untested on hardware)
-- [x] dependency install (pacman + AUR)
-- [x] dependency list
-- [x] ssh config (PKCS11 filter)
-- [x] git config
-- [x] zsh config
-- [x] vim config
-- [ ] terminal config (ghostty Linux path)
-- [x] vscode(ium) config
-- [ ] verify PKCS11 provider paths (`providers.fedora`)
-- [x] neovim config

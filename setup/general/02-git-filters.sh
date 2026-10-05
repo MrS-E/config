@@ -16,9 +16,10 @@ presteps() {
 help() {
   cat <<'EOF'
 Register git clean/smudge filters for this dotfiles repo: pkcs11-provider
-(tokenizes/resolves SSH PKCS#11 provider paths) and scrub-apikey (redacts API
-keys in junie model configs). Idempotent: filters are only rewritten when the
-configured value differs.
+(tokenizes/resolves SSH PKCS#11 provider paths), scrub-apikey (redacts API keys
+in Junie model configs), and Junie JSON filters (require Python 3, track
+selected settings, and keep MCP enabled values local). Idempotent: filters are
+only rewritten when the configured value differs.
 EOF
 }
 
@@ -33,6 +34,18 @@ run() {
     "sed -E 's/(\"apiKey\"[[:space:]]*:[[:space:]]*)\"[^\"]*\"/\\1\"REDACTED\"/'"
   ensure_git_config filter.scrub-apikey.smudge cat
   ensure_git_config filter.scrub-apikey.required true
+
+  ensure_git_config filter.junie-settings.clean \
+    "python3 scripts/junie-json-filter.py clean-settings"
+  ensure_git_config filter.junie-settings.smudge \
+    "python3 scripts/junie-json-filter.py smudge-settings %f"
+  ensure_git_config filter.junie-settings.required true
+
+  ensure_git_config filter.junie-mcp.clean \
+    "python3 scripts/junie-json-filter.py clean-mcp"
+  ensure_git_config filter.junie-mcp.smudge \
+    "python3 scripts/junie-json-filter.py smudge-mcp %f"
+  ensure_git_config filter.junie-mcp.required true
 
   if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     while IFS= read -r -d '' file; do
@@ -57,7 +70,7 @@ run() {
     done < <(git ls-files -z -- 'ssh/config.d/*')
   fi
 
-  log "Git filters configured: pkcs11-provider, scrub-apikey"
+  log "Git filters configured: pkcs11-provider, scrub-apikey, junie-settings, junie-mcp"
 }
 
 case "${1:-}" in
