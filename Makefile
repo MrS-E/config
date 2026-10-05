@@ -32,7 +32,7 @@ endif
 BATS_COMMON  := tests/bats/smoke.bats tests/bats/idempotency.bats tests/bats/zshrc.bats tests/bats/git-filters.bats
 BATS_FEDORA  := $(BATS_COMMON) \
 		tests/bats/assertions-fedora.bats \
-		tests/bats/fedora-rpm-dependency-graph.bats
+		tests/bats/fedora-packages.bats
 BATS_MANJARO := $(BATS_COMMON) tests/bats/assertions-manjaro.bats
 BATS_ATOMIC  := $(BATS_COMMON) tests/bats/assertions-fedora-atomic.bats
 BATS_MACOS   := $(BATS_COMMON) tests/bats/assertions-macos.bats

@@ -81,7 +81,7 @@ config/
 | `lazygit/` | Lazygit TUI: custom keybinding overrides. |
 | `vscodium/` | VSCodium: base+overlay settings (`settings.base.json` + platform-specific overlays), extensions list, `code export`/`code import` zsh functions. |
 | `ssh/` | SSH config: `config` entry point (Include, ControlMaster, keychain), `config.d/*` host stanzas (private, homelab, infra, zhaw), YubiKey PKCS11 provider filter. |
-| `scripts/` | Custom CLI tools: `project` (project directory switcher), `work-finder` (git/file activity scanner), `fedora-rpm-dependency-graph.py` (export user-installed Fedora RPM dependency closures), `fedora-rpm-dependency-graph-viewer.html` (local interactive graph viewer), and `fedora-rpm-manifest-dependencies.py` (annotate in-manifest dependencies). `project` and `work-finder` support `--shell-integration` for zsh wrappers and completions. |
+| `scripts/` | Custom CLI tools: `project` (project directory switcher), `work-finder` (git/file activity scanner), and `filter-fedora-packages` (capture, filter, and enrich Fedora package manifests). `project` and `work-finder` support `--shell-integration` for zsh wrappers and completions. |
 | `Nextcloud/` | Nextcloud desktop client config (`nextcloud.cfg`) and sync-exclude patterns (`sync-exclude.lst`). |
 | `junie/` | Junie AI assistant: `settings.json`, model configs with API key scrub filter. |
 
@@ -319,7 +319,7 @@ Each platform's manifests live alongside their step scripts in `setup/<os>/`.
 | Manifest | Format | Export command |
 |---|---|---|
 | `setup/macos/Brewfile` | Homebrew Bundle | `brew bundle dump --file=setup/macos/Brewfile --force` |
-| `setup/fedora/dnf.txt` | Fedora package manifest | `scripts/filter-fedora-packages` |
+| `setup/fedora/dnf.txt` | Fedora package manifest | `scripts/filter-fedora-packages capture setup/fedora/dnf.txt` |
 | `setup/fedora/copr.txt` | One COPR repo per line | (manual) |
 | `setup/fedora/flatpak.txt` | One app ID per line | `flatpak list --app --columns=application \| sort` |
 | `setup/fedora-atomic/rpm-ostree.txt` | One package per line | `rpm-ostree status --json \| jq -r '.deployments[0]["requested-packages"][]'` |
@@ -330,89 +330,6 @@ Each platform's manifests live alongside their step scripts in `setup/<os>/`.
 | `setup/manjaro/aur.txt` | One package per line | `pacman -Qqem \| sort` |
 
 Use `scripts/filter-fedora-packages` to manage the Fedora package manifest.
-
-### Fedora RPM Dependency Graph
-
-On Fedora, export the dependency closure of packages marked user-installed by DNF:
-
-```bash
-python3 scripts/fedora-rpm-dependency-graph.py \
-  --dot ~/fedora-rpm-dependencies.dot \
-  --json ~/fedora-rpm-dependencies.json
-```
-
-The command reads the installed RPM database and DNF install reasons without
-changing package state. It requires the system Python DNF bindings
-(`python3-libdnf5` or `python3-dnf`). Nodes are identified by package name and
-full RPM EVR (`[epoch:]version-release`); records with the same name and EVR
-are merged, with architectures retained as metadata. JSON contains sorted
-`nodes` and `edges` arrays, and DOT represents the same graph. Node reasons are
-`user-installed` for roots and `dependency` for packages reached through edges.
-
-To explore an export, open `scripts/fedora-rpm-dependency-graph-viewer.html`
-directly in a browser and choose the JSON file written by `--json` (for
-example, `~/fedora-rpm-dependencies.json`). The standalone viewer reads the
-file locally and makes no network requests. It accepts only schema-version-1
-graph output: top-level `schema_version: 1`, a `nodes` array with `id`, `name`,
-`version`, `architectures`, and `reason` fields, and an `edges` array with
-`from` and `to`. Each edge points from a requiring package to its dependency.
-
-To create a second copy of a package manifest with direct dependencies between
-listed packages marked, first export the graph as JSON and then pass it together
-with the manifest to `scripts/fedora-rpm-manifest-dependencies.py`:
-
-```bash
-python3 scripts/fedora-rpm-dependency-graph.py \
-  --json ~/fedora-rpm-dependencies.json
-python3 scripts/fedora-rpm-manifest-dependencies.py \
-  --graph-json ~/fedora-rpm-dependencies.json \
-  --manifest setup/fedora/dnf.txt \
-  --output ~/fedora-dnf-annotated.txt
-```
-
-The output preserves package order and existing comments, adding a separate
-`# Required by manifest packages: ...` line after a package only when another
-distinct package in the manifest has a direct edge to it. Full-line comments
-are ignored by the Fedora manifest installer, so the generated copy remains
-install-compatible. Packages missing from the graph are left unchanged and
-reported to stderr; the original manifest and graph export are not modified.
-
-Use `--fixture-json PATH` to export normalized package data without querying the
-host, for example in tests. A fixture contains `user_installed` package keys
-and a `packages` array; package keys have `name` and `version`, while package
-records also have an `architecture` and optional `dependencies` array:
-
-```json
-{
-  "user_installed": [{"name": "editor", "version": "1:2.0-1.fc40"}],
-  "packages": [
-    {
-      "name": "editor",
-      "version": "1:2.0-1.fc40",
-      "architecture": "x86_64",
-      "dependencies": [{"name": "libeditor", "version": "0.9-2.fc40"}]
-    },
-    {
-      "name": "libeditor",
-      "version": "0.9-2.fc40",
-      "architecture": "x86_64",
-      "dependencies": []
-    }
-  ]
-}
-```
-
-This raw fixture format is exporter input and is not accepted directly by the
-viewer. To visualize a fixture, first export it with `--json`:
-
-```bash
-python3 scripts/fedora-rpm-dependency-graph.py \
-  --fixture-json tests/fixtures/fedora-rpm-dependency-graph.json \
-  --json ~/fedora-rpm-dependencies.json
-```
-
-Then open `scripts/fedora-rpm-dependency-graph-viewer.html` and select
-`~/fedora-rpm-dependencies.json`.
 
 ### Test Harness
 
@@ -776,7 +693,7 @@ Both scripts are auto-loaded by `zshrc` via shell integration, so their commands
 2. Add the package name to the appropriate text file (one per line).
 3. After installing on the target machine, run the export command to keep the manifest in sync:
    - macOS: `brew bundle dump --file=setup/macos/Brewfile --force`
-   - Fedora: `dnf repoquery --userinstalled --qf "%{name}\n" | sort > setup/fedora/dnf.txt` (`--userinstalled` excludes dependency-only packages)
+   - Fedora: `scripts/filter-fedora-packages capture setup/fedora/dnf.txt` (captures explicitly installed packages and their descriptions)
    - Fedora Flatpak: `flatpak list --app --columns=application | sort > setup/fedora/flatpak.txt`
    - Manjaro: `pacman -Qqen | sort > setup/manjaro/pacman.txt` (official) and `pacman -Qqem | sort > setup/manjaro/aur.txt` (AUR)
 

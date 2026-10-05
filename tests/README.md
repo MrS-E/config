@@ -20,13 +20,10 @@ tests/
 │   ├── idempotency.bats               # second run is a safe no-op
 │   ├── git-filters.bats               # portable clean/smudge filter bootstrap
 │   ├── assertions-fedora.bats
-│   ├── fedora-rpm-dependency-graph.bats # fixture CLI and read-only RPM query checks
+│   ├── fedora-packages.bats           # Fedora package manifest filtering
 │   ├── assertions-manjaro.bats
 │   ├── assertions-fedora-atomic.bats
 │   └── assertions-macos.bats
-├── fixtures/
-│   └── fedora-rpm-dependency-graph.json # normalized package graph test data
-├── test_fedora_rpm_dependency_graph.py # graph model and serializer unit tests
 └── baselines/                         # recorded pre-migration results (see README.md)
 ```
 
@@ -46,8 +43,8 @@ make compare-baseline    # re-run and diff against the recorded baseline
 The repo is bind-mounted at `/workspace` inside each container; the test user is
 `tester` with `HOME=/home/tester` and passwordless `sudo`.
 
-The Fedora test target runs graph model tests, fixture-backed CLI exports, and
-a read-only export from the container's installed RPM database.
+The Fedora test target includes package-manifest assertions and tests for the
+retained Fedora package filter.
 
 ## Strategy & known limitations
 
