@@ -71,7 +71,7 @@ ensure_yay() {
 
   local tmpdir
   tmpdir="$(mktemp -d)"
-  trap 'rm -rf "$tmpdir"' RETURN
+  trap 'rm -rf "$tmpdir"; trap - RETURN' RETURN
 
   git clone https://aur.archlinux.org/yay.git "$tmpdir/yay"
   pushd "$tmpdir/yay" >/dev/null || return 1

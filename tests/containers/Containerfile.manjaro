@@ -1,6 +1,6 @@
 # Real Manjaro container for the setup test harness.
 # Provides bats-core, git, sudo, and the base tools setup.sh expects.
-FROM manjarolinux/base
+FROM docker.io/manjarolinux/base
 
 RUN pacman -Syu --noconfirm --needed \
         bats git sudo wget curl tar unzip which findutils procps-ng \

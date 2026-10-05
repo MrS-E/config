@@ -45,18 +45,19 @@ make compare-baseline    # re-run and diff against the recorded baseline
 The repo is bind-mounted at `/workspace` inside each container; the test user is
 `tester` with `HOME=/home/tester` and passwordless `sudo`.
 
-The Fedora test target includes package-manifest assertions, tests for the
-retained Fedora package filter, and the standalone `tests/work-finder.bats`
-suite. `make shellcheck` checks `setup.sh`, shell scripts under `setup/`,
-executable helpers under `scripts/`, and `.bash` test helpers; it excludes Zsh
-configuration and Bats DSL files.
+The Fedora test target checks package manifests and exercises the DNF,
+Flatpak, and Zsh-plugin setup steps with command stubs, in addition to the
+retained Fedora package filter and standalone `tests/work-finder.bats` suite.
+This verifies manifest forwarding without installing the full desktop package
+set or downloading Flatpak apps in CI. `make shellcheck` checks `setup.sh`,
+shell scripts under `setup/`, executable helpers under `scripts/`, and `.bash`
+test helpers; it excludes Zsh configuration and Bats DSL files.
 
 ## Strategy & known limitations
 
-Per the migration plan, the harness favors **real package-manager execution**
-inside disposable Linux containers wherever practical. The following are
-documented limitations of the container environment and are recorded (not
-hidden) by the baseline:
+The container matrix tests real Fedora and Manjaro detection, with command
+stubs at system-changing or network-dependent boundaries so CI remains
+repeatable:
 
 - **macOS** cannot run natively in Podman. `test-macos` uses a Linux container
   with mocked `uname` (returns `Darwin`), `brew`, `open`, `ssh-agent`, and
@@ -64,14 +65,13 @@ hidden) by the baseline:
   This validates dispatch paths and contract behavior, not real Homebrew.
 - **Fedora Atomic** has no practical rpm-ostree-capable Podman image. The
   container ships a documented mock `rpm-ostree` and mock `toolbox`; Flatpak
-  tests remain real where feasible.
-- **`chsh`**, **`systemctl enable --now`**, Tailscale, CUPS, firewall, and
-  ClamAV are limited inside unprivileged containers and may fail in the
-  baseline. These are annotated, not blocking.
-- **External network installers** (JetBrains Toolbox, Proton Bridge, Bun,
-  Junie, Joplin, Jabba, Dracula vim theme) are slow/flaky and may fail; the
-  baseline records their pass/fail/skip status.
+  setup calls are covered with mocks.
+- Fedora package, Flatpak, and Zsh-plugin tests stub `sudo`, `dnf`, `flatpak`,
+  and `git`, avoiding full package installations and external downloads.
+- Manjaro tests use the packages installed in the test image for `pacman -Q`
+  checks; the AUR bootstrap, AUR manifest, and Zsh-plugin paths use command
+  stubs instead of building packages or cloning external repositories.
 
-The baseline is intentionally **non-blocking**: current scripts are not yet
-fully idempotent or container-safe, so baseline failures are expected and are
-used only as a comparison point for the post-migration re-run.
+`make baseline` is an observational, non-blocking snapshot that records each
+target's output and exit status. The CI workflow runs `make test` separately
+and treats its failures as blocking.
