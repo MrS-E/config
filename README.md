@@ -81,7 +81,7 @@ config/
 | `lazygit/` | Lazygit TUI: custom keybinding overrides. |
 | `vscodium/` | VSCodium: base+overlay settings (`settings.base.json` + platform-specific overlays), extensions list, `code export`/`code import` zsh functions. |
 | `ssh/` | SSH config: `config` entry point (Include, ControlMaster, keychain), `config.d/*` host stanzas (private, homelab, infra, zhaw), YubiKey PKCS11 provider filter. |
-| `scripts/` | Custom CLI tools: `project` (project directory switcher), `work-finder` (git/file activity scanner). Both support `--shell-integration` for zsh wrapper + completion generation. |
+| `scripts/` | Custom CLI tools: `project` (project directory switcher), `work-finder` (git/file activity scanner), and `filter-fedora-packages` (capture, filter, and enrich Fedora package manifests). `project` and `work-finder` support `--shell-integration` for zsh wrappers and completions. |
 | `Nextcloud/` | Nextcloud desktop client config (`nextcloud.cfg`) and sync-exclude patterns (`sync-exclude.lst`). |
 | `junie/` | Junie AI assistant: `settings.json`, model configs with API key scrub filter. |
 
@@ -319,7 +319,7 @@ Each platform's manifests live alongside their step scripts in `setup/<os>/`.
 | Manifest | Format | Export command |
 |---|---|---|
 | `setup/macos/Brewfile` | Homebrew Bundle | `brew bundle dump --file=setup/macos/Brewfile --force` |
-| `setup/fedora/dnf.txt` | One package per line | `dnf repoquery --userinstalled --qf "%{name}\n" \| sort` |
+| `setup/fedora/dnf.txt` | Fedora package manifest | `scripts/filter-fedora-packages capture setup/fedora/dnf.txt` |
 | `setup/fedora/copr.txt` | One COPR repo per line | (manual) |
 | `setup/fedora/flatpak.txt` | One app ID per line | `flatpak list --app --columns=application \| sort` |
 | `setup/fedora-atomic/rpm-ostree.txt` | One package per line | `rpm-ostree status --json \| jq -r '.deployments[0]["requested-packages"][]'` |
@@ -328,6 +328,8 @@ Each platform's manifests live alongside their step scripts in `setup/<os>/`.
 | `setup/fedora-atomic/toolboxes/*.txt` | Per-toolbox dnf packages | (manual per toolbox) |
 | `setup/manjaro/pacman.txt` | One package per line | `pacman -Qqen \| sort` |
 | `setup/manjaro/aur.txt` | One package per line | `pacman -Qqem \| sort` |
+
+Use `scripts/filter-fedora-packages` to manage the Fedora package manifest.
 
 ### Test Harness
 
@@ -691,7 +693,7 @@ Both scripts are auto-loaded by `zshrc` via shell integration, so their commands
 2. Add the package name to the appropriate text file (one per line).
 3. After installing on the target machine, run the export command to keep the manifest in sync:
    - macOS: `brew bundle dump --file=setup/macos/Brewfile --force`
-   - Fedora: `dnf repoquery --userinstalled --qf "%{name}\n" | sort > setup/fedora/dnf.txt`
+   - Fedora: `scripts/filter-fedora-packages capture setup/fedora/dnf.txt` (captures explicitly installed packages and their descriptions)
    - Fedora Flatpak: `flatpak list --app --columns=application | sort > setup/fedora/flatpak.txt`
    - Manjaro: `pacman -Qqen | sort > setup/manjaro/pacman.txt` (official) and `pacman -Qqem | sort > setup/manjaro/aur.txt` (AUR)
 

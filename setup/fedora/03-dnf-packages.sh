@@ -11,6 +11,9 @@ source "$SCRIPT_DIR/common.bash"
 
 DNF_FILE="$SCRIPT_DIR/dnf.txt"
 
+# Refresh this manifest with explicitly installed packages only (excluding dependencies):
+# "$REPO_DIR/scripts/filter-fedora-packages" capture "$DNF_FILE"
+
 presteps() {
   [[ -f /etc/fedora-release ]] || die "this step requires Fedora"
   command_exists dnf || die "dnf not found"
