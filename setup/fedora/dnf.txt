@@ -1,11 +1,19 @@
+# Description: Virtual package to make easy default installation on desktop environments
+abrt-desktop
 # Description: Android platform tools(adb, fastboot)
 android-tools
 # Description: Fast and lightweight package manager originally for Alpine
 apk-tools
+# Description: A GNU tool for automatically configuring source code
+autoconf
+# Description: A GNU tool for automatically creating Makefiles
+automake
 # Description: Bash Automated Testing System
 bats
 # Description: Command line tools for BPF Compiler Collection (BCC)
 bcc-tools
+# Description: A GNU general-purpose parser generator
+bison
 # Description: Berkeley Yacc, a parser generator
 byacc
 # Description: C/C++ compiler cache
@@ -38,14 +46,22 @@ doxygen
 eog
 # Description: Digital VCR and streaming server
 ffmpeg
+# Description: A tool for generating scanners (text pattern recognizers)
+flex
 # Description: A command-line fuzzy finder written in Go
 fzf
+# Description: Various compilers (C, C++, Objective-C, ...)
+gcc
+# Description: C++ support for GCC
+gcc-c++
 # Description: GNU Image Manipulation Program
 gimp
 # Description: Quickly rewrite git repository history (git-filter-branch replacement)
 git-filter-repo
 # Description: Git extension for versioning large files
 git-lfs
+# Description: Object files for development using standard C libraries.
+glibc-devel
 # Description: Manage GNOME Shell extensions
 gnome-extensions-app
 # Description: GnuPG SmartCard daemon
@@ -56,12 +72,22 @@ gnupg2-utils
 google-chrome-stable
 # Description: Graphical interface for GPaste
 gpaste-ui
+# Description: XIM support for GTK+
+gtk3-immodule-xim
 # Description: HPLIP graphical tools
 hplip-gui
 # Description: Interactive process viewer
 htop
+# Description: Cangjie based input methods
+ibus-table-chinese-cangjie
+# Description: Desktop Input Method configuration tool
+im-chooser
 # Description: A hex editor for reverse engineers and programmers
 imhex
+# Description: Delivery framework for general Input Method configuration
+imsettings
+# Description: GSettings support on imsettings
+imsettings-gsettings
 # Description: A GNU program for formatting C code
 indent
 # Description: Development package for building kernel modules to match the kernel
@@ -76,6 +102,10 @@ libtool
 ltrace
 # Description: A deployment and management system for Lua modules
 luarocks
+# Description: A GNU tool which simplifies the build process for users
+make
+# Description: A text-based modem control and terminal emulation program
+minicom
 # Description: Make and install locally trusted development certificates
 mkcert
 # Description: A portable x86 assembler which uses Intel-like syntax
@@ -94,6 +124,8 @@ okular
 openscad
 # Description: Markup conversion between documentation formats
 pandoc-cli
+# Description: Utility for modifying/upgrading files
+patch
 # Description: A collection of programs for manipulating patch files
 patchutils
 # Description: Performance monitoring for the Linux kernel
@@ -114,10 +146,20 @@ proton-vpn-gnome-desktop
 protonvpn-stable-release
 # Description: A tool for monitoring the progress of data through a pipeline
 pv
+# Description: Qt decoration plugin implementing Adwaita-like client-side decorations
+qadwaitadecorations-qt5
 # Description: QEMU user mode emulation of qemu targets static build
 qemu-user-static
 # Description: Command-line tools and library for transforming PDF files
 qpdf
+# Description: Qt5 - QtBase components
+qt5-qtbase
+# Description: Qt5 GUI-related libraries
+qt5-qtbase-gui
+# Description: Qt5 - QtDeclarative component
+qt5-qtdeclarative
+# Description: Qt5 - QtXmlPatterns component
+qt5-qtxmlpatterns
 # Description: Rsync for cloud storage
 rclone
 # Description: Program that finds duplicate files
@@ -148,6 +190,8 @@ socat
 sqlite
 # Description: Tracks and displays system calls associated with a running process
 strace
+# Description: A Modern Concurrent Version Control System
+subversion
 # Description: A graphical interface for modifying the system language
 system-config-language
 # Description: Programmable system-wide instrumentation system
@@ -168,6 +212,8 @@ texlive-siunitx
 texlive-tocbibind
 # Description: Mozilla Thunderbird mail/newsgroup client
 thunderbird
+# Description: Totem video thumbnailer
+totem-video-thumbnailer
 # Description: Dynamic analysis tools to detect memory or thread bugs and profile
 valgrind
 # Description: A version of the VIM editor which includes recent enhancements
