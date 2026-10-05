@@ -11,53 +11,20 @@ android-tools
 apk-tools
 # Description: Multitrack audio editor
 audacity
-# Description: A GNU tool for automatically configuring source code
-autoconf
-# Required by manifest packages: automake, libtool
-# Description: A GNU tool for automatically creating Makefiles
-automake
-# Required by manifest packages: libtool
-# Description: A dynamic, any to any, pixel format conversion library
-babl
-# Required by manifest packages: gegl04, gegl04-matting-levin, gimp, gimp-libs
 # Description: Bash Automated Testing System
 bats
-# Description: BPF Compiler Collection (BCC)
-bcc
-# Required by manifest packages: bcc-tools, python3-bcc
 # Description: Command line tools for BPF Compiler Collection (BCC)
 bcc-tools
-# Description: A GNU general-purpose parser generator
-bison
-# Required by manifest packages: kernel-devel
 # Description: Berkeley Yacc, a parser generator
 byacc
-# Description: Utility for extracting cabinet (.cab) archives
-cabextract
-# Required by manifest packages: lutris, winetricks
 # Description: Development files for cairo-gobject
 cairo-gobject-devel
 # Description: C/C++ compiler cache
 ccache
-# Description: Compact Disc Digital Audio (CDDA) extraction tool (or ripper)
-cdparanoia
-# Required by manifest packages: abcde, icedax
-# Description: Library for manipulating FITS data files
-cfitsio
-# Required by manifest packages: gimp
 # Description: End-user tools for the Clam Antivirus scanner
 clamav
-# Description: Auto-updater for the Clam Antivirus scanner data-files
-clamav-freshclam
-# Required by manifest packages: clamav
 # Description: A C language family front-end for LLVM
 clang
-# Description: Runtime library for clang
-clang20-libs
-# Required by manifest packages: bcc
-# Description: Filesystem package that owns the clang resource directory
-clang20-resource-filesystem
-# Required by manifest packages: clang20-libs, compiler-rt20, libomp20-devel
 # Description: Extra tools for clang
 clang-tools-extra
 # Description: Cross-platform make system
@@ -84,25 +51,16 @@ diffstat
 direnv
 # Description: A documentation system for C/C++
 doxygen
-# Description: Development support for libelf
-elfutils-libelf-devel
-# Required by manifest packages: kernel-devel
 # Description: Eye of GNOME image viewer
 eog
 # Description: Utility to show EXIF information hidden in JPEG files
 exif
-# Description: Base package for Fedora COSMIC specific default configurations
-fedora-release-cosmic
-# Required by manifest packages: rpmfusion-free-release, rpmfusion-nonfree-release
 # Description: Digital VCR and streaming server
 ffmpeg
 # Description: FTP, FTPS and SFTP client
 filezilla
 # Description: An encoder/decoder for the Free Lossless Audio Codec
 flac
-# Description: A tool for generating scanners (text pattern recognizers)
-flex
-# Required by manifest packages: kernel-devel
 # Description: Freeglut developmental libraries and header files
 freeglut-devel
 # Description: Free implementation of the Remote Desktop Protocol (RDP)
@@ -117,23 +75,14 @@ gcc
 # Description: C++ support for GCC
 gcc-c++
 # Required by manifest packages: clang
-# Description: Graph based image processing framework
-gegl04
-# Required by manifest packages: gegl04-matting-levin, gimp, gimp-libs
 # Description: Matting Levin foreground select plugin for gegl04
 gegl04-matting-levin
 # Description: GNU Image Manipulation Program
 gimp
-# Description: GIMP libraries
-gimp-libs
-# Required by manifest packages: gimp
 # Description: Quickly rewrite git repository history (git-filter-branch replacement)
 git-filter-repo
 # Description: Git extension for versioning large files
 git-lfs
-# Description: Object files for development using standard C libraries.
-glibc-devel
-# Required by manifest packages: gcc
 # Description: Libraries and header files for glib development
 glib-devel
 # Description: A command line compiler for GLSL/HLSL to SPIR-V
@@ -159,41 +108,14 @@ gpaste
 gpaste-ui
 # Description: System utility designed to stress and monitoring various hardware components
 gst
-# Description: GStreamer 1.0 streaming media framework "bad" plug-ins
-gstreamer1-plugins-bad-freeworld
-# Description: GStreamer 1.0 streaming media framework "ugly" plug-ins
-gstreamer1-plugins-ugly
-# Description: XIM support for GTK+
-gtk3-immodule-xim
-# Description: An open-source multiplatform video transcoder
-HandBrake
-# Description: An open-source multiplatform video transcoder (GUI)
-HandBrake-gui
 # Description: HPLIP graphical tools
 hplip-gui
 # Description: Interactive process viewer
 htop
-# Description: Cangjie based input methods
-ibus-table-chinese-cangjie
-# Description: A utility for sampling/copying .wav files from digital audio CDs
-icedax
-# Description: Open Source implementation of JSR-56 better known as Java Web Start
-icedtea-web
-# Description: Desktop Input Method configuration tool
-im-chooser
 # Description: A hex editor for reverse engineers and programmers
 imhex
-# Description: Delivery framework for general Input Method configuration
-imsettings
-# Required by manifest packages: imsettings-gsettings
-# Description: GSettings support on imsettings
-imsettings-gsettings
-# Required by manifest packages: imsettings
 # Description: A GNU program for formatting C code
 indent
-# Description: OpenJDK 21 Runtime Environment
-java-21-openjdk
-# Required by manifest packages: icedtea-web, java-21-openjdk-devel
 # Description: OpenJDK 21 Development Environment
 java-21-openjdk-devel
 # Description: Development package for building kernel modules to match the kernel
@@ -204,66 +126,23 @@ kitty
 lame
 # Description: Simple terminal UI for git commands
 lazygit
-# Description: Freeworld libavcodec to complement the distro counterparts
-libavcodec-freeworld
-# Required by manifest packages: HandBrake, HandBrake-gui, ffmpeg, scrcpy
-# Description: C++ API for mamba depsolving library
-libmamba
-# Required by manifest packages: python3-libmambapy
-# Description: Library for making brush strokes
-libmypaint
-# Required by manifest packages: gimp
-# Description: OpenMP runtime for clang
-libomp20
-# Required by manifest packages: libomp20-devel
-# Description: OpenMP header files
-libomp20-devel
-# Description: Header files for the Soup library
-libsoup-devel
 # Description: The GNU Portable Library Tool
 libtool
-# Description: Windows MetaFile Library
-libwmf
-# Required by manifest packages: gimp
-# Description: Development files for libX11
-libX11-devel
-# Required by manifest packages: cairo-gobject-devel, libXi-devel, libXmu-devel
 # Description: X.Org X11 libXi development package
 libXi-devel
 # Description: X.Org X11 libXmu development package
 libXmu-devel
-# Description: Header files for Zstd library
-libzstd-devel
-# Required by manifest packages: elfutils-libelf-devel
-# Description: Filesystem package that owns the versioned llvm prefix
-llvm20-filesystem
-# Required by manifest packages: llvm20-libs
-# Description: LLVM shared libraries
-llvm20-libs
-# Required by manifest packages: bcc, clang20-libs, libomp20
 # Description: Tracks runtime library calls from dynamically linked executables
 ltrace
-# Description: Lua bindings to GObject libraries for Lua 5.1
-lua-lgi-compat
-# Required by manifest packages: gimp
 # Description: A deployment and management system for Lua modules
 luarocks
 # Description: Install and play any video game easily
 lutris
-# Description: GNU macro processor
-m4
-# Required by manifest packages: autoconf, bison, flex
 # Description: A GNU tool which simplifies the build process for users
 make
 # Required by manifest packages: cmake, gcc, kernel-devel
 # Description: Java project management and project comprehension tool
 maven
-# Description: Mesa libGL development package
-mesa-libGL-devel
-# Required by manifest packages: freeglut-devel
-# Description: Development files for mesa-libGLU
-mesa-libGLU-devel
-# Required by manifest packages: freeglut-devel
 # Description: A text-based modem control and terminal emulation program
 minicom
 # Description: Make and install locally trusted development certificates
@@ -281,9 +160,6 @@ nextcloud-client
 nextcloud-client-nautilus
 # Description: Small build system with a focus on speed
 ninja-build
-# Description: Tools for the Network Security Services
-nss-tools
-# Required by manifest packages: mkcert
 # Description: A document viewer
 okular
 # Description: Get up and running AI LLMs
@@ -292,18 +168,12 @@ ollama
 openscad
 # Description: Markup conversion between documentation formats
 pandoc-cli
-# Description: Utility for modifying/upgrading files
-patch
-# Required by manifest packages: patchutils
 # Description: A collection of programs for manipulating patch files
 patchutils
 # Description: Performance monitoring for the Linux kernel
 perf
 # Description: Utility for reading and writing image meta info
 perl-Image-ExifTool
-# Description: A SAT solver library
-picosat-libs
-# Required by manifest packages: python3-pycosat
 # Description: Program to generate UML diagram from a text description
 plantuml
 # Description: Run docker-compose.yml using podman
@@ -312,181 +182,22 @@ podman-compose
 postgresql
 # Description: Proton Mail Bridge
 protonmail-bridge
-# Description: proton-vpn-daemon library
-proton-vpn-daemon
-# Required by manifest packages: proton-vpn-gnome-desktop
 # Description: Proton VPN Gnome Desktop metapackage
 proton-vpn-gnome-desktop
-# Description: proton-vpn-gtk-app library
-proton-vpn-gtk-app
-# Required by manifest packages: proton-vpn-gnome-desktop
 # Description: Stable release package
 protonvpn-stable-release
 # Description: A tool for monitoring the progress of data through a pipeline
 pv
-# Description: Simple DNS resolver for asyncio
-python3-aiodns
-# Required by manifest packages: python3-aiohttp+speedups
-# Description: Happy Eyeballs for asyncio
-python3-aiohappyeyeballs
-# Required by manifest packages: python3-aiohttp
-# Description: Python HTTP client/server for asyncio
-python3-aiohttp
-# Required by manifest packages: python3-aiohttp+speedups, python3-proton-core
 # Description: Metapackage for python3-aiohttp: speedups extras
 python3-aiohttp+speedups
-# Description: List of registered asynchronous callbacks
-python3-aiosignal
-# Required by manifest packages: python3-aiohttp
-# Description: A library to query system architecture
-python3-archspec
-# Required by manifest packages: python3-conda
-# Description: Python3 bindings for BPF Compiler Collection (BCC)
-python3-bcc
-# Required by manifest packages: bcc-tools, proton-vpn-daemon
-# Description: Modern password hashing for your software and your servers
-python3-bcrypt
-# Required by manifest packages: python3-proton-core
-# Description: Functionality that should be in the standard library
-python3-boltons
-# Required by manifest packages: python3-conda, python3-conda-libmamba-solver
-# Description: Lossless compression algorithm (python 3)
-python3-brotli
-# Required by manifest packages: python3-aiohttp+speedups
-# Description: conda tests
-python3-conda
-# Required by manifest packages: conda, python3-conda-libmamba-solver
-# Description: The libmamba based solver for conda
-python3-conda-libmamba-solver
-# Required by manifest packages: python3-conda
-# Description: Create and extract conda packages of various formats
-python3-conda-package-handling
-# Required by manifest packages: python3-conda
-# Description: Extract metadata from remote conda packages without downloading whole file
-python3-conda-package-streaming
-# Required by manifest packages: python3-conda-package-handling
-# Description: A faster version of dbus-next
-python3-dbus-fast
-# Required by manifest packages: proton-vpn-daemon, python3-proton-vpn-api-core
 # Description: Libraries and header files needed for Python development
 python3-devel
-# Description: Functionality for FIDO 2.0, including USB device communication
-python3-fido2
-# Required by manifest packages: python3-proton-vpn-api-core
-# Description: An immutable dictionary
-python3-frozendict
-# Required by manifest packages: python3-conda
-# Description: List-like structure which can be made immutable
-python3-frozenlist
-# Required by manifest packages: python3-aiohttp, python3-aiosignal
-# Description: A wrapper for the Gnu Privacy Guard (GPG or GnuPG)
-python3-gnupg
-# Required by manifest packages: python3-proton-core
-# Description: Library to access the metadata for a Python package
-python3-importlib-metadata
-# Required by manifest packages: python3-proton-core
-# Description: Utility functions for Python class constructs
-python3-jaraco-classes
-# Required by manifest packages: python3-keyring
-# Description: Context managers by jaraco
-python3-jaraco-context
-# Required by manifest packages: python3-keyring
-# Description: Functools like those found in stdlib
-python3-jaraco-functools
-# Required by manifest packages: python3-keyring
-# Description: Low-level, pure Python DBus protocol wrapper
-python3-jeepney
-# Required by manifest packages: python3-keyring, python3-secretstorage
-# Description: General purpose template engine
-python3-jinja2
-# Required by manifest packages: python3-proton-vpn-api-core
-# Description: Applying JSON Patches in Python 3
-python3-jsonpatch
-# Required by manifest packages: python3-conda
-# Description: Resolve JSON Pointers in Python
-python3-jsonpointer
-# Required by manifest packages: python3-jsonpatch
-# Description: Python 3 library to access the system keyring service
-python3-keyring
-# Required by manifest packages: python3-keyring+completion, python3-proton-keyring-linux
 # Description: Shell completion support for the keyring command
 python3-keyring+completion
-# Description: Python bindings for libmamba
-python3-libmambapy
-# Required by manifest packages: python3-conda-libmamba-solver
-# Description: Cross platform menu item installation
-python3-menuinst
-# Required by manifest packages: python3-conda
-# Description: More routines for operating on Python iterables, beyond itertools
-python3-more-itertools
-# Required by manifest packages: python3-jaraco-classes, python3-jaraco-functools
-# Description: MultiDict implementation
-python3-multidict
-# Required by manifest packages: python3-aiohttp, python3-yarl
-# Description: A pure Python network address representation and manipulation library
-python3-netaddr
-# Required by manifest packages: bcc-tools
 # Description: A tool for installing and managing Python3 packages
 python3-pip
-# Description: The plugin manager stripped of pytest specific details
-python3-pluggy
-# Required by manifest packages: python3-conda
-# Description: Module for fast property caching
-python3-propcache
-# Required by manifest packages: python3-aiohttp, python3-yarl
-# Description: proton-core library
-python3-proton-core
-# Required by manifest packages: python3-proton-keyring-linux, python3-proton-vpn-api-core
-# Description: proton-keyring-linux library
-python3-proton-keyring-linux
-# Required by manifest packages: proton-vpn-gnome-desktop
-# Description: proton-vpn-api-core library
-python3-proton-vpn-api-core
-# Required by manifest packages: proton-vpn-daemon, proton-vpn-gnome-desktop, proton-vpn-gtk-app
-# Description: Python interface for c-ares
-python3-pycares
-# Required by manifest packages: python3-aiodns
-# Description: Python bindings to picosat (a SAT solver)
-python3-pycosat
-# Required by manifest packages: python3-conda
-# Description: Python binding to the Networking and Cryptography (NaCl) library
-python3-pynacl
-# Required by manifest packages: python3-proton-vpn-api-core
-# Description: YAML 1.2 loader/dumper package for Python
-python3-ruamel-yaml
-# Required by manifest packages: python3-conda, python3-ruamel-yaml-clib
-# Description: C version of reader, parser and emitter for ruamel.yaml derived from libyaml
-python3-ruamel-yaml-clib
-# Required by manifest packages: python3-ruamel-yaml
-# Description: Reactive Extensions (Rx) for Python
-python3-rx
-# Required by manifest packages: gst
-# Description: Python bindings to FreeDesktop.org Secret Service API
-python3-secretstorage
-# Required by manifest packages: python3-keyring, python3-proton-keyring-linux
-# Description: The new Python SDK for Sentry.io
-python3-sentry-sdk
-# Required by manifest packages: python3-proton-vpn-api-core
-# Description: Easily build and distribute Python 3 packages
-python3-setuptools
-# Required by manifest packages: python3-conda
-# Description: Automagic shell tab completion for Python CLI applications
-python3-shtab
-# Required by manifest packages: python3-keyring+completion
-# Description: Fast, Extensible Progress Meter
-python3-tqdm
-# Required by manifest packages: python3-conda
 # Description: Tool to create isolated Python environments
 python3-virtualenv
-# Description: Python module to handle URLs
-python3-yarl
-# Required by manifest packages: python3-aiohttp
-# Description: Backport of pathlib-compatible object wrapper for zip files
-python3-zipp
-# Required by manifest packages: python3-importlib-metadata
-# Description: Zstandard bindings for Python
-python3-zstandard
-# Required by manifest packages: python3-conda, python3-conda-package-streaming
 # Description: Qt decoration plugin implementing Adwaita-like client-side decorations
 qadwaitadecorations-qt5
 # Description: A Bittorrent Client
@@ -495,18 +206,9 @@ qbittorrent
 qemu-user-static
 # Description: Command-line tools and library for transforming PDF files
 qpdf
-# Description: Qt5 - QtBase components
-qt5-qtbase
-# Required by manifest packages: openscad, qadwaitadecorations-qt5, qt5-qtbase-devel, qt5-qtbase-gui, qt5-qtdeclarative, qt5-qtxmlpatterns
 # Description: Development files for qt5-qtbase
 qt5-qtbase-devel
-# Description: Qt5 GUI-related libraries
-qt5-qtbase-gui
-# Required by manifest packages: openscad, qadwaitadecorations-qt5, qt5-qtbase-devel, qt5-qtdeclarative
 # Description: Qt5 - QtDeclarative component
-qt5-qtdeclarative
-# Required by manifest packages: qt5-qtxmlpatterns
-# Description: Qt5 - QtXmlPatterns component
 qt5-qtxmlpatterns
 # Description: Common files for Qt
 qt-common
@@ -521,9 +223,6 @@ remmina
 remmina-plugins-rdp
 # Description: VNC plugin for Remmina Remote Desktop Client
 remmina-plugins-vnc
-# Description: A cross-platform (C99/C++11) process library
-reproc
-# Required by manifest packages: libmamba
 # Description: Line-oriented search tool
 ripgrep
 # Description: Graphical user-interface to write disk images and format SD cards
@@ -542,9 +241,6 @@ seahorse
 setroubleshoot
 # Description: Shell script compiler
 shc
-# Description: Parsing gigabytes of JSON per second
-simdjson
-# Required by manifest packages: libmamba
 # Description: Bidirectional data relay between two data channels ('netcat++')
 socat
 # Description: Clean and lean CD ripper
@@ -557,9 +253,6 @@ steam
 strace
 # Description: A Modern Concurrent Version Control System
 subversion
-# Description: A collection of sparse matrix libraries
-suitesparse
-# Required by manifest packages: gegl04-matting-levin
 # Description: A graphical interface for modifying the system language
 system-config-language
 # Description: Programmable system-wide instrumentation system
@@ -592,16 +285,10 @@ valgrind
 vim-enhanced
 # Description: The cross-platform open-source multimedia framework, player and server
 vlc
-# Description: The Vorbis General Audio Compression Codec tools
-vorbis-tools
-# Required by manifest packages: abcde, icedax
 # Description: A compatibility layer for windows applications
 wine
 # Description: Work around common problems in Wine
 winetricks
-# Description: Fast, modern, secure VPN tunnel
-wireguard-tools
-# Required by manifest packages: proton-vpn-daemon
 # Description: Network traffic analyzer
 wireshark
 # Description: Command line clipboard grabber
@@ -610,17 +297,11 @@ xclip
 xournal
 # Description: Command line clipboard and X selection tool
 xsel
-# Description: A YAML parser and emitter for C++
-yaml-cpp
-# Required by manifest packages: libmamba
 # Description: Fast, reliable, and secure dependency management.
 yarnpkg
 # Description: Yq is a portable command-line YAML, JSON, XML, CSV, TOML, HCL  and properties processor
 yq
 # Description: Tool for interacting with the PIV applet on a YubiKey
 yubico-piv-tool
-# Description: Development files for zlib-ng-compat
-zlib-ng-compat-devel
-# Required by manifest packages: cairo-gobject-devel, elfutils-libelf-devel, libsoup-devel
 # Description: Powerful interactive shell
 zsh
