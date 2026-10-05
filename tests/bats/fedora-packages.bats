@@ -28,8 +28,6 @@ setup() {
   assert_success
   assert_output_partial "--add-descriptions"
   assert_output_partial "capture [FILE]"
-  assert_output_partial "graph [MANIFEST]"
-  assert_output_partial "browser [MANIFEST] [OUTPUT]"
 }
 
 @test "Fedora package filter is not offered as zsh integration without Fedora tools" {

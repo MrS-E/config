@@ -11,23 +11,17 @@ Usage:
   filter-fedora-packages baseline [FILE]
   filter-fedora-packages capture [FILE]
   filter-fedora-packages filter BASELINE [MANIFEST] [OUTPUT]
-  filter-fedora-packages graph [MANIFEST]
-  filter-fedora-packages browser [MANIFEST] [OUTPUT]
   filter-fedora-packages --add-descriptions MANIFEST [OUTPUT]
 
 Capture Fedora package manifests, remove baseline packages from an
-explicitly-installed package manifest, browse package dependencies, or add
-descriptions. The filter preserves each package's immediately preceding
-# Description: comment.
+explicitly-installed package manifest, or add descriptions. The filter
+preserves each package's immediately preceding # Description: comment.
 
 Defaults:
   baseline FILE       fedora-base.txt
   capture FILE        fedora-custom.txt
   filter MANIFEST     setup/fedora/dnf.txt
   filter OUTPUT       stdout
-  graph MANIFEST      interactive dependency browser (requires fzf)
-  browser MANIFEST    generate interactive HTML dependency graph
-  browser OUTPUT      default: fedora-package-graph.html
   descriptions OUTPUT stdout
 EOF
 }
@@ -156,98 +150,6 @@ add_descriptions() {
   fi
 }
 
-graph_packages() {
-  local manifest="${1:-$DEFAULT_MANIFEST}"
-  local package_list userinstalled
-
-  [[ -f "$manifest" ]] || { printf 'error: manifest not found: %s\n' "$manifest" >&2; return 1; }
-  command -v fzf >/dev/null 2>&1 || {
-    printf 'error: fzf is required for the interactive package graph\n' >&2
-    return 1
-  }
-
-  package_list="$(mktemp)"
-  userinstalled="$(mktemp)"
-  awk '!/^[[:space:]]*#/ && NF { print $1 }' "$manifest" | sort -u > "$package_list"
-  if ! dnf repoquery --userinstalled --qf '%{name}\n' | sort -u > "$userinstalled"; then
-    rm -f "$package_list" "$userinstalled"
-    return 1
-  fi
-
-  awk 'NR == FNR { user[$1] = 1; next }
-       { printf "[%s] %s\n", ($1 in user ? "user-installed" : "not user-installed"), $1 }' \
-    "$userinstalled" "$package_list" |
-    fzf --delimiter=' ' --with-nth=2.. --prompt='package graph> ' \
-      --preview 'printf "Installed packages requiring {2}:\n"; dnf repoquery --installed --whatrequires --qf "%{name}\n" {2} 2>/dev/null | sort -u | sed "s/^/  /"' \
-      --preview-window='right,60%,wrap' || true
-  rm -f "$package_list" "$userinstalled"
-}
-
-browser_graph() {
-  local manifest="${1:-$DEFAULT_MANIFEST}"
-  local output="${2:-fedora-package-graph.html}"
-  local package_list userinstalled edges package requiring
-
-  [[ -f "$manifest" ]] || { printf 'error: manifest not found: %s\n' "$manifest" >&2; return 1; }
-  package_list="$(mktemp)"
-  userinstalled="$(mktemp)"
-  edges="$(mktemp)"
-  awk '!/^[[:space:]]*#/ && NF { print $1 }' "$manifest" | sort -u > "$package_list"
-  if ! dnf repoquery --userinstalled --qf '%{name}\n' | sort -u > "$userinstalled"; then
-    rm -f "$package_list" "$userinstalled" "$edges"
-    return 1
-  fi
-
-  while IFS= read -r package; do
-    dnf repoquery --installed --whatrequires --qf '%{name}\n' "$package" 2>/dev/null |
-      while IFS= read -r requiring; do
-        [[ "$requiring" != "$package" ]] && printf '%s\t%s\n' "$requiring" "$package"
-      done
-  done < "$package_list" | sort -u > "$edges"
-
-  {
-    cat <<'HTML'
-<!doctype html>
-<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fedora package dependency graph</title>
-<style>
-body{font:15px system-ui,sans-serif;margin:0;background:#111827;color:#e5e7eb}header{padding:1rem 1.5rem;background:#1f2937;display:flex;gap:1rem;align-items:center;flex-wrap:wrap}h1{font-size:1.25rem;margin:0}input{padding:.6rem;border-radius:.4rem;border:1px solid #4b5563;background:#111827;color:inherit;min-width:18rem}main{display:grid;grid-template-columns:minmax(0,3fr) minmax(16rem,1fr);height:calc(100vh - 5rem)}svg{width:100%;height:100%;background:#0b1220}.panel{padding:1rem;overflow:auto;background:#172033}.edge{stroke:#64748b;stroke-opacity:.55}.node{cursor:pointer;stroke:#111827;stroke-width:2}.user{fill:#34d399}.dependency{fill:#fbbf24}.label{font-size:11px;fill:#e5e7eb;pointer-events:none}.muted{color:#9ca3af}@media(max-width:700px){main{grid-template-columns:1fr;grid-template-rows:60vh auto;height:auto}}
-</style>
-<header><h1>Fedora package dependencies</h1><input id="search" type="search" placeholder="Filter packages…"><span class="muted"><span style="color:#34d399">●</span> user-installed · <span style="color:#fbbf24">●</span> other</span></header>
-<main><svg id="graph" role="img" aria-label="Package dependency graph"></svg><aside class="panel" id="details">Select a package to inspect its dependencies.</aside></main>
-<script>
-const nodes=[
-HTML
-    while IFS= read -r package; do
-      if grep -Fxq "$package" "$userinstalled"; then status=true; else status=false; fi
-      printf '{"id":"%s","user":%s},\n' "$package" "$status"
-    done < "$package_list"
-    cat <<'HTML'
-];
-const edges=[
-HTML
-    while IFS=$'\t' read -r requiring package; do
-      grep -Fxq "$requiring" "$package_list" && grep -Fxq "$package" "$package_list" &&
-        printf '{"from":"%s","to":"%s"},\n' "$requiring" "$package"
-    done < "$edges"
-    cat <<'HTML'
-];
-const svg=document.querySelector('#graph'), details=document.querySelector('#details'), search=document.querySelector('#search');
-const ns='http://www.w3.org/2000/svg', W=1000,H=700;
-svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
-const positions=new Map(nodes.map((n,i)=>[n.id,{x:W/2+Math.cos(i*2.399)*Math.min(300,80+nodes.length*5),y:H/2+Math.sin(i*2.399)*Math.min(250,60+nodes.length*4)}]));
-const lines=edges.map(e=>{const a=positions.get(e.from),b=positions.get(e.to);if(!a||!b)return null;const l=document.createElementNS(ns,'line');l.setAttribute('x1',a.x);l.setAttribute('y1',a.y);l.setAttribute('x2',b.x);l.setAttribute('y2',b.y);l.setAttribute('class','edge');svg.append(l);return l;}).filter(Boolean);
-const elements=nodes.map(n=>{const p=positions.get(n.id),g=document.createElementNS(ns,'g');g.setAttribute('transform',`translate(${p.x},${p.y})`);g.setAttribute('class','package');const c=document.createElementNS(ns,'circle');c.setAttribute('r',8);c.setAttribute('class',`node ${n.user?'user':'dependency'}`);const t=document.createElementNS(ns,'text');t.setAttribute('x',11);t.setAttribute('y',4);t.setAttribute('class','label');t.textContent=n.id;g.append(c,t);g.addEventListener('click',()=>show(n));svg.append(g);return {n,g};});
-function show(n){const needs=edges.filter(e=>e.from===n.id).map(e=>e.to),usedBy=edges.filter(e=>e.to===n.id).map(e=>e.from);details.replaceChildren();const title=document.createElement('h2');title.textContent=n.id;details.append(title);const reason=document.createElement('p');reason.textContent=n.user?'DNF marks this package user-installed':'DNF does not mark this package user-installed';details.append(reason);for(const [label,items] of [['Depends on',needs],['Required by',usedBy]]){const h=document.createElement('h3');h.textContent=`${label} (${items.length})`;details.append(h);const ul=document.createElement('ul');items.forEach(x=>{const li=document.createElement('li');li.textContent=x;ul.append(li)});details.append(ul)}}
-search.addEventListener('input',()=>{const q=search.value.toLowerCase();elements.forEach(({n,g})=>g.style.display=n.id.toLowerCase().includes(q)?'':'none')});
-document.querySelector('h1').insertAdjacentText('afterend',` · ${nodes.length} packages · ${edges.length} relationships`);
-</script></html>
-HTML
-  } > "$output"
-  rm -f "$package_list" "$userinstalled" "$edges"
-  printf 'Wrote interactive Fedora package graph to %s\n' "$output" >&2
-}
-
 if [[ "${1:-}" == "--shell-integration" ]] &&
    ! [[ -f /etc/fedora-release && -x "$(command -v rpm 2>/dev/null)" && -x "$(command -v dnf 2>/dev/null)" ]]; then
   exit 0
@@ -282,14 +184,6 @@ case "${1:-}" in
   filter)
     [[ $# -ge 2 && $# -le 4 ]] || { usage >&2; exit 2; }
     filter_manifest "$2" "${3:-$DEFAULT_MANIFEST}" "${4:--}"
-    ;;
-  graph)
-    [[ $# -le 2 ]] || { usage >&2; exit 2; }
-    graph_packages "${2:-$DEFAULT_MANIFEST}"
-    ;;
-  browser)
-    [[ $# -le 3 ]] || { usage >&2; exit 2; }
-    browser_graph "${2:-$DEFAULT_MANIFEST}" "${3:-fedora-package-graph.html}"
     ;;
   *)
     usage >&2
