@@ -22,8 +22,6 @@ clang
 clang-tools-extra
 # Description: Cross-platform make system
 cmake
-# Description: Common SRPM macros for cmake
-cmake-srpm-macros
 # Description: Code editing. Redefined.
 codium
     # Description: LLVM "compiler-rt" runtime libraries
@@ -64,24 +62,16 @@ git-filter-repo
 git-lfs
 # Description: Manage GNOME Shell extensions
 gnome-extensions-app
-    # Description: Helper SRPM macros common across GNOME hosted projects
-    gnome-srpm-macros
-    # Description: GnuPG tool for managing encrypted file system containers
-    gnupg2-g13
     # Description: GnuPG SmartCard daemon
     gnupg2-scdaemon
     # Description: GnuPG utilities
     gnupg2-utils
-    # Description: GnuPG Web Key Service client and server
-    gnupg2-wks
 # Description: Google Chrome
 google-chrome-stable
 # Description: Clipboard management system
 gpaste
 # Description: Graphical interface for GPaste
 gpaste-ui
-    # Description: System utility designed to stress and monitoring various hardware components
-    gst
 # Description: HPLIP graphical tools
 hplip-gui
 # Description: Interactive process viewer
@@ -108,8 +98,6 @@ libtool
 ltrace
 # Description: A deployment and management system for Lua modules
 luarocks
-    # Description: A text-based modem control and terminal emulation program
-    minicom
 # Description: Make and install locally trusted development certificates
 mkcert
 # Description: A portable x86 assembler which uses Intel-like syntax
@@ -148,12 +136,8 @@ proton-vpn-gnome-desktop
 protonvpn-stable-release
 # Description: A tool for monitoring the progress of data through a pipeline
 pv
-    # Description: Metapackage for python3-aiohttp: speedups extras
-    python3-aiohttp+speedups
-    # Description: Libraries and header files needed for Python development
-    python3-devel
-    # Description: Shell completion support for the keyring command
-    python3-keyring+completion
+# Description: Libraries and header files needed for Python development
+python3-devel
 # Description: A tool for installing and managing Python3 packages
 python3-pip
 # Description: Tool to create isolated Python environments
@@ -201,8 +185,6 @@ socat
 sqlite
 # Description: Tracks and displays system calls associated with a running process
 strace
-    # Description: A Modern Concurrent Version Control System
-    subversion
 # Description: A graphical interface for modifying the system language
 system-config-language
 # Description: Programmable system-wide instrumentation system
@@ -225,8 +207,6 @@ texlive-tocbibind
 texstudio
 # Description: Mozilla Thunderbird mail/newsgroup client
 thunderbird
-    # Description: Totem video thumbnailer
-    totem-video-thumbnailer
 # Description: Dynamic analysis tools to detect memory or thread bugs and profile
 valgrind
 # Description: A version of the VIM editor which includes recent enhancements
