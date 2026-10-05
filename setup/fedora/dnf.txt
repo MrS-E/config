@@ -1,5 +1,3 @@
-# Description: A Better CD Encoder
-abcde
 # Description: Android platform tools(adb, fastboot)
 android-tools
 # Description: Fast and lightweight package manager originally for Alpine
@@ -24,8 +22,8 @@ clang-tools-extra
 cmake
 # Description: Code editing. Redefined.
 codium
-    # Description: LLVM "compiler-rt" runtime libraries
-    compiler-rt20
+# Description: LLVM "compiler-rt" runtime libraries
+compiler-rt20
 # Description: Tool for static C/C++ code analysis
 cppcheck
 # Description: C source code tree search and browse tool
@@ -40,8 +38,6 @@ direnv
 doxygen
 # Description: Eye of GNOME image viewer
 eog
-# Description: Utility to show EXIF information hidden in JPEG files
-exif
 # Description: Digital VCR and streaming server
 ffmpeg
 # Description: FTP, FTPS and SFTP client
@@ -62,10 +58,10 @@ git-filter-repo
 git-lfs
 # Description: Manage GNOME Shell extensions
 gnome-extensions-app
-    # Description: GnuPG SmartCard daemon
-    gnupg2-scdaemon
-    # Description: GnuPG utilities
-    gnupg2-utils
+# Description: GnuPG SmartCard daemon
+gnupg2-scdaemon
+# Description: GnuPG utilities
+gnupg2-utils
 # Description: Google Chrome
 google-chrome-stable
 # Description: Clipboard management system
@@ -80,20 +76,14 @@ htop
 imhex
 # Description: A GNU program for formatting C code
 indent
-    # Description: Development package for building kernel modules to match the kernel
-    kernel-devel
+# Description: Development package for building kernel modules to match the kernel
+kernel-devel
 # Description: Cross-platform, fast, feature full, GPU based terminal emulator
 kitty
-    # Description: Free MP3 audio compressor
-    lame
 # Description: Simple terminal UI for git commands
 lazygit
 # Description: The GNU Portable Library Tool
 libtool
-    # Description: X.Org X11 libXi development package
-    libXi-devel
-    # Description: X.Org X11 libXmu development package
-    libXmu-devel
 # Description: Tracks runtime library calls from dynamically linked executables
 ltrace
 # Description: A deployment and management system for Lua modules
@@ -136,8 +126,6 @@ proton-vpn-gnome-desktop
 protonvpn-stable-release
 # Description: A tool for monitoring the progress of data through a pipeline
 pv
-# Description: Libraries and header files needed for Python development
-python3-devel
 # Description: A tool for installing and managing Python3 packages
 python3-pip
 # Description: Tool to create isolated Python environments
@@ -148,8 +136,6 @@ python3-virtualenv
 qemu-user-static
 # Description: Command-line tools and library for transforming PDF files
 qpdf
-    # Description: Development files for qt5-qtbase
-    qt5-qtbase-devel
     # Description: Qt5 - QtDeclarative component
     qt5-qtxmlpatterns
     # Description: Common files for Qt
