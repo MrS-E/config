@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+usage() {
+  cat <<'EOF'
+Generate an RSA-4096 PIV key, self-signed certificate, and SSH public key.
+
+Usage:
+  yubikey-piv-rsa --slot SLOT --name COMMON_NAME [options]
+
+Required:
+  --slot SLOT             PIV slot, for example 9c
+  --name COMMON_NAME      Common Name used in the self-signed certificate
+
+Options:
+  --output-dir DIRECTORY  Output directory (default: ~/.ssh)
+  --force                 Overwrite existing output files
+  -h, --help              Show this help
+
+Outputs:
+  yubikey-SLOT-public.pem  Exported RSA public key
+  yubikey-SLOT-cert.pem    Self-signed X.509 certificate, imported into PIV
+  yubikey-SLOT.pub         OpenSSH public key
+EOF
+}
+
+die() {
+  printf 'error: %s\n' "$*" >&2
+  exit 1
+}
+
+slot=''
+name=''
+output_dir="$HOME/.ssh"
+force=0
+
+while (($# > 0)); do
+  case "$1" in
+    --slot)
+      (($# >= 2)) || die "--slot requires an argument"
+      slot="$2"
+      shift 2
+      ;;
+    --slot=*)
+      slot="${1#*=}"
+      shift
+      ;;
+    --name)
+      (($# >= 2)) || die "--name requires an argument"
+      name="$2"
+      shift 2
+      ;;
+    --name=*)
+      name="${1#*=}"
+      shift
+      ;;
+    --output-dir)
+      (($# >= 2)) || die "--output-dir requires an argument"
+      output_dir="$2"
+      shift 2
+      ;;
+    --output-dir=*)
+      output_dir="${1#*=}"
+      shift
+      ;;
+    --force)
+      force=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      die "unknown option: $1 (use --help for usage)"
+      ;;
+  esac
+done
+
+[[ -n "$slot" ]] || die "--slot is required"
+[[ "$slot" =~ ^[[:xdigit:]]{2}$ ]] || die "--slot must be two hexadecimal characters"
+slot="${slot,,}"
+
+[[ -n "$name" ]] || die "--name is required"
+[[ "$name" != */* && "$name" != *$'\n'* && "$name" != *$'\r'* ]] ||
+  die "--name must not contain '/', a newline, or a carriage return"
+
+piv_tool="$(command -v yubico-piv-tool || true)"
+ssh_keygen="$(command -v ssh-keygen || true)"
+[[ -x "$piv_tool" ]] || die "yubico-piv-tool is required"
+[[ -x "$ssh_keygen" ]] || die "ssh-keygen is required"
+
+mkdir -p -- "$output_dir"
+
+public_pem="$output_dir/yubikey-$slot-public.pem"
+certificate="$output_dir/yubikey-$slot-cert.pem"
+ssh_public="$output_dir/yubikey-$slot.pub"
+
+if (( ! force )); then
+  for file in "$public_pem" "$certificate" "$ssh_public"; do
+    [[ ! -e "$file" ]] || die "output already exists: $file (use --force to overwrite)"
+  done
+fi
+
+printf 'Generating RSA-4096 key in PIV slot %s...\n' "$slot"
+"$piv_tool" -a generate -s "$slot" -A RSA4096 -o "$public_pem"
+
+printf 'Creating self-signed certificate with CN=%s...\n' "$name"
+"$piv_tool" \
+  -a verify-pin \
+  -a selfsign-certificate \
+  -s "$slot" \
+  -S "/CN=$name/" \
+  -i "$public_pem" \
+  -o "$certificate"
+
+printf 'Importing certificate into PIV slot %s...\n' "$slot"
+"$piv_tool" -a import-certificate -s "$slot" -i "$certificate"
+
+printf 'Converting public key to OpenSSH format...\n'
+"$ssh_keygen" -i -m PKCS8 -f "$public_pem" > "$ssh_public"
+
+printf '\nCreated:\n  %s\n  %s\n  %s\n' "$public_pem" "$certificate" "$ssh_public"
