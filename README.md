@@ -81,7 +81,7 @@ config/
 | `lazygit/` | Lazygit TUI: custom keybinding overrides. |
 | `vscodium/` | VSCodium: base+overlay settings (`settings.base.json` + platform-specific overlays), extensions list, `code export`/`code import` zsh functions. |
 | `ssh/` | SSH config: `config` entry point (Include, ControlMaster, keychain), `config.d/*` host stanzas (private, homelab, infra, zhaw), YubiKey PKCS11 provider filter. |
-| `scripts/` | Custom CLI tools: `project` (project directory switcher), `work-finder` (git/file activity scanner). Both support `--shell-integration` for zsh wrapper + completion generation. |
+| `scripts/` | Custom CLI tools: `project` (project directory switcher), `work-finder` (git/file activity scanner), and `fedora-rpm-dependency-graph.py` (export user-installed Fedora RPM dependency closures). `project` and `work-finder` support `--shell-integration` for zsh wrappers and completions. |
 | `Nextcloud/` | Nextcloud desktop client config (`nextcloud.cfg`) and sync-exclude patterns (`sync-exclude.lst`). |
 | `junie/` | Junie AI assistant: `settings.json`, model configs with API key scrub filter. |
 
@@ -330,6 +330,49 @@ Each platform's manifests live alongside their step scripts in `setup/<os>/`.
 | `setup/manjaro/aur.txt` | One package per line | `pacman -Qqem \| sort` |
 
 Use `scripts/filter-fedora-packages` to manage the Fedora package manifest.
+
+### Fedora RPM Dependency Graph
+
+On Fedora, export the dependency closure of packages marked user-installed by DNF:
+
+```bash
+python3 scripts/fedora-rpm-dependency-graph.py \
+  --dot ~/fedora-rpm-dependencies.dot \
+  --json ~/fedora-rpm-dependencies.json
+```
+
+The command reads the installed RPM database and DNF install reasons without
+changing package state. It requires the system Python DNF bindings
+(`python3-libdnf5` or `python3-dnf`). Nodes are identified by package name and
+full RPM EVR (`[epoch:]version-release`); records with the same name and EVR
+are merged, with architectures retained as metadata. JSON contains sorted
+`nodes` and `edges` arrays, and DOT represents the same graph. Node reasons are
+`user-installed` for roots and `dependency` for packages reached through edges.
+
+Use `--fixture-json PATH` to export normalized package data without querying the
+host, for example in tests. A fixture contains `user_installed` package keys
+and a `packages` array; package keys have `name` and `version`, while package
+records also have an `architecture` and optional `dependencies` array:
+
+```json
+{
+  "user_installed": [{"name": "editor", "version": "1:2.0-1.fc40"}],
+  "packages": [
+    {
+      "name": "editor",
+      "version": "1:2.0-1.fc40",
+      "architecture": "x86_64",
+      "dependencies": [{"name": "libeditor", "version": "0.9-2.fc40"}]
+    },
+    {
+      "name": "libeditor",
+      "version": "0.9-2.fc40",
+      "architecture": "x86_64",
+      "dependencies": []
+    }
+  ]
+}
+```
 
 ### Test Harness
 
