@@ -1,550 +1,236 @@
-7zip
-aajohan-comfortaa-fonts
-abcde
-abrt-cli
+# Description: Virtual package to make easy default installation on desktop environments
 abrt-desktop
-acl
-adobe-source-code-pro-fonts
-alsa-sof-firmware
-alsa-ucm
-alsa-utils
-amd-gpu-firmware
-amd-ucode-firmware
-anaconda-install-env-deps
-anaconda-live
+# Description: Android platform tools(adb, fastboot)
 android-tools
+# Description: Fast and lightweight package manager originally for Alpine
 apk-tools
-at
-atheros-firmware
-at-spi2-atk
-at-spi2-core
-attr
-audit
-authselect
+# Description: A GNU tool for automatically configuring source code
 autoconf
+# Description: A GNU tool for automatically creating Makefiles
 automake
-avahi
-b43-fwcutter
-b43-openfwwf
-baobab
-bash
-bash-color-prompt
-bash-completion
-bat
-bc
-bcc
+# Description: Bash Automated Testing System
+bats
+# Description: Command line tools for BPF Compiler Collection (BCC)
 bcc-tools
-bind-utils
-binutils
+# Description: A GNU general-purpose parser generator
 bison
-bluez-cups
-brcmfmac-firmware
-brltty
-btrfs-progs
+# Description: Berkeley Yacc, a parser generator
 byacc
-bzip2
-cabextract
+# Description: C/C++ compiler cache
 ccache
-cdparanoia
-chrony
-cifs-utils
-cirrus-audio-firmware
+# Description: End-user tools for the Clam Antivirus scanner
 clamav
-clamav-freshclam
+# Description: A C language family front-end for LLVM
 clang
-clang20-libs
-clang20-resource-filesystem
+# Description: Extra tools for clang
 clang-tools-extra
+# Description: Cross-platform make system
 cmake
+# Description: Code editing. Redefined.
 codium
-colord
+# Description: LLVM "compiler-rt" runtime libraries
 compiler-rt20
-compsize
-coreutils
-cpio
+# Description: Tool for static C/C++ code analysis
 cppcheck
-crontabs
-cryptsetup
+# Description: C source code tree search and browse tool
 cscope
-ctags
-cups
-cups-browsed
-cups-filters
-cups-pk-helper
-curl
-cyrus-sasl-plain
-dbus
-dconf
-ddb-adventure-muncher
-decibels
-default-editor
-default-fonts-cjk-mono
-default-fonts-cjk-sans
-default-fonts-cjk-serif
-default-fonts-core-emoji
-default-fonts-core-math
-default-fonts-core-mono
-default-fonts-core-sans
-default-fonts-core-serif
-default-fonts-other-mono
-default-fonts-other-sans
-default-fonts-other-serif
-deltarpm
-desktop-backgrounds-gnome
+# Description: Provides the ISC DHCP client daemon and dhclient-script
 dhcp-client
+# Description: A utility which provides statistics based on the output of diff
 diffstat
-dnf5
-dnf5-plugins
-dnsmasq
-dos2unix
-dosfstools
+# Description: Per-directory shell configuration tool
+direnv
+# Description: A documentation system for C/C++
 doxygen
-dracut-config-rescue
-dracut-live
-dracut-network
-e2fsprogs
-ed
-efibootmgr
-elfutils
-elfutils-libelf-devel
+# Description: Eye of GNOME image viewer
 eog
-ethtool
-exfatprogs
-fedora-bookmarks
-fedora-chromium-config
-fedora-flathub-remote
-fedora-release-cosmic
-fedora-release-workstation
-fedora-workstation-backgrounds
-fedora-workstation-repositories
-file
-filesystem
-filezilla
-firefox
-firewalld
-flac
+# Description: Digital VCR and streaming server
+ffmpeg
+# Description: A tool for generating scanners (text pattern recognizers)
 flex
-fpaste
-fprintd-pam
-freerdp
-fuse-libs
-fwupd
+# Description: A command-line fuzzy finder written in Go
 fzf
-gamemode
+# Description: Various compilers (C, C++, Objective-C, ...)
 gcc
+# Description: C++ support for GCC
 gcc-c++
-gdb
-gdm
-gettext
-ghostscript
-git
+# Description: GNU Image Manipulation Program
+gimp
+# Description: Quickly rewrite git repository history (git-filter-branch replacement)
 git-filter-repo
+# Description: Git extension for versioning large files
 git-lfs
-glibc
-glibc-all-langpacks
+# Description: Object files for development using standard C libraries.
 glibc-devel
-glib-networking
-glycin-thumbnailer
-gnome-backgrounds
-gnome-bluetooth
-gnome-boxes
-gnome-browser-connector
-gnome-calculator
-gnome-calendar
-gnome-characters
-gnome-classic-session
-gnome-clocks
-gnome-color-manager
-gnome-connections
-gnome-contacts
-gnome-control-center
-gnome-control-center-filesystem
-gnome-disk-utility
-gnome-epub-thumbnailer
+# Description: Manage GNOME Shell extensions
 gnome-extensions-app
-gnome-font-viewer
-gnome-initial-setup
-gnome-logs
-gnome-maps
-gnome-remote-desktop
-gnome-session-wayland-session
-gnome-shell
-gnome-shell-extension-background-logo
-gnome-software
-gnome-system-monitor
-gnome-text-editor
-gnome-user-docs
-gnome-user-share
-gnome-weather
-gnupg2
-gnupg2-g13
+# Description: GnuPG SmartCard daemon
 gnupg2-scdaemon
+# Description: GnuPG utilities
 gnupg2-utils
-gnupg2-wks
+# Description: Google Chrome
 google-chrome-stable
-gpaste
+# Description: Graphical interface for GPaste
 gpaste-ui
-grub2-efi-ia32
-grub2-efi-ia32-cdboot
-grub2-efi-ia32-modules
-grub2-efi-x64
-grub2-efi-x64-cdboot
-grub2-efi-x64-modules
-grub2-pc
-grub2-tools
-grub2-tools-efi
-grub2-tools-extra
-grubby
-gstreamer1-plugin-dav1d
-gstreamer1-plugin-libav
-gstreamer1-plugin-openh264
-gstreamer1-plugins-bad-free
-gstreamer1-plugins-good
-gstreamer1-plugins-ugly-free
+# Description: XIM support for GTK+
 gtk3-immodule-xim
-gutenprint
-gutenprint-cups
-gvfs-afc
-gvfs-afp
-gvfs-archive
-gvfs-fuse
-gvfs-goa
-gvfs-gphoto2
-gvfs-mtp
-gvfs-smb
-HandBrake
-HandBrake-gui
-hfsplus-tools
-hostname
-hplip
-hunspell
-hyperv-daemons
-ibus-anthy
-ibus-chewing
-ibus-gtk3
-ibus-gtk4
-ibus-hangul
-ibus-libpinyin
-ibus-m17n
+# Description: HPLIP graphical tools
+hplip-gui
+# Description: Interactive process viewer
+htop
+# Description: Cangjie based input methods
 ibus-table-chinese-cangjie
-ibus-typing-booster
-icedax
-icedtea-web
+# Description: Desktop Input Method configuration tool
 im-chooser
+# Description: A hex editor for reverse engineers and programmers
 imhex
+# Description: Delivery framework for general Input Method configuration
 imsettings
+# Description: GSettings support on imsettings
 imsettings-gsettings
+# Description: A GNU program for formatting C code
 indent
-intel-audio-firmware
-intel-gpu-firmware
-intel-vsc-firmware
-iproute
-iptables-nft
-iptstate
-iputils
-irqbalance
-iscsi-initiator-utils
-isomd5sum
-iwlegacy-firmware
-iwlwifi-dvm-firmware
-iwlwifi-mvm-firmware
-java-21-openjdk
-java-21-openjdk-devel
-kbd
-kbd-legacy
-kernel
-kernel-core
+# Description: Development package for building kernel modules to match the kernel
 kernel-devel
-kernel-modules
-kernel-modules-core
-kernel-modules-extra
-kexec-tools
+# Description: Cross-platform, fast, feature full, GPU based terminal emulator
 kitty
-lame
+# Description: Simple terminal UI for git commands
 lazygit
-less
-libertas-firmware
-libglvnd-gles
-libnma-gtk4
-libomp20
-libomp20-devel
-libreoffice-calc
-libreoffice-emailmerge
-libreoffice-graphicfilter
-libreoffice-impress
-libreoffice-writer
-librsvg2
-libsane-hpaio
+# Description: The GNU Portable Library Tool
 libtool
-libva-intel-media-driver
-libzstd-devel
-linux-firmware
-livesys-scripts
-llhttp
-llvm20-filesystem
-llvm20-libs
-localsearch
-logrotate
-loupe
-lrzsz
-lsof
+# Description: Tracks runtime library calls from dynamically linked executables
 ltrace
+# Description: A deployment and management system for Lua modules
 luarocks
-lutris
-lvm2
-m4
-mactel-boot
-mailcap
+# Description: A GNU tool which simplifies the build process for users
 make
-man-db
-man-pages
-maven
-mcelog
-mdadm
-mediawriter
-mesa-dri-drivers
-mesa-libEGL
-mesa-vulkan-drivers
-microcode_ctl
+# Description: A text-based modem control and terminal emulation program
 minicom
-ModemManager
-mpage
-mt7xxx-firmware
-mtr
-nautilus
-ncurses
+# Description: Make and install locally trusted development certificates
+mkcert
+# Description: A portable x86 assembler which uses Intel-like syntax
+nasm
+# Description: Vim-fork focused on extensibility and agility
 neovim
-net-tools
-NetworkManager
-NetworkManager-adsl
-NetworkManager-bluetooth
-NetworkManager-config-connectivity-fedora
-NetworkManager-openconnect-gnome
-NetworkManager-openvpn
-NetworkManager-openvpn-gnome
-NetworkManager-ppp
-NetworkManager-ssh-gnome
-NetworkManager-vpnc-gnome
-NetworkManager-wifi
-NetworkManager-wwan
+# Description: The Nextcloud Client
 nextcloud-client
+# Description: nextcloud client nautilus extension
 nextcloud-client-nautilus
-nfs-utils
+# Description: Small build system with a focus on speed
 ninja-build
-nmap-ncat
-nss-mdns
-ntfs-3g
-ntfsprogs
-nvidia-gpu-firmware
-nvme-cli
-nxpwireless-firmware
+# Description: A document viewer
 okular
-ollama
-opensc
+# Description: The Programmers Solid 3D CAD Modeller
 openscad
-openssh-clients
-openssh-server
-openssl-devel
-open-vm-tools-desktop
-openvpn
-orca
-PackageKit-command-not-found
-PackageKit-gstreamer-plugin
-PackageKit-gtk3-module
-pam_afs_session
+# Description: Markup conversion between documentation formats
 pandoc-cli
-papers
-papers-nautilus
-paps
-parted
-passwdqc
+# Description: Utility for modifying/upgrading files
 patch
+# Description: A collection of programs for manipulating patch files
 patchutils
-pciutils
+# Description: Performance monitoring for the Linux kernel
 perf
-pinentry-gnome3
-pinfo
-pipewire-alsa
-pipewire-config-raop
-pipewire-gstreamer
-pipewire-pulseaudio
-pipewire-utils
-pkcs11-helper
-pkgconf
+# Description: Utility for reading and writing image meta info
+perl-Image-ExifTool
+# Description: Program to generate UML diagram from a text description
 plantuml
-plocate
-plymouth
-plymouth-system-theme
+# Description: Run docker-compose.yml using podman
 podman-compose
-policycoreutils
-policycoreutils-python-utils
-polkit
-ppp
-prefixdevname
-procps-ng
+# Description: PostgreSQL client programs
+postgresql
+# Description: Proton Mail Bridge
 protonmail-bridge
-proton-vpn-daemon
+# Description: Proton VPN Gnome Desktop metapackage
 proton-vpn-gnome-desktop
-proton-vpn-gtk-app
+# Description: Stable release package
 protonvpn-stable-release
-psacct
-psmisc
-ptyxis
+# Description: A tool for monitoring the progress of data through a pipeline
 pv
-python3-aiodns
-python3-aiohappyeyeballs
-python3-aiohttp
-python3-aiohttp+speedups
-python3-aiosignal
-python3-bcc
-python3-bcrypt
-python3-brotli
-python3-dbus-fast
-python3-fido2
-python3-frozenlist
-python3-gnupg
-python3-importlib-metadata
-python3-jaraco-classes
-python3-jaraco-context
-python3-jaraco-functools
-python3-jeepney
-python3-jinja2
-python3-keyring
-python3-keyring+completion
-python3-more-itertools
-python3-multidict
-python3-netaddr
-python3-pip
-python3-propcache
-python3-proton-core
-python3-proton-keyring-linux
-python3-proton-vpn-api-core
-python3-proton-vpn-local-agent
-python3-pycares
-python3-pynacl
-python3-secretstorage
-python3-sentry-sdk
-python3-shtab
-python3-virtualenv
-python3-yarl
-python3-zipp
+# Description: Qt decoration plugin implementing Adwaita-like client-side decorations
 qadwaitadecorations-qt5
-qbittorrent
-qcom-wwan-firmware
-qemu-guest-agent
+# Description: QEMU user mode emulation of qemu targets static build
 qemu-user-static
+# Description: Command-line tools and library for transforming PDF files
+qpdf
+# Description: Qt5 - QtBase components
 qt5-qtbase
+# Description: Qt5 GUI-related libraries
 qt5-qtbase-gui
+# Description: Qt5 - QtDeclarative component
 qt5-qtdeclarative
+# Description: Qt5 - QtXmlPatterns component
 qt5-qtxmlpatterns
-quota
+# Description: Rsync for cloud storage
 rclone
-realmd
-realtek-firmware
+# Description: Program that finds duplicate files
+rdfind
+# Description: Remote Desktop Client
+remmina
+# Description: RDP plugin for Remmina Remote Desktop Client
+remmina-plugins-rdp
+# Description: VNC plugin for Remmina Remote Desktop Client
+remmina-plugins-vnc
+# Description: Line-oriented search tool
 ripgrep
-rootfiles
-rpm
+# Description: Graphical user-interface to write disk images and format SD cards
+rpi-imager
+# Description: RPM Fusion (free) Repository Configuration
 rpmfusion-free-release
+# Description: RPM Fusion (nonfree) Repository Configuration
 rpmfusion-nonfree-release
-rsync
-rsyslog
-rygel
-samba-client
-sane-backends-drivers-scanners
-scenebuilder
+# Description: Display and control your Android device
 scrcpy
+# Description: A GNOME application for managing encryption keys
 seahorse
-selinux-policy-targeted
+# Description: Helps troubleshoot SELinux problems
 setroubleshoot
-setup
-shadow-utils
-shc
-shim-ia32
-shim-x64
-showtime
-simple-scan
-smartmontools
-snapshot
+# Description: Bidirectional data relay between two data channels ('netcat++')
 socat
-sos
-sound-juicer
-speech-dispatcher
-spice-vdagent
-spice-webdavd
+# Description: Library that implements an embeddable SQL database engine
 sqlite
-sssd-common
-sssd-kcm
-sssd-proxy
-steam
+# Description: Tracks and displays system calls associated with a running process
 strace
+# Description: A Modern Concurrent Version Control System
 subversion
-sudo
-sushi
-symlinks
+# Description: A graphical interface for modifying the system language
 system-config-language
-system-config-printer-udev
-systemd
-systemd-container
-systemd-oomd-defaults
-systemd-resolved
-systemd-udev
+# Description: Programmable system-wide instrumentation system
 systemtap
+# Description: The easiest, most secure way to use WireGuard and 2FA
 tailscale
-tar
-tcpdump
+# Description: Fetch and show tldr help pages for many CLI commands
 tealdeer
-teamd
+# Description: Raw OCR Engine
 tesseract
+# Description: Computer modern fonts in T1 and TS1 encodings
 texlive-ec
+# Description: A TeX macro package that defines LaTeX
 texlive-latex
+# Description: A comprehensive (SI) units package
 texlive-siunitx
+# Description: Add bibliography/index/contents to Table of Contents
 texlive-tocbibind
-texstudio
-thermald
+# Description: Mozilla Thunderbird mail/newsgroup client
 thunderbird
-time
-tinysparql
-tiwilink-firmware
-toolbox
+# Description: Totem video thumbnailer
 totem-video-thumbnailer
-traceroute
-tree
-udisks2-btrfs
-unoconv
-unzip
-uresourced
-usb_modeswitch
-usbutils
-util-linux
+# Description: Dynamic analysis tools to detect memory or thread bugs and profile
 valgrind
+# Description: A version of the VIM editor which includes recent enhancements
 vim-enhanced
-vim-minimal
-virtualbox-guest-additions
+# Description: The cross-platform open-source multimedia framework, player and server
 vlc
-vorbis-tools
-vte-profile
-wget2-wget
-which
-whois
-wine
-winetricks
-wireguard-tools
-wireplumber
+# Description: Network traffic analyzer
 wireshark
-words
-wpa_supplicant
+# Description: Command line clipboard grabber
 xclip
-xdg-desktop-portal
-xdg-desktop-portal-gnome
-xdg-desktop-portal-gtk
-xdg-user-dirs-gtk
-xfsprogs
+# Description: Command line clipboard and X selection tool
 xsel
+# Description: Fast, reliable, and secure dependency management.
 yarnpkg
-yelp
+# Description: Yq is a portable command-line YAML, JSON, XML, CSV, TOML, HCL  and properties processor
 yq
+# Description: Tool for interacting with the PIV applet on a YubiKey
 yubico-piv-tool
-zip
-zlib-ng-compat-devel
-zram-generator-defaults
+# Description: Powerful interactive shell
 zsh

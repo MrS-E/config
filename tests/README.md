@@ -20,6 +20,7 @@ tests/
 │   ├── idempotency.bats               # second run is a safe no-op
 │   ├── git-filters.bats               # portable clean/smudge filter bootstrap
 │   ├── assertions-fedora.bats
+│   ├── fedora-packages.bats           # Fedora package manifest filtering
 │   ├── assertions-manjaro.bats
 │   ├── assertions-fedora-atomic.bats
 │   ├── migrate-brew-to-nix.bats       # mocked one-shot Homebrew migration safeguards
@@ -42,6 +43,9 @@ make compare-baseline    # re-run and diff against the recorded baseline
 
 The repo is bind-mounted at `/workspace` inside each container; the test user is
 `tester` with `HOME=/home/tester` and passwordless `sudo`.
+
+The Fedora test target includes package-manifest assertions and tests for the
+retained Fedora package filter.
 
 ## Strategy & known limitations
 

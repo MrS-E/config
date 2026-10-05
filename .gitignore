@@ -13,6 +13,7 @@ ssh/*
 !ssh/providers.mac
 !ssh/providers.fedora
 !ssh/pkcs11-filter.sh
+!ssh/README.md
 ssh/config.d/dienstwerk
 # !ssh/known_hosts
 
@@ -39,6 +40,7 @@ Nextcloud/*
 # junie
 # =========================
 junie/*
+!junie/junie-json-filter.py
 !junie/settings.json
 !junie/config.json
 !junie/*.md

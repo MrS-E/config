@@ -145,10 +145,10 @@ load "/workspace/tests/bats/helpers/assertions.bash"
 
 @test "Junie filters track selected settings and omit MCP enabled keys" {
   local repo="$BATS_TEST_TMPDIR/junie-filter-repo"
-  mkdir -p "$repo/setup/general" "$repo/scripts" "$repo/junie/mcp"
+  mkdir -p "$repo/setup/general" "$repo/junie/mcp"
   cp "$REPO_DIR/.gitattributes" "$repo/"
   cp "$REPO_DIR/setup/general/common.bash" "$REPO_DIR/setup/general/02-git-filters.sh" "$repo/setup/general/"
-  cp "$REPO_DIR/scripts/junie-json-filter.py" "$repo/scripts/"
+  cp "$REPO_DIR/junie/junie-json-filter.py" "$repo/junie/"
 
   git -C "$repo" init --quiet
   git -C "$repo" config user.email test@example.com
