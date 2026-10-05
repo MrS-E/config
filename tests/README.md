@@ -7,6 +7,7 @@ OS setup system for **Fedora**, **Manjaro**, **Fedora Atomic**, and **macOS**.
 
 ```
 tests/
+├── work-finder.bats                 # standalone work-finder test suite
 ├── containers/
 │   ├── Containerfile.fedora           # real Fedora image + bats
 │   ├── Containerfile.manjaro          # real Manjaro image + bats
@@ -35,7 +36,8 @@ make test-fedora         # run Fedora bats
 make test-manjaro        # run Manjaro bats
 make test-fedora-atomic  # run Fedora Atomic bats (mocked rpm-ostree)
 make test-macos          # run mocked macOS bats
-make test                # run the full matrix
+make test                # run the full matrix, including work-finder tests
+make shellcheck          # lint maintained Bash sources
 make baseline            # record current results under tests/baselines/
 make compare-baseline    # re-run and diff against the recorded baseline
 ```
@@ -43,8 +45,11 @@ make compare-baseline    # re-run and diff against the recorded baseline
 The repo is bind-mounted at `/workspace` inside each container; the test user is
 `tester` with `HOME=/home/tester` and passwordless `sudo`.
 
-The Fedora test target includes package-manifest assertions and tests for the
-retained Fedora package filter.
+The Fedora test target includes package-manifest assertions, tests for the
+retained Fedora package filter, and the standalone `tests/work-finder.bats`
+suite. `make shellcheck` checks `setup.sh`, shell scripts under `setup/`,
+executable helpers under `scripts/`, and `.bash` test helpers; it excludes Zsh
+configuration and Bats DSL files.
 
 ## Strategy & known limitations
 

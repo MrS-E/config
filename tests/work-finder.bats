@@ -119,7 +119,7 @@ setup() {
   [[ "$output" == *"13:30 - 18:00  unknown"* ]]
   [[ "$output" == *"Timeline summary:"* ]]
   [[ "$output" == *"| repo: $repo"* ]]
-  [[ "$output" == *"| $branch "*" | 02:00 "*" |"* ]]
+  [[ "$output" == *"| $branch "*"| 02:00 "*" |"* ]]
   [[ "$output" == *"| master "*" | 01:00 "*" |"* ]]
   [[ "$output" == *"| $unmerged_branch "*" | 00:00 "*" |"* ]]
   [[ "$output" == *"| total time on repo "*" | 03:00 "*" |"* ]]

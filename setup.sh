@@ -148,7 +148,8 @@ validate_selectors() {
 list_steps() {
   local idx
   for idx in "${!STEP_PATH[@]}"; do
-    local fq="${STEP_SCOPE[$idx]}/$(basename "${STEP_PATH[$idx]}")"
+    local fq
+    fq="${STEP_SCOPE[$idx]}/$(basename "${STEP_PATH[$idx]}")"
     local help_text
     help_text="$("${STEP_PATH[$idx]}" help 2>/dev/null | head -1 || true)"
     printf '%s\t%s\n' "$fq" "$help_text"
@@ -164,7 +165,8 @@ interactive_select() {
   fi
   local entries=() idx
   for idx in "${!STEP_PATH[@]}"; do
-    local fq="${STEP_SCOPE[$idx]}/$(basename "${STEP_PATH[$idx]}")"
+    local fq
+    fq="${STEP_SCOPE[$idx]}/$(basename "${STEP_PATH[$idx]}")"
     local help_text
     help_text="$("${STEP_PATH[$idx]}" help 2>/dev/null | head -1 || true)"
     entries+=("$fq — $help_text")
@@ -175,7 +177,8 @@ interactive_select() {
 
 run_step() {
   local scope="$1" path="$2"
-  local label="$scope/$(basename "$path")"
+  local label
+  label="$scope/$(basename "$path")"
   log "==> $label: presteps"
   if ! "$path" presteps; then
     log "    presteps failed; skipping run"

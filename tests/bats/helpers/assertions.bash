@@ -10,8 +10,11 @@ _fail() {
 }
 
 assert_success() {
+  # These variables are set by bats-core's `run` helper.
+  # shellcheck disable=SC2154
   if [ "$status" -ne 0 ]; then
     _fail "expected success, got status $status"
+    # shellcheck disable=SC2154
     _fail "output: $output"
     return 1
   fi

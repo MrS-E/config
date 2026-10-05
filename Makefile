@@ -16,6 +16,14 @@ IMAGE_PREFIX ?= setup-test
 REPO_ROOT   := $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 WORKSPACE   := /workspace
 
+SHELLCHECK  ?= shellcheck
+SHELLCHECK_FLAGS ?= -x -S warning
+SHELLCHECK_SOURCES := setup.sh \
+	$(shell find setup -type f -name '*.sh' -print) \
+	$(shell find setup -type f -name '*.bash' -print) \
+	$(shell find scripts -maxdepth 1 -type f -perm -111 -print) \
+	$(shell find tests -type f -name '*.bash' -print)
+
 # The workspace contains user-owned dotfiles that must not be relabeled on an
 # enforcing SELinux host. Disable labeling for the disposable test container;
 # other hosts retain Podman's private bind-mount label.
@@ -32,16 +40,20 @@ endif
 BATS_COMMON  := tests/bats/smoke.bats tests/bats/idempotency.bats tests/bats/zshrc.bats tests/bats/git-filters.bats
 BATS_FEDORA  := $(BATS_COMMON) \
 		tests/bats/assertions-fedora.bats \
-		tests/bats/fedora-packages.bats
+		tests/bats/fedora-packages.bats \
+		tests/work-finder.bats
 BATS_MANJARO := $(BATS_COMMON) tests/bats/assertions-manjaro.bats
 BATS_ATOMIC  := $(BATS_COMMON) tests/bats/assertions-fedora-atomic.bats
 BATS_MACOS   := $(BATS_COMMON) tests/bats/assertions-macos.bats
 
 OS_LIST := fedora manjaro fedora-atomic macos
 
-.PHONY: build $(addprefix build-,$(OS_LIST)) \
+.PHONY: shellcheck build $(addprefix build-,$(OS_LIST)) \
         test $(addprefix test-,$(OS_LIST)) \
         baseline compare-baseline
+
+shellcheck:
+	$(SHELLCHECK) $(SHELLCHECK_FLAGS) $(SHELLCHECK_SOURCES)
 
 # ---------------------------------------------------------------------------
 # Image builds
