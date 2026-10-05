@@ -2,8 +2,6 @@
 android-tools
 # Description: Fast and lightweight package manager originally for Alpine
 apk-tools
-# Description: Multitrack audio editor
-audacity
 # Description: Bash Automated Testing System
 bats
 # Description: Command line tools for BPF Compiler Collection (BCC)
@@ -40,10 +38,6 @@ doxygen
 eog
 # Description: Digital VCR and streaming server
 ffmpeg
-# Description: FTP, FTPS and SFTP client
-filezilla
-# Description: An encoder/decoder for the Free Lossless Audio Codec
-flac
 # Description: A command-line fuzzy finder written in Go
 fzf
 # Description: GNU Image Manipulation Program
@@ -120,10 +114,6 @@ proton-vpn-gnome-desktop
 protonvpn-stable-release
 # Description: A tool for monitoring the progress of data through a pipeline
 pv
-# Description: A tool for installing and managing Python3 packages
-python3-pip
-# Description: Tool to create isolated Python environments
-python3-virtualenv
 # Description: QEMU user mode emulation of qemu targets static build
 qemu-user-static
 # Description: Command-line tools and library for transforming PDF files
@@ -176,8 +166,6 @@ texlive-latex
 texlive-siunitx
 # Description: Add bibliography/index/contents to Table of Contents
 texlive-tocbibind
-# Description: A feature-rich editor for LaTeX documents
-texstudio
 # Description: Mozilla Thunderbird mail/newsgroup client
 thunderbird
 # Description: Dynamic analysis tools to detect memory or thread bugs and profile
@@ -190,8 +178,6 @@ vlc
 wireshark
 # Description: Command line clipboard grabber
 xclip
-# Description: Notetaking, sketching, PDF annotation and general journal
-xournal
 # Description: Command line clipboard and X selection tool
 xsel
 # Description: Fast, reliable, and secure dependency management.
