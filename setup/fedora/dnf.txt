@@ -42,12 +42,8 @@ eog
 ffmpeg
 # Description: FTP, FTPS and SFTP client
 filezilla
-    # Description: An encoder/decoder for the Free Lossless Audio Codec
-    flac
-    # Description: Free implementation of the Remote Desktop Protocol (RDP)
-    freerdp
-    # Description: File System in Userspace (FUSE) v2 libraries
-    fuse-libs
+# Description: An encoder/decoder for the Free Lossless Audio Codec
+flac
 # Description: A command-line fuzzy finder written in Go
 fzf
 # Description: GNU Image Manipulation Program
@@ -64,8 +60,6 @@ gnupg2-scdaemon
 gnupg2-utils
 # Description: Google Chrome
 google-chrome-stable
-# Description: Clipboard management system
-gpaste
 # Description: Graphical interface for GPaste
 gpaste-ui
 # Description: HPLIP graphical tools
@@ -130,23 +124,16 @@ pv
 python3-pip
 # Description: Tool to create isolated Python environments
 python3-virtualenv
-    # Description: Qt decoration plugin implementing Adwaita-like client-side decorations
-    qadwaitadecorations-qt5
 # Description: QEMU user mode emulation of qemu targets static build
 qemu-user-static
 # Description: Command-line tools and library for transforming PDF files
 qpdf
-    # Description: Qt5 - QtDeclarative component
-    qt5-qtxmlpatterns
-    # Description: Common files for Qt
-    qt-common
 # Description: Rsync for cloud storage
 rclone
 # Description: Program that finds duplicate files
 rdfind
 # Description: Remote Desktop Client
 remmina
-# Required by manifest packages: remmina-plugins-rdp, remmina-plugins-vnc
 # Description: RDP plugin for Remmina Remote Desktop Client
 remmina-plugins-rdp
 # Description: VNC plugin for Remmina Remote Desktop Client
