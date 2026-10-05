@@ -824,7 +824,7 @@ pipewire-gstreamer
 pipewire-pulseaudio
 # Description: PipeWire media server utilities
 pipewire-utils
-# Description: A library for using PKCSnumber sign11 providers
+# Description: A library for using PKCS#11 providers
 pkcs11-helper
 # Description: Package compiler and linker metadata toolkit
 pkgconf
@@ -952,8 +952,6 @@ python3-proton-core
 python3-proton-keyring-linux
 # Description: proton-vpn-api-core library
 python3-proton-vpn-api-core
-# Description: A client for interacting with local agent
-python3-proton-vpn-local-agent
 # Description: Python interface for c-ares
 python3-pycares
 # Description: Python bindings to picosat (a SAT solver)
@@ -1242,7 +1240,7 @@ yaml-cpp
 yarnpkg
 # Description: Help browser for the GNOME desktop
 yelp
-# Description: Yq is a portable command-line YAML, JSON, XML, CSV, TOML, HCL and properties processor
+# Description: Yq is a portable command-line YAML, JSON, XML, CSV, TOML, HCL  and properties processor
 yq
 # Description: Tool for interacting with the PIV applet on a YubiKey
 yubico-piv-tool
