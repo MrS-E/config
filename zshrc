@@ -205,6 +205,7 @@ alias hosts='vim $HOME/.ssh/known_hosts'
 ##########
 # Completion
 ##########
+setopt CORRECT
 autoload -Uz compinit
 zmodload zsh/complist
 compinit
