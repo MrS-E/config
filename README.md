@@ -491,6 +491,21 @@ and slowdowns described above. Fedora currently supports the OpenSC-backed
 YubiKey hosts, but not Ed25519 YubiKey authentication through the standard
 setup.
 
+#### Generate an RSA PIV SSH key
+
+The `scripts/yubikey-piv-rsa` helper generates an RSA-4096 key in a selected
+PIV slot, exports the public key, creates and imports a self-signed certificate,
+and writes an OpenSSH `.pub` file:
+
+```bash
+scripts/yubikey-piv-rsa --slot 9c --name ssh-9c
+```
+
+By default, the files are written to `~/.ssh` as
+`yubikey-9c-public.pem`, `yubikey-9c-cert.pem`, and `yubikey-9c.pub`. Use
+`--output-dir` to select another directory, or `--force` to overwrite existing
+files. The key itself remains non-exportable on the YubiKey.
+
 ## Vim Configuration
 
 ### vimrc
