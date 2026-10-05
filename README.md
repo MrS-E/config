@@ -81,7 +81,7 @@ config/
 | `lazygit/` | Lazygit TUI: custom keybinding overrides. |
 | `vscodium/` | VSCodium: base+overlay settings (`settings.base.json` + platform-specific overlays), extensions list, `code export`/`code import` zsh functions. |
 | `ssh/` | SSH config: `config` entry point (Include, ControlMaster, keychain), `config.d/*` host stanzas (private, homelab, infra, zhaw), YubiKey PKCS11 provider filter. |
-| `scripts/` | Custom CLI tools: `project` (project directory switcher), `work-finder` (git/file activity scanner), and `fedora-rpm-dependency-graph.py` (export user-installed Fedora RPM dependency closures). `project` and `work-finder` support `--shell-integration` for zsh wrappers and completions. |
+| `scripts/` | Custom CLI tools: `project` (project directory switcher), `work-finder` (git/file activity scanner), `fedora-rpm-dependency-graph.py` (export user-installed Fedora RPM dependency closures), and `fedora-rpm-dependency-graph-viewer.html` (local interactive graph viewer). `project` and `work-finder` support `--shell-integration` for zsh wrappers and completions. |
 | `Nextcloud/` | Nextcloud desktop client config (`nextcloud.cfg`) and sync-exclude patterns (`sync-exclude.lst`). |
 | `junie/` | Junie AI assistant: `settings.json`, model configs with API key scrub filter. |
 
@@ -349,6 +349,14 @@ are merged, with architectures retained as metadata. JSON contains sorted
 `nodes` and `edges` arrays, and DOT represents the same graph. Node reasons are
 `user-installed` for roots and `dependency` for packages reached through edges.
 
+To explore an export, open `scripts/fedora-rpm-dependency-graph-viewer.html`
+directly in a browser and choose the JSON file written by `--json` (for
+example, `~/fedora-rpm-dependencies.json`). The standalone viewer reads the
+file locally and makes no network requests. It accepts only schema-version-1
+graph output: top-level `schema_version: 1`, a `nodes` array with `id`, `name`,
+`version`, `architectures`, and `reason` fields, and an `edges` array with
+`from` and `to`. Each edge points from a requiring package to its dependency.
+
 Use `--fixture-json PATH` to export normalized package data without querying the
 host, for example in tests. A fixture contains `user_installed` package keys
 and a `packages` array; package keys have `name` and `version`, while package
@@ -373,6 +381,18 @@ records also have an `architecture` and optional `dependencies` array:
   ]
 }
 ```
+
+This raw fixture format is exporter input and is not accepted directly by the
+viewer. To visualize a fixture, first export it with `--json`:
+
+```bash
+python3 scripts/fedora-rpm-dependency-graph.py \
+  --fixture-json tests/fixtures/fedora-rpm-dependency-graph.json \
+  --json ~/fedora-rpm-dependencies.json
+```
+
+Then open `scripts/fedora-rpm-dependency-graph-viewer.html` and select
+`~/fedora-rpm-dependencies.json`.
 
 ### Test Harness
 
