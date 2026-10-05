@@ -1,0 +1,74 @@
+{
+  "user_installed": [
+    {
+      "name": "editor",
+      "version": "1:2.0-1.fc40"
+    }
+  ],
+  "packages": [
+    {
+      "name": "editor",
+      "version": "1:2.0-1.fc40",
+      "architecture": "x86_64",
+      "dependencies": [
+        {
+          "name": "libeditor",
+          "version": "0.9-2.fc40"
+        }
+      ]
+    },
+    {
+      "name": "editor",
+      "version": "1:2.0-1.fc40",
+      "architecture": "i686",
+      "dependencies": [
+        {
+          "name": "libeditor",
+          "version": "0.9-2.fc40"
+        }
+      ]
+    },
+    {
+      "name": "libeditor",
+      "version": "0.9-2.fc40",
+      "architecture": "x86_64",
+      "dependencies": [
+        {
+          "name": "glibc",
+          "version": "2.39-1.fc40"
+        }
+      ]
+    },
+    {
+      "name": "glibc",
+      "version": "2.39-1.fc40",
+      "architecture": "x86_64",
+      "dependencies": [
+        {
+          "name": "editor",
+          "version": "1:2.0-1.fc40"
+        },
+        {
+          "name": "glibc",
+          "version": "2.39-1.fc40"
+        },
+        {
+          "name": "missing-provider",
+          "version": "1-1.fc40"
+        }
+      ]
+    },
+    {
+      "name": "editor",
+      "version": "1:2.1-1.fc40",
+      "architecture": "x86_64",
+      "dependencies": []
+    },
+    {
+      "name": "unrelated",
+      "version": "1-1.fc40",
+      "architecture": "noarch",
+      "dependencies": []
+    }
+  ]
+}
