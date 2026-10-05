@@ -4,6 +4,13 @@
 load "/workspace/tests/bats/helpers/common.bash"
 load "/workspace/tests/bats/helpers/assertions.bash"
 
+create_private_ssh_config_fixture() {
+  cat > "$1" <<'EOF'
+Host private-test
+  PKCS11Provider /opt/homebrew/lib/libykcs11.dylib
+EOF
+}
+
 @test "git filter commands remain valid after a repository move" {
   local repo="$BATS_TEST_TMPDIR/filter-repo"
   local checkout="$BATS_TEST_TMPDIR/checkout"
@@ -12,7 +19,7 @@ load "/workspace/tests/bats/helpers/assertions.bash"
   cp "$REPO_DIR/.gitattributes" "$repo/"
   cp "$REPO_DIR/setup/general/common.bash" "$REPO_DIR/setup/general/02-git-filters.sh" "$repo/setup/general/"
   cp "$REPO_DIR/ssh/pkcs11-filter.sh" "$REPO_DIR/ssh/providers.mac" "$REPO_DIR/ssh/providers.fedora" "$repo/ssh/"
-  cp "$REPO_DIR/ssh/config.d/private" "$repo/ssh/config.d/"
+  create_private_ssh_config_fixture "$repo/ssh/config.d/private"
   "$REPO_DIR/ssh/pkcs11-filter.sh" clean < "$repo/ssh/config.d/private" > "$repo/ssh/config.d/private.tmp"
   mv "$repo/ssh/config.d/private.tmp" "$repo/ssh/config.d/private"
 
@@ -38,7 +45,7 @@ load "/workspace/tests/bats/helpers/assertions.bash"
   local expected_provider
   case "$(uname -s)" in
     Darwin) expected_provider="/opt/homebrew/lib/libykcs11.dylib" ;;
-    *) expected_provider="/usr/lib64/libykcs11.so.2" ;;
+    *) expected_provider="/usr/lib64/pkcs11/opensc-pkcs11.so" ;;
   esac
   run grep -F "PKCS11Provider $expected_provider" "$checkout/portable/ssh/config.d/private"
   assert_success
@@ -53,7 +60,7 @@ load "/workspace/tests/bats/helpers/assertions.bash"
   cp "$REPO_DIR/.gitattributes" "$producer/"
   cp "$REPO_DIR/setup/general/common.bash" "$REPO_DIR/setup/general/02-git-filters.sh" "$producer/setup/general/"
   cp "$REPO_DIR/ssh/pkcs11-filter.sh" "$REPO_DIR/ssh/providers.mac" "$producer/ssh/"
-  cp "$REPO_DIR/ssh/config.d/private" "$producer/ssh/config.d/"
+  create_private_ssh_config_fixture "$producer/ssh/config.d/private"
   "$REPO_DIR/ssh/pkcs11-filter.sh" clean < "$producer/ssh/config.d/private" > "$producer/ssh/config.d/private.tmp"
   mv "$producer/ssh/config.d/private.tmp" "$producer/ssh/config.d/private"
 
