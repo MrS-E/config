@@ -3,8 +3,8 @@
 # There is no practical rpm-ostree-capable Podman image: real rpm-ostree
 # cannot operate inside an ordinary container. This image therefore provides a
 # MOCK `rpm-ostree` and MOCK `toolbox` so setup.atomic-fedora.sh can be
-# exercised for dispatch/contract/idempotency behavior. Flatpak remains real
-# where feasible. See tests/README.md "Strategy & known limitations".
+# exercised for dispatch/contract/idempotency behavior. Flatpak setup calls are
+# stubbed by Bats tests. See tests/README.md "Strategy & known limitations".
 FROM fedora:40
 
 RUN dnf -y install --setopt=install_weak_deps=False \

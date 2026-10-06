@@ -146,9 +146,11 @@ validate_selectors() {
 
 # Print "scope/filename<TAB>help" for each discovered step.
 list_steps() {
-  local idx fq help_text
+  local idx
   for idx in "${!STEP_PATH[@]}"; do
+    local fq
     fq="${STEP_SCOPE[$idx]}/$(basename "${STEP_PATH[$idx]}")"
+    local help_text
     help_text="$("${STEP_PATH[$idx]}" help 2>/dev/null | head -1 || true)"
     printf '%s\t%s\n' "$fq" "$help_text"
   done
@@ -161,9 +163,11 @@ interactive_select() {
     err "Use flag-based selection instead, e.g.:  ./setup.sh --only general/01-symlinks.sh"
     exit 1
   fi
-  local entries=() idx fq help_text
+  local entries=() idx
   for idx in "${!STEP_PATH[@]}"; do
+    local fq
     fq="${STEP_SCOPE[$idx]}/$(basename "${STEP_PATH[$idx]}")"
+    local help_text
     help_text="$("${STEP_PATH[$idx]}" help 2>/dev/null | head -1 || true)"
     entries+=("$fq — $help_text")
   done
@@ -172,7 +176,8 @@ interactive_select() {
 }
 
 run_step() {
-  local scope="$1" path="$2" label
+  local scope="$1" path="$2"
+  local label
   label="$scope/$(basename "$path")"
   log "==> $label: presteps"
   if ! "$path" presteps; then

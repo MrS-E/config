@@ -71,12 +71,15 @@ ensure_yay() {
 
   local tmpdir
   tmpdir="$(mktemp -d)"
-  trap 'rm -rf "$tmpdir"' RETURN
+  trap 'rm -rf "$tmpdir"; trap - RETURN' RETURN
 
   git clone https://aur.archlinux.org/yay.git "$tmpdir/yay"
-  pushd "$tmpdir/yay" >/dev/null
-  makepkg -si --noconfirm
-  popd >/dev/null
+  pushd "$tmpdir/yay" >/dev/null || return 1
+  if ! makepkg -si --noconfirm; then
+    popd >/dev/null || return 1
+    return 1
+  fi
+  popd >/dev/null || return 1
 }
 
 # Install AUR packages from a manifest via yay. Uses --needed for idempotency.

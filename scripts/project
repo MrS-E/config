@@ -245,11 +245,10 @@ main() {
         return 1
       fi
 
-      local path curdesc
+      local path
       local -a project_data=()
       mapfile -t project_data < <(project__load "$name") || return 1
       path="${project_data[0]:-}"
-      curdesc="${project_data[1]:-}"
 
       project__save "$name" "$path" "$desc"
       project__ok "Description set for '$name'"

@@ -64,7 +64,8 @@ ensure_symlink() {
   fi
 
   if [[ -e "$dest" ]]; then
-    local backup="${dest}.bak.$(date +%Y%m%d%H%M%S)"
+    local backup
+    backup="${dest}.bak.$(date +%Y%m%d%H%M%S)"
     mv "$dest" "$backup"
     log "backup: $dest -> $backup"
   fi

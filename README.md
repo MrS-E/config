@@ -17,6 +17,22 @@ cd ~/config
 The setup runner detects the current platform and applies the relevant setup.
 See the [setup guide](setup/README.md) for more information.
 
+## Install from a tagged archive
+
+GitHub automatically provides `.tar.gz` and `.zip` source archives for each
+tag. Download either archive from the tag page, extract it, and place or rename
+its top-level `<repository>-<tag>` directory to `~/config`. Keep the complete
+tree together so `setup.sh` and the `setup/` directory are both directly inside
+`~/config`, then run:
+
+```sh
+cd ~/config
+./setup.sh
+```
+
+No custom release asset or GitHub Packages artifact is needed for this install
+path.
+
 ## Supported platforms
 
 - macOS
