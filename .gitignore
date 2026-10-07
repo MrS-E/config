@@ -42,6 +42,7 @@ Nextcloud/*
 junie/*
 !junie/junie-json-filter.py
 !junie/settings.json
+!junie/junie-local-install.sh
 !junie/config.json
 !junie/*.md
 !junie/versions
