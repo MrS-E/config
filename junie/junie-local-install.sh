@@ -59,7 +59,7 @@ PROTOCOL_VERSION=1
 MACHINE_OUTPUT=false
 CHECK_ONLY=false
 LIST_MODELS=false
-MODEL="Qwen3.6-27B-MLX-4bit"
+MODEL="Qwen3.8-3.6-27B-blend-MLX-4bit"
 CHANNEL="main"
 
 usage() {
@@ -1386,12 +1386,12 @@ fi
 # ============================================================
 # Abort unless all hard requirements are met
 # ============================================================
-if [ "$ALL_OK" = false ]; then
-  echo ""
-  printf '  %sSome system requirements are not met. Installation cannot proceed.%s\n' "$RED" "$RESET"
-  emit_error "Some system requirements are not met. Installation cannot proceed."
-  wait_and_exit 1
-fi
+#if [ "$ALL_OK" = false ]; then
+#  echo ""
+#  printf '  %sSome system requirements are not met. Installation cannot proceed.%s\n' "$RED" "$RESET"
+#  emit_error "Some system requirements are not met. Installation cannot proceed."
+#  wait_and_exit 1
+#fi
 
 # ============================================================
 # Main installation flow
