@@ -1,11 +1,22 @@
 {
-  "baseUrl": "https://openrouter.ai/api/v1/responses",
+  "baseUrl": "https://openrouter.ai/api/v1/chat/completions",
   "id": "z-ai/glm-5.3",
-  "apiType": "OpenAIResponses",
+  "apiType": "OpenAICompletion",
   "apiKey": "REDACTED",
-  "temperature": 0.8,
+  "temperature": 0.6,
   "fasterModel": {
     "id": "z-ai/glm-5.3-flash",
     "temperature": 0.5
+  },
+  "extraBody": {
+    "provider": {
+      "sort": "price",
+      "preferred_min_throughput": 30,
+      "data_collection": "deny",
+      "allow_fallbacks": true
+    },
+    "top_p": 0.9,
+    "presence_penalty": 0,
+    "repetition_penalty": 1
   }
 }
