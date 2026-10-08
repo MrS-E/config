@@ -14,6 +14,8 @@ TRACKED_SETTINGS = (
     "subagentsMode",
     "diffViewMode",
     "toolbarVisibility",
+    "steeringHintSeen",
+    "transcriptDisplayMode",
 )
 TRACKED_SETTINGS_SET = set(TRACKED_SETTINGS)
 SETTINGS_CACHE = "junie-settings-local.json"

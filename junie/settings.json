@@ -1,7 +1,9 @@
 {
     "diffViewMode": "Split",
     "shareAnonymousStatistics": "false",
+    "steeringHintSeen": "true",
     "stepsLimit": "false",
     "subagentsMode": "Auto",
-    "toolbarVisibility": "{\"workingDirectory\":true,\"gitBranch\":true,\"braveMode\":true,\"model\":true,\"effort\":true,\"activeEditor\":true,\"contextWindow\":true,\"sessionCredits\":false,\"notifications\":true}"
+    "toolbarVisibility": "{\"workingDirectory\":true,\"gitBranch\":true,\"braveMode\":true,\"model\":true,\"effort\":true,\"activeEditor\":true,\"contextWindow\":true,\"sessionCredits\":false,\"notifications\":true}",
+    "transcriptDisplayMode": "Terminal"
 }
