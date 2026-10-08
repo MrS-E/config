@@ -17,7 +17,6 @@ with pkgs;
   protonmail-bridge
   proton-vpn
   proxyman
-  raycast
   slack
   spotify
   tailscale-gui

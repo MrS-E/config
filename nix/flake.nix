@@ -38,6 +38,10 @@
       url = "path:../custom-flakes/prusa-slicer";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    raycast = {
+      url = "path:../custom-flakes/raycast";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -58,6 +62,7 @@
     adb-enhanced,
     zotero,
     prusa-slicer,
+    raycast,
     ...
   }:
     let
@@ -80,7 +85,6 @@
                 "obsidian"
                 "postman"
                 "proxyman"
-                "raycast"
                 "segger-jlink"
                 "slack"
                 "spotify"
@@ -118,6 +122,7 @@
               adbEnhanced = adb-enhanced.packages.${system}.adb-enhanced;
               zoteroPackage = zotero.packages.${system}.zotero;
               prusaSlicer = prusa-slicer.packages.${system}.prusa-slicer;
+              raycastPackage = raycast.packages.${system}.raycast;
             };
             home-manager.users."simeon.stix" = {
               imports = [
