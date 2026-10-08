@@ -1,4 +1,4 @@
-{ config, lib, pkgs, betterMouse, figma, texifier, protonDrive, burpSuite, crealityPrint, prusaSlicer, protonMailBridge, raspberryPiImager, nordicNrfCommandLineTools, aflPlusPlus, mbpoll, adbEnhanced, zoteroPackage, raycastPackage, ... }:
+{ config, lib, pkgs, betterMouse, figma, texifier, protonDrive, burpSuite, crealityPrint, prusaSlicer, protonMailBridge, raspberryPiImager, nordicNrfCommandLineTools, aflPlusPlus, mbpoll, adbEnhanced, zoteroPackage, ... }:
 {
   home.stateVersion = "26.05";
   targets.darwin.linkApps.enable = true;
@@ -113,6 +113,6 @@ APPLESCRIPT
       adbEnhanced
       pkgs.segger-jlink
       zoteroPackage
-      raycastPackage
+      pkgs.rectangle
     ];
 }

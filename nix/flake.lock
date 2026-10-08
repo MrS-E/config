@@ -434,22 +434,6 @@
       },
       "parent": []
     },
-    "raycast": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "../custom-flakes/raycast",
-        "type": "path"
-      },
-      "original": {
-        "path": "../custom-flakes/raycast",
-        "type": "path"
-      },
-      "parent": []
-    },
     "root": {
       "inputs": {
         "adb-enhanced": "adb-enhanced",
@@ -468,7 +452,6 @@
         "proton-mail-bridge": "proton-mail-bridge",
         "prusa-slicer": "prusa-slicer",
         "raspberry-pi-imager": "raspberry-pi-imager",
-        "raycast": "raycast",
         "texifier": "texifier",
         "zotero": "zotero"
       }
