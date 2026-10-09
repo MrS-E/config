@@ -1,9 +1,9 @@
 # Mocked macOS test container.
 #
-# Podman cannot run real macOS. This Linux container mocks `uname`, `brew`,
-# `open`, `ssh-agent`, and `ssh-add` so macOS setup steps can be exercised for OS
-# detection, dispatch, and contract behavior. This is path/contract
-# validation, NOT real Homebrew validation. See tests/README.md.
+# Podman cannot run real macOS. This Linux container mocks `uname`, `open`,
+# `ssh-agent`, and `ssh-add` so macOS setup steps can be exercised for OS
+# detection, dispatch, and contract behavior. Individual Nix tests provide
+# their own Nix mock; this image has no Homebrew command. See tests/README.md.
 FROM fedora:40
 
 RUN dnf -y install --setopt=install_weak_deps=False \
@@ -22,17 +22,6 @@ RUN printf '%s\n' \
     'if [[ -z "${1:-}" ]]; then echo Darwin; exit 0; fi' \
     'exec /usr/bin/uname "$@"' \
     > /usr/local/bin/uname && chmod +x /usr/local/bin/uname
-
-# --- Mock brew ---------------------------------------------------------------
-RUN printf '%s\n' \
-    '#!/usr/bin/env bash' \
-    'case "${1:-}" in' \
-    '  bundle)  echo "mock brew bundle: $*"; exit 0 ;;' \
-    '  shellenv) echo "export PATH=/opt/homebrew/bin:$PATH"; exit 0 ;;' \
-    '  --version) echo "Homebrew 4.0.0 (mock)"; exit 0 ;;' \
-    '  *) echo "mock brew: $*"; exit 0 ;;' \
-    'esac' \
-    > /usr/local/bin/brew && chmod +x /usr/local/bin/brew
 
 # --- Mock open ---------------------------------------------------------------
 RUN printf '%s\n' \

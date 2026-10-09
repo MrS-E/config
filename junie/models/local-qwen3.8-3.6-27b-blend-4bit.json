@@ -1,0 +1,20 @@
+{
+    "displayName": "Qwen 3.8/3.6 Blend",
+    "providerName": "Local",
+    "id": "Qwen3.8-3.6-27B-blend-MLX-4bit",
+    "baseUrl": "http://localhost:19239/v1/chat/completions",
+    "apiType": "OpenAICompletion",
+    "apiKey": "REDACTED",
+    "maxContextLength": 150000,
+    "temperature": 1.0,
+    "extraBody": {
+        "enable_thinking": true,
+        "reasoning_effort": "low",
+        "preserve_thinking": true,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0.0,
+        "presence_penalty": 0.0,
+        "repetition_penalty": 1.0
+    }
+}

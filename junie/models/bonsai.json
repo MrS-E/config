@@ -1,0 +1,15 @@
+{
+  "baseUrl": "https://chat.stix.foo/api/chat/completions",
+  "apiType": "OpenAICompletion",
+  "apiKey": "REDACTED",
+  "id": "bonsai2",
+  "temperature": 0.7,
+  "primaryModel": {
+    "id": "bonsai2",
+    "temperature": 0.6
+  },
+  "fasterModel": {
+    "id": "bonsai2",
+    "temperature": 0.3
+  }
+}

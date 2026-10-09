@@ -4,6 +4,8 @@
 export EDITOR=vim
 export VISUAL=vim
 export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+mkdir -p "$XDG_DATA_HOME/zsh"
 
 if [[ -d "$HOME/Library/Android/sdk" ]]; then
   export ANDROID_HOME="$HOME/Library/Android/sdk"
@@ -31,6 +33,14 @@ case "$(uname -s)" in
     esac
 
     export MAC_RAM_GB="$(( $(sysctl -n hw.memsize) / 1024 / 1024 / 1024 ))"
+
+    # nix-darwin system
+    if [[ -d /run/current-system/sw/bin ]] && [[ ":$PATH:" != *":/run/current-system/sw/bin:"* ]]; then
+      export PATH="/run/current-system/sw/bin:$PATH"
+    fi
+    if [[ -d "$HOME/.nix-profile/bin" ]] && [[ ":$PATH:" != *":$HOME/.nix-profile/bin:"* ]]; then
+      export PATH="$HOME/.nix-profile/bin:$PATH"
+    fi
     ;;
   Linux)
     export OS="linux"
@@ -129,6 +139,34 @@ o() {
   fi
 }
 
+# nix-darwin (macOS system manager for launchd daemons)
+if [[ "$OS" = "macos" ]]; then
+  alias nix-system-reload='sudo darwin-rebuild switch --flake "path:$HOME/config/nix-darwin"'
+
+  # Rebuild and activate Home Manager without nix-darwin system activation.
+  nix-system-update() {
+    local config_dir="${NIX_DARWIN_CONFIG_DIR:-$CONFIG_DIR/nix}"
+    local flake_ref
+    local configuration="${NIX_DARWIN_HOSTNAME:-aarch64-darwin}"
+    local username
+    local activation_package
+
+    if [[ "${config_dir:A}" == "$CONFIG_DIR/nix" ]]; then
+      flake_ref="git+file://$CONFIG_DIR?dir=nix"
+    else
+      flake_ref="path:$config_dir"
+    fi
+
+    username="$(id -un)" || return
+    activation_package="$(nix --extra-experimental-features 'nix-command flakes' build \
+      --no-link \
+      --no-write-lock-file \
+      --print-out-paths \
+      "$flake_ref#darwinConfigurations.$configuration.config.home-manager.users.\"$username\".home.activationPackage")" || return
+    "$activation_package/activate"
+  }
+fi
+
 # Grep
 alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
@@ -208,6 +246,13 @@ alias hosts='vim $HOME/.ssh/known_hosts'
 setopt CORRECT
 autoload -Uz compinit
 zmodload zsh/complist
+
+if [[ -d /usr/share/zsh/site-functions ]]; then
+  FPATH="/usr/share/zsh/site-functions:$FPATH"
+fi
+if [[ -d "$HOME/.nix-profile/share/zsh/site-functions" ]]; then
+  FPATH="$HOME/.nix-profile/share/zsh/site-functions:$FPATH"
+fi
 compinit
 
 # bash completions into zsh
@@ -244,12 +289,6 @@ if [[ -d /usr/share/bash-completion/completions ]]; then
   done
 fi
 
-if [[ -d /usr/share/zsh/site-functions ]]; then
-  FPATH="/usr/share/zsh/site-functions:$FPATH"
-elif command -v brew >/dev/null 2>&1; then
-  FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
-fi
-
 ##########
 # Keybinds
 ##########
@@ -282,6 +321,11 @@ if [[ "$OS" = "macos" ]]; then
 fi
 
 ##########
+# Jetbrains Junie
+##########
+export PATH="$PATH:$HOME/.local/bin"
+
+##########
 # Prompt
 ##########
 if command -v starship >/dev/null 2>&1; then
@@ -299,25 +343,8 @@ else
 fi
 
 ##########
-# Homebrew
-##########
-if ! command -v brew >/dev/null 2>&1; then
-  [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)" 
-  [[ -x /usr/local/bin/brew ]] && eval "$(/usr/local/bin/brew shellenv)"
-fi
-[[ -x /opt/homebrew/bin/brew ]] && export PATH="/opt/homebrew/sbin:/opt/homebrew/bin:$PATH"
-# TODO add brew paths for intel mac
-
-##########
 # FZF
 ##########
-
-if (( $+commands[brew] )); then
-  BREW_PREFIX="$(brew --prefix 2>/dev/null)"
-  if [[ -n "$BREW_PREFIX" && -d "$BREW_PREFIX/opt/fzf/bin" && ":$PATH:" != *":$BREW_PREFIX/opt/fzf/bin:"* ]]; then
-    export PATH="$BREW_PREFIX/opt/fzf/bin:$PATH"
-  fi
-fi
 
 if (( $+commands[fzf] )); then
   source <(fzf --zsh)
@@ -328,61 +355,6 @@ fi
 ##########
 
 export PATH="$PATH:/usr/local/bin"
-
-##########
-# Jetbrains Junie
-##########
-
-export PATH="$PATH:$HOME/.local/bin"
-
-##########
-# NVM
-##########
-if [[ -s /usr/share/nvm/init-nvm.sh ]]; then
-  export NVM_DIR="$HOME/.nvm"
-  source /usr/share/nvm/init-nvm.sh
-  [[ -s /usr/share/nvm/bash_completion ]] && source /usr/share/nvm/bash_completion
-elif command -v brew >/dev/null 2>&1 && [[ -d "$(brew --prefix 2>/dev/null)/opt/nvm" ]]; then
-  export NVM_DIR="$HOME/.nvm"
-  [[ -s "$(brew --prefix)/opt/nvm/nvm.sh" ]] && source "$(brew --prefix)/opt/nvm/nvm.sh"
-  [[ -s "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm" ]] && source "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm"
-elif [[ -s "$HOME/.nvm/nvm.sh" ]]; then
-  export NVM_DIR="$HOME/.nvm"
-  source "$NVM_DIR/nvm.sh"
-  [[ -s "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"
-fi
-
-##########
-# JABBA
-##########
-if [[ -s "$HOME/.jabba/jabba.sh" ]]; then
-  export JABBA_INDEX="https://github.com/typelevel/jdk-index/raw/main/index.json"
-  export JABBA_HOME="$HOME/.jabba"
-  source "$JABBA_HOME/jabba.sh"
-fi
-
-##########
-# PYENV
-##########
-if [[ -d "$HOME/.pyenv/bin" ]]; then
-  export PATH="$HOME/.pyenv/bin:$PATH"
-fi
-
-if command -v pyenv >/dev/null 2>&1; then
-  eval "$(pyenv init -)"
-  eval "$(pyenv init --path)"
-fi
-
-##########
-# RBENV
-##########
-if [[ -d "$HOME/.rbenv/bin" ]]; then
-  export PATH="$HOME/.rbenv/bin:$PATH"
-fi
-
-if command -v rbenv >/dev/null 2>&1; then
-  eval "$(rbenv init - zsh)"
-fi
 
 ##########
 # Zephyr-SDK
@@ -402,16 +374,10 @@ if [[ -s "/home/sstix/.bun/_bun" ]]; then
 fi
 
 ##########
-# GNU grep (Homebrew)
-##########
-if command -v brew >/dev/null 2>&1; then
-  export PATH="$(brew --prefix)/opt/grep/libexec/gnubin:$PATH"
-fi
-
-##########
 # Tailscale
 ##########
-if command -v tailscale >/dev/null 2>&1; then
+# The macOS tailscale-gui package exposes its app binary, not the CLI.
+if [[ "$OS" != "macos" ]] && command -v tailscale >/dev/null 2>&1; then
   source <(tailscale completion zsh)
 fi
 
@@ -426,22 +392,24 @@ fi
 # ZSH Plugins
 ##########
 
-# Prefer local clones if present
-if [[ -f "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+# Prefer Nix-managed plugins when present; use Git clones as a fallback.
+if [[ -f "$HOME/.nix-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+  source "$HOME/.nix-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+elif [[ -f "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
   source "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh"
-elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
-  source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 fi
 
-if [[ -f "$HOME/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
+if [[ -f "$HOME/.nix-profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
+  source "$HOME/.nix-profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
+elif [[ -f "$HOME/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
   source "$HOME/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
 fi
 
 # Syntax highlighting should be last
-if [[ -f "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+if [[ -f "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+  source "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+elif [[ -f "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
   source "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-elif command -v brew >/dev/null 2>&1 && [[ -f "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-  source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
 
 ##########
@@ -521,80 +489,6 @@ git() {
       ;;
   esac
 }
-
-# Homebrew
-if (( $+commands[brew] )); then
-  brew() {
-    case "$1" in
-      fullupgrade)
-        command brew update && command brew upgrade && command brew cleanup -s
-        ;;
-      file)
-        shift
-        local brewfile="${1:-Brewfile}"
-        local backup="${brewfile}.old"
-        local dump leaves
-        if [[ -f "$brewfile" ]]; then
-          if [[ -f "$backup" ]]; then
-            mv "$brewfile" "${backup}.$(date +%Y%m%d%H%M%S)"
-          else
-            mv "$brewfile" "$backup"
-          fi
-        fi
-
-        dump="$(mktemp -t brewfile-dump)"
-        leaves="$(mktemp -t brewfile-leaves)"
-        command brew leaves --installed-on-request > "$leaves"
-
-        command brew bundle dump --file="$dump" --force
-
-        awk '
-        NR == FNR {
-          keep[$1] = 1
-          next
-        }
-
-        # Buffer comments and blank lines. They may describe the next entry.
-        /^[[:space:]]*(#.*)?$/ {
-          pending = pending $0 "\n"
-          next
-        }
-
-        /^brew "/ {
-          formula = $0
-          sub(/^brew "/, "", formula)
-          sub(/".*$/, "", formula)
-
-          if (formula in keep) {
-            printf "%s", pending
-            print
-          }
-
-          # Discard comments if this formula is a dependency.
-          pending = ""
-          next
-        }
-
-        # Preserve comments/blank lines before taps, casks, etc.
-        {
-          printf "%s", pending
-          pending = ""
-          print
-        }
-
-        END {
-          printf "%s", pending
-        }
-        ' "$leaves" "$dump" > "$brewfile"
-
-        rm -f "$dump" "$leaves"
-        ;;
-      *)
-        command brew "$@"
-        ;;
-    esac
-  }
-fi 
 
 # Custom Utility
 local CUSTOM_SCRIPTS="$CONFIG_DIR/scripts"
