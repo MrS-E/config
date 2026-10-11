@@ -10,14 +10,14 @@ step inventory here.
 
 | Platform | Package sources and manifests |
 |---|---|
-| macOS | Homebrew (`macos/Brewfile`) |
+| macOS | Nix flakes and nix-darwin (`../nix/`) |
 | Fedora | DNF, COPR, and Flatpak (`fedora/`) |
 | Fedora Atomic | rpm-ostree, Flatpak, and Toolbx (`fedora-atomic/`) |
 | Manjaro | pacman and AUR (`manjaro/`) |
 
-Each platform directory contains its setup steps and any package manifests.
-Fedora Atomic also keeps per-toolbox package manifests in
-`fedora-atomic/toolboxes/`.
+Each platform directory contains its setup steps and any local package
+manifests. The macOS flake and package declarations live in `../nix/`. Fedora
+Atomic also keeps per-toolbox package manifests in `fedora-atomic/toolboxes/`.
 
 ## Runner Options
 

@@ -12,6 +12,10 @@ Baseline files are intentionally committed as comparison artifacts; they are
 
 ## Pre-migration baseline findings (recorded 2026-07-02)
 
+The archived `macos.txt` captures the earlier Homebrew-mock test suite; it is
+retained as historical comparison data and is not the current macOS test
+expectation.
+
 Summary of the recorded baseline across all four targets:
 
 - **Symlink layer is healthy and idempotent.** `setup.sh` creates the core
@@ -26,8 +30,9 @@ Summary of the recorded baseline across all four targets:
 - **Post-migration: packages, Flatpaks, ZSH plugins, and services are now
   installed** by the step scripts in containers where the package manager is
   functional. See the post-migration comparison for per-OS pass/fail details.
-- **macOS mock** validates OS detection (`uname -s` → `Darwin`), dispatch path,
-  Brewfile presence, and mocked `brew`/`ssh-agent`/`ssh-add` availability.
+- **Current macOS mock** validates OS detection (`uname -s` → `Darwin`),
+  dispatch, the repository Nix flake, and the absence of Homebrew setup steps;
+  Nix activation is mocked per-test and never runs against the host.
 - **Fedora Atomic mock** validates `rpm-ostree`/`toolbox` mock presence and
   manifest/toolbox-file discovery; real layering cannot happen in containers.
 - **Flatpak is not initialized** in any container (`/var/lib/flatpak/repo`
@@ -38,10 +43,11 @@ Summary of the recorded baseline across all four targets:
 - `chsh`, `systemctl enable --now`, Tailscale, CUPS, firewall, ClamAV are
   limited inside unprivileged containers.
 - External network installers (JetBrains Toolbox, Proton Bridge, Bun, Junie,
-  Joplin, Jabba, Dracula vim theme) are not exercised in the baseline.
+  Joplin, WaveForms, Dracula vim theme) are not exercised in the baseline;
+  Nix/nix-darwin behavior is mocked in the current macOS tests.
 - `manjarolinux/base` is "Manjaro ARM" and lacks `/etc/manjaro-release`; the
   container creates it so `setup.sh` detects Manjaro.
 - Fedora Atomic uses mocked `rpm-ostree`/`toolbox` (no rpm-ostree-capable
   Podman image exists).
-- macOS uses mocked `uname`/`brew`/`ssh-agent`/`ssh-add` (no real macOS in
-  Podman).
+- macOS uses mocked `uname`/`open`/`ssh-agent`/`ssh-add` and test-local Nix
+  mocks (no real macOS or nix-darwin activation in Podman).

@@ -1,0 +1,492 @@
+{
+  "nodes": {
+    "adb-enhanced": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "../custom-flakes/adb-enhanced",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/adb-enhanced",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "aflplusplus": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "path": "../custom-flakes/aflplusplus",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/aflplusplus",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "bettermouse": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "path": "../custom-flakes/bettermouse",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/bettermouse",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "burp-suite": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_3"
+      },
+      "locked": {
+        "path": "../custom-flakes/burp-suite",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/burp-suite",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "creality-print": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_4"
+      },
+      "locked": {
+        "path": "../custom-flakes/creality-print",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/creality-print",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "figma": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_5"
+      },
+      "locked": {
+        "path": "../custom-flakes/figma",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/figma",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "home-manager": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790819692,
+        "narHash": "sha256-rvubAPbh3QCliic3sAK+CXTrPCGgJstY52OTs/5H1J4=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "c8ecc29e5175452bee4a2aa1ba2383856d795338",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "mbpoll": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_6"
+      },
+      "locked": {
+        "path": "../custom-flakes/mbpoll",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/mbpoll",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "nextcloud-vfs": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_7"
+      },
+      "locked": {
+        "path": "../custom-flakes/nextcloud-vfs",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/nextcloud-vfs",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "nix-darwin": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786845137,
+        "narHash": "sha256-oQFip+v0luP8NIxJzmiW4Wu8bILsbFWom5l0zonl8hQ=",
+        "owner": "LnL7",
+        "repo": "nix-darwin",
+        "rev": "4cff07de74b50e64bdd68cd4e722ab5b6b35ee48",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LnL7",
+        "repo": "nix-darwin",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1790692979,
+        "narHash": "sha256-m/h8WyGFpj34/AvKpxfZFG98Alm2sh/p9gq+IGH066c=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "68e5b9f7e82a76a5171d10b5d316e0ae5e1df6e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_10": {
+      "locked": {
+        "lastModified": 1790692979,
+        "narHash": "sha256-m/h8WyGFpj34/AvKpxfZFG98Alm2sh/p9gq+IGH066c=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "68e5b9f7e82a76a5171d10b5d316e0ae5e1df6e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_11": {
+      "locked": {
+        "lastModified": 1790692979,
+        "narHash": "sha256-m/h8WyGFpj34/AvKpxfZFG98Alm2sh/p9gq+IGH066c=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "68e5b9f7e82a76a5171d10b5d316e0ae5e1df6e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_12": {
+      "locked": {
+        "lastModified": 1790692979,
+        "narHash": "sha256-m/h8WyGFpj34/AvKpxfZFG98Alm2sh/p9gq+IGH066c=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "68e5b9f7e82a76a5171d10b5d316e0ae5e1df6e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_13": {
+      "locked": {
+        "lastModified": 1790692979,
+        "narHash": "sha256-m/h8WyGFpj34/AvKpxfZFG98Alm2sh/p9gq+IGH066c=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "68e5b9f7e82a76a5171d10b5d316e0ae5e1df6e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1790692979,
+        "narHash": "sha256-m/h8WyGFpj34/AvKpxfZFG98Alm2sh/p9gq+IGH066c=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "68e5b9f7e82a76a5171d10b5d316e0ae5e1df6e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_3": {
+      "locked": {
+        "lastModified": 1790692979,
+        "narHash": "sha256-m/h8WyGFpj34/AvKpxfZFG98Alm2sh/p9gq+IGH066c=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "68e5b9f7e82a76a5171d10b5d316e0ae5e1df6e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_4": {
+      "locked": {
+        "lastModified": 1790692979,
+        "narHash": "sha256-m/h8WyGFpj34/AvKpxfZFG98Alm2sh/p9gq+IGH066c=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "68e5b9f7e82a76a5171d10b5d316e0ae5e1df6e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_5": {
+      "locked": {
+        "lastModified": 1790692979,
+        "narHash": "sha256-m/h8WyGFpj34/AvKpxfZFG98Alm2sh/p9gq+IGH066c=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "68e5b9f7e82a76a5171d10b5d316e0ae5e1df6e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_6": {
+      "locked": {
+        "lastModified": 1790772421,
+        "narHash": "sha256-754eQtr0m8xKtNnKYhX7ukI7XaA7oeiQpui1LiEuhyU=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e49322d1ec25b45f7c587c5fd69ac826d1a57dbc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_7": {
+      "locked": {
+        "lastModified": 1790692979,
+        "narHash": "sha256-m/h8WyGFpj34/AvKpxfZFG98Alm2sh/p9gq+IGH066c=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "68e5b9f7e82a76a5171d10b5d316e0ae5e1df6e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_8": {
+      "locked": {
+        "lastModified": 1790652569,
+        "narHash": "sha256-641r7xrlSOHYoktL9/aArPIYNgZJ9eM5URzSEOtPJDY=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "b6c8664de9b6cc07fe5666a29f91884ba81197c4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_9": {
+      "locked": {
+        "lastModified": 1790772421,
+        "narHash": "sha256-754eQtr0m8xKtNnKYhX7ukI7XaA7oeiQpui1LiEuhyU=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e49322d1ec25b45f7c587c5fd69ac826d1a57dbc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nordic-nrf-command-line-tools": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_9"
+      },
+      "locked": {
+        "path": "../custom-flakes/nordic-nrf-command-line-tools",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/nordic-nrf-command-line-tools",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "proton-drive": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_10"
+      },
+      "locked": {
+        "path": "../custom-flakes/proton-drive",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/proton-drive",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "proton-mail-bridge": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_11"
+      },
+      "locked": {
+        "path": "../custom-flakes/proton-mail-bridge",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/proton-mail-bridge",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "prusa-slicer": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "../custom-flakes/prusa-slicer",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/prusa-slicer",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "raspberry-pi-imager": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_12"
+      },
+      "locked": {
+        "path": "../custom-flakes/raspberry-pi-imager",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/raspberry-pi-imager",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "root": {
+      "inputs": {
+        "adb-enhanced": "adb-enhanced",
+        "aflplusplus": "aflplusplus",
+        "bettermouse": "bettermouse",
+        "burp-suite": "burp-suite",
+        "creality-print": "creality-print",
+        "figma": "figma",
+        "home-manager": "home-manager",
+        "mbpoll": "mbpoll",
+        "nextcloud-vfs": "nextcloud-vfs",
+        "nix-darwin": "nix-darwin",
+        "nixpkgs": "nixpkgs_8",
+        "nordic-nrf-command-line-tools": "nordic-nrf-command-line-tools",
+        "proton-drive": "proton-drive",
+        "proton-mail-bridge": "proton-mail-bridge",
+        "prusa-slicer": "prusa-slicer",
+        "raspberry-pi-imager": "raspberry-pi-imager",
+        "texifier": "texifier",
+        "zotero": "zotero"
+      }
+    },
+    "texifier": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_13"
+      },
+      "locked": {
+        "path": "../custom-flakes/texifier",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/texifier",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "zotero": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "../custom-flakes/zotero",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes/zotero",
+        "type": "path"
+      },
+      "parent": []
+    }
+  },
+  "root": "root",
+  "version": 7
+}

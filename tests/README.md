@@ -9,23 +9,24 @@ OS setup system for **Fedora**, **Manjaro**, **Fedora Atomic**, and **macOS**.
 tests/
 ├── work-finder.bats                 # standalone work-finder test suite
 ├── containers/
-│   ├── Containerfile.fedora           # real Fedora image + bats
-│   ├── Containerfile.manjaro          # real Manjaro image + bats
-│   ├── Containerfile.fedora-atomic    # Fedora + mocked rpm-ostree/toolbox (fallback)
-│   └── Containerfile.macos-mock       # Fedora + mocked uname/brew/ssh (macOS mock)
+│   ├── Containerfile.fedora         # real Fedora image + bats
+│   ├── Containerfile.manjaro        # real Manjaro image + bats
+│   ├── Containerfile.fedora-atomic  # Fedora + mocked rpm-ostree/toolbox (fallback)
+│   └── Containerfile.macos-mock     # Fedora + mocked macOS identity/desktop/SSH commands
 ├── bats/
 │   ├── helpers/
-│   │   ├── common.bash                # run_setup, platform_script, env
-│   │   └── assertions.bash            # symlink / manifest / package assertions
-│   ├── smoke.bats                     # setup.sh runs + creates symlinks
-│   ├── idempotency.bats               # second run is a safe no-op
-│   ├── git-filters.bats               # portable clean/smudge filter bootstrap
+│   │   ├── common.bash              # run_setup, platform_script, env
+│   │   └── assertions.bash          # symlink / manifest / package assertions
+│   ├── smoke.bats                   # setup.sh runs + creates symlinks
+│   ├── idempotency.bats             # second run is a safe no-op
+│   ├── git-filters.bats             # filter bootstrap and provider migration
 │   ├── assertions-fedora.bats
-│   ├── fedora-packages.bats           # Fedora package manifest filtering
+│   ├── fedora-packages.bats         # Fedora package manifest filtering
 │   ├── assertions-manjaro.bats
 │   ├── assertions-fedora-atomic.bats
+│   ├── migrate-brew-to-nix.bats     # mocked one-shot Homebrew migration safeguards
 │   └── assertions-macos.bats
-└── baselines/                         # recorded pre-migration results (see README.md)
+└── baselines/                       # recorded pre-migration results (see README.md)
 ```
 
 ## Usage
@@ -60,9 +61,10 @@ stubs at system-changing or network-dependent boundaries so CI remains
 repeatable:
 
 - **macOS** cannot run natively in Podman. `test-macos` uses a Linux container
-  with mocked `uname` (returns `Darwin`), `brew`, `open`, `ssh-agent`, and
-  `ssh-add`.
-  This validates dispatch paths and contract behavior, not real Homebrew.
+  with mocked `uname` (returns `Darwin`), `open`, `ssh-agent`, and `ssh-add`;
+  individual Nix and Homebrew migration tests provide their own mocks. The
+  container has no real `brew` command and does not perform real nix-darwin
+  activation or Homebrew uninstallation.
 - **Fedora Atomic** has no practical rpm-ostree-capable Podman image. The
   container ships a documented mock `rpm-ostree` and mock `toolbox`; Flatpak
   setup calls are covered with mocks.
@@ -71,6 +73,10 @@ repeatable:
 - Manjaro tests use the packages installed in the test image for `pacman -Q`
   checks; the AUR bootstrap, AUR manifest, and Zsh-plugin paths use command
   stubs instead of building packages or cloning external repositories.
+- The observational baseline can still exercise integrations limited in
+  containers, including `chsh`, `systemctl enable --now`, Tailscale, CUPS,
+  firewall, ClamAV, and external network installers. It records their output
+  and status without making these integrations blocking CI checks.
 
 `make baseline` is an observational, non-blocking snapshot that records each
 target's output and exit status. The CI workflow runs `make test` separately
