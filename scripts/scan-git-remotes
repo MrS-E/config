@@ -4,7 +4,7 @@ set -u
 
 ROOT="${1:-.}"
 ROOT="$(cd "$ROOT" 2>/dev/null && pwd)" || {
-    echo "Error: directory does not exist: $1" >&2
+    echo "Error: directory not found: $1" >&2
     exit 1
 }
 
@@ -16,15 +16,8 @@ command -v git >/dev/null 2>&1 || {
 TMP_ROOT="$(mktemp -d)"
 trap 'rm -rf "$TMP_ROOT"' EXIT
 
-declare -a REPOS_WITH_REMOTES=()
-declare -a REPOS_WITHOUT_REMOTES=()
-declare -a NOT_GIT_REPOS=()
-declare -a ARCHIVE_ERRORS=()
-
 is_archive() {
-    local file="$1"
-
-    case "${file,,}" in
+    case "${1,,}" in
         *.zip|*.tar|*.tar.gz|*.tgz|*.tar.bz2|*.tbz2|*.tar.xz|*.txz)
             return 0
             ;;
@@ -37,140 +30,104 @@ is_archive() {
 is_git_repo() {
     local dir="$1"
 
-    # Normal Git repository or linked worktree
-    if [[ -e "$dir/.git" ]]; then
-        return 0
-    fi
+    [[ -e "$dir/.git" ]] && return 0
 
-    # Bare repository
-    if [[ -f "$dir/HEAD" && -f "$dir/config" ]]; then
-        if git -C "$dir" rev-parse --is-bare-repository 2>/dev/null |
-            grep -q '^true$'; then
-            return 0
-        fi
-    fi
-
-    return 1
+    # Detect bare repositories
+    [[ -f "$dir/HEAD" && -f "$dir/config" ]] &&
+        git -C "$dir" rev-parse --is-bare-repository 2>/dev/null |
+        grep -q '^true$'
 }
 
-get_git_remotes() {
+report_directory() {
     local dir="$1"
+    local display_path="$2"
     local remote
     local url
-    local found=1
+    local found=0
+
+    if ! is_git_repo "$dir"; then
+        NOT_REPOS+=("$display_path")
+        return
+    fi
 
     while IFS= read -r remote; do
         while IFS= read -r url; do
             [[ -n "$url" ]] || continue
-            printf '%s = %s\n' "$remote" "$url"
-            found=0
+
+            if [[ "$found" -eq 0 ]]; then
+                REPOS_WITH_REMOTES+=("$display_path")
+                found=1
+            fi
+
+            REMOTE_LINES+=("  $remote = $url")
         done < <(git -C "$dir" remote get-url --all "$remote" 2>/dev/null)
     done < <(git -C "$dir" remote 2>/dev/null)
 
-    return "$found"
+    if [[ "$found" -eq 0 ]]; then
+        REPOS_WITHOUT_REMOTES+=("$display_path")
+    fi
 }
 
 scan_archive() {
     local archive="$1"
     local display_path="$2"
     local extract_dir
-    local archive_name
+    local child
+    local child_name
 
-    archive_name="$(basename "$archive")"
     extract_dir="$(mktemp -d "$TMP_ROOT/archive.XXXXXX")"
-
-    echo "Scanning archive: $display_path"
 
     case "${archive,,}" in
         *.zip)
-            if ! command -v unzip >/dev/null 2>&1; then
-                ARCHIVE_ERRORS+=("$display_path: unzip command not found")
-                rm -rf "$extract_dir"
+            command -v unzip >/dev/null 2>&1 || {
+                ARCHIVE_ERRORS+=("$display_path: unzip is not installed")
                 return
-            fi
+            }
 
-            if ! unzip -qq "$archive" -d "$extract_dir"; then
-                ARCHIVE_ERRORS+=("$display_path: failed to extract")
-                rm -rf "$extract_dir"
+            unzip -qq "$archive" -d "$extract_dir" 2>/dev/null || {
+                ARCHIVE_ERRORS+=("$display_path: could not extract")
                 return
-            fi
+            }
             ;;
 
         *.tar|*.tar.gz|*.tgz|*.tar.bz2|*.tbz2|*.tar.xz|*.txz)
-            if ! command -v tar >/dev/null 2>&1; then
-                ARCHIVE_ERRORS+=("$display_path: tar command not found")
-                rm -rf "$extract_dir"
+            tar -xf "$archive" -C "$extract_dir" \
+                --no-same-owner --no-same-permissions 2>/dev/null || {
+                ARCHIVE_ERRORS+=("$display_path: could not extract")
                 return
-            fi
-
-            if ! tar -xf "$archive" -C "$extract_dir" \
-                    --no-same-owner --no-same-permissions 2>/dev/null; then
-                ARCHIVE_ERRORS+=("$display_path: failed to extract")
-                rm -rf "$extract_dir"
-                return
-            fi
+            }
             ;;
     esac
 
-    # Scan the archive contents. The extraction root itself is not reported
-    # unless it is actually a Git repository.
-    scan_directory "$extract_dir" "${display_path}!/" 0
-
-    rm -rf "$extract_dir"
-}
-
-scan_directory() {
-    local dir="$1"
-    local display_path="$2"
-    local classify_non_repo="${3:-1}"
-
-    local child
-    local child_name
-    local archive_display
-    local remotes
-
-    [[ -d "$dir" ]] || return
-
-    if is_git_repo "$dir"; then
-        remotes="$(get_git_remotes "$dir" || true)"
-
-        if [[ -n "$remotes" ]]; then
-            REPOS_WITH_REMOTES+=(
-                "$display_path"$'\n'"$remotes"
-            )
-        else
-            REPOS_WITHOUT_REMOTES+=("$display_path")
-        fi
-
-        # Do not report .git internals or directories below this repository.
-        return
+    # Check whether the archive root itself is a Git repository.
+    if is_git_repo "$extract_dir"; then
+        report_directory "$extract_dir" "$display_path!/"
     fi
 
-    if [[ "$classify_non_repo" == "1" ]]; then
-        NOT_GIT_REPOS+=("$display_path")
-    fi
-
-    # Scan immediate subdirectories.
+    # Only inspect directories immediately inside the archive.
     while IFS= read -r -d '' child; do
         child_name="$(basename "$child")"
-
-        # Avoid scanning a Git metadata directory separately.
-        [[ "$child_name" == ".git" ]] && continue
-
-        scan_directory "$child" "$display_path/$child_name" 1
-    done < <(find "$dir" -mindepth 1 -maxdepth 1 -type d -print0)
-
-    # Scan archives directly inside this directory.
-    while IFS= read -r -d '' child; do
-        if is_archive "$child"; then
-            child_name="$(basename "$child")"
-            archive_display="$display_path/$child_name"
-            scan_archive "$child" "$archive_display"
-        fi
-    done < <(find "$dir" -mindepth 1 -maxdepth 1 -type f -print0)
+        report_directory "$child" "$display_path!/$child_name"
+    done < <(find "$extract_dir" -mindepth 1 -maxdepth 1 -type d -print0)
 }
 
-scan_directory "$ROOT" "$ROOT" 1
+declare -a REPOS_WITH_REMOTES=()
+declare -a REMOTE_LINES=()
+declare -a REPOS_WITHOUT_REMOTES=()
+declare -a NOT_REPOS=()
+declare -a ARCHIVE_ERRORS=()
+
+# Scan only directories immediately inside ROOT.
+while IFS= read -r -d '' dir; do
+    report_directory "$dir" "$dir"
+done < <(find "$ROOT" -mindepth 1 -maxdepth 1 -type d -print0)
+
+# Scan only archive files immediately inside ROOT.
+while IFS= read -r -d '' archive; do
+    if is_archive "$archive"; then
+        scan_archive "$archive" "$archive"
+    fi
+done < <(find "$ROOT" -mindepth 1 -maxdepth 1 -type f -print0)
 
 echo
 echo "============================================================"
@@ -180,9 +137,15 @@ echo "============================================================"
 if ((${#REPOS_WITH_REMOTES[@]} == 0)); then
     echo "None found."
 else
-    for item in "${REPOS_WITH_REMOTES[@]}"; do
+    for repo in "${REPOS_WITH_REMOTES[@]}"; do
+        echo "$repo"
+
+        # Print matching remote lines in order.
+        for remote_line in "${REMOTE_LINES[@]}"; do
+            echo "$remote_line"
+        done
+
         echo
-        echo "$item"
     done
 fi
 
@@ -202,10 +165,10 @@ echo "============================================================"
 echo "DIRECTORIES THAT ARE NOT GIT REPOSITORIES"
 echo "============================================================"
 
-if ((${#NOT_GIT_REPOS[@]} == 0)); then
+if ((${#NOT_REPOS[@]} == 0)); then
     echo "None found."
 else
-    printf '%s\n' "${NOT_GIT_REPOS[@]}"
+    printf '%s\n' "${NOT_REPOS[@]}"
 fi
 
 if ((${#ARCHIVE_ERRORS[@]} > 0)); then
