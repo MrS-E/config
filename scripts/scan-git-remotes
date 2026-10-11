@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+
+set -u
+
+ROOT="${1:-.}"
+
+ROOT="$(cd "$ROOT" 2>/dev/null && pwd)" || {
+    echo "Error: directory not found: $1" >&2
+    exit 1
+}
+
+command -v git >/dev/null 2>&1 || {
+    echo "Error: git is required." >&2
+    exit 1
+}
+
+TMP_ROOT="$(mktemp -d)"
+trap 'rm -rf "$TMP_ROOT"' EXIT
+
+
+is_archive() {
+    case "${1,,}" in
+        *.zip|*.tar|*.tar.gz|*.tgz|*.tar.bz2|*.tbz2|*.tar.xz|*.txz)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+
+is_git_repo() {
+    local dir="$1"
+
+    # Normal Git repository or linked worktree
+    [[ -e "$dir/.git" ]] && return 0
+
+    # Bare Git repository
+    if [[ -f "$dir/HEAD" && -f "$dir/config" ]]; then
+        git -C "$dir" rev-parse --is-bare-repository 2>/dev/null |
+            grep -q '^true$' && return 0
+    fi
+
+    return 1
+}
+
+
+inspect_directory() {
+    local dir="$1"
+    local display_path="$2"
+    local remote
+    local url
+    local found=0
+
+    if ! is_git_repo "$dir"; then
+        printf "NOT_REPO\t%s\t\t\n" "$display_path"
+        return
+    fi
+
+    while IFS= read -r remote; do
+        while IFS= read -r url; do
+            [[ -n "$url" ]] || continue
+
+            printf "REMOTE\t%s\t%s\t%s\n" \
+                "$display_path" "$remote" "$url"
+
+            found=1
+        done < <(
+            git -C "$dir" remote get-url --all "$remote" 2>/dev/null
+        )
+    done < <(
+        git -C "$dir" remote 2>/dev/null
+    )
+
+    if [[ "$found" -eq 0 ]]; then
+        printf "NO_REMOTE\t%s\t\t\n" "$display_path"
+    fi
+}
+
+
+inspect_archive() {
+    local archive="$1"
+    local display_path="$2"
+    local extract_dir
+    local child
+    local child_name
+
+    extract_dir="$(mktemp -d "$TMP_ROOT/archive.XXXXXX")"
+
+    case "${archive,,}" in
+        *.zip)
+            if ! command -v unzip >/dev/null 2>&1; then
+                printf "ARCHIVE_ERROR\t%s\tunzip not installed\t\n" \
+                    "$display_path"
+                return
+            fi
+
+            if ! unzip -qq "$archive" -d "$extract_dir" 2>/dev/null; then
+                printf "ARCHIVE_ERROR\t%s\tcould not extract\t\n" \
+                    "$display_path"
+                return
+            fi
+            ;;
+
+        *.tar|*.tar.gz|*.tgz|*.tar.bz2|*.tbz2|*.tar.xz|*.txz)
+            if ! tar -xf "$archive" \
+                    -C "$extract_dir" \
+                    --no-same-owner \
+                    --no-same-permissions 2>/dev/null; then
+                printf "ARCHIVE_ERROR\t%s\tcould not extract\t\n" \
+                    "$display_path"
+                return
+            fi
+            ;;
+    esac
+
+    # Check the archive root itself.
+    if is_git_repo "$extract_dir"; then
+        inspect_directory "$extract_dir" "$display_path!/"
+    fi
+
+    # Check only directories immediately inside the archive.
+    while IFS= read -r -d '' child; do
+        child_name="$(basename "$child")"
+
+        inspect_directory \
+            "$child" \
+            "$display_path!/$child_name"
+    done < <(
+        find "$extract_dir" \
+            -mindepth 1 \
+            -maxdepth 1 \
+            -type d \
+            -print0
+    )
+}
+
+
+# Generate the output, then sort by type/status first.
+{
+    printf "TYPE\tPATH\tREMOTE\tURL\n"
+
+    # Scan only directories immediately inside ROOT.
+    while IFS= read -r -d '' dir; do
+        inspect_directory "$dir" "$dir"
+    done < <(
+        find "$ROOT" \
+            -mindepth 1 \
+            -maxdepth 1 \
+            -type d \
+            -print0
+    )
+
+    # Scan only archive files immediately inside ROOT.
+    while IFS= read -r -d '' archive; do
+        if is_archive "$archive"; then
+            inspect_archive "$archive" "$archive"
+        fi
+    done < <(
+        find "$ROOT" \
+            -mindepth 1 \
+            -maxdepth 1 \
+            -type f \
+            -print0
+    )
+
+} | {
+    # Keep the header at the top.
+    IFS= read -r header
+    printf '%s\n' "$header"
+
+    # Sort by TYPE, then PATH, REMOTE, and URL.
+    LC_ALL=C sort \
+        -t $'\t' \
+        -k1,1 \
+        -k2,2 \
+        -k3,3 \
+        -k4,4
+}
