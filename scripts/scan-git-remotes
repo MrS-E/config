@@ -4,12 +4,7 @@ set -u
 
 ROOT="${1:-.}"
 ROOT="$(cd "$ROOT" 2>/dev/null && pwd)" || {
-    echo "Error: directory not found: $1" >&2
-    exit 1
-}
-
-command -v git >/dev/null 2>&1 || {
-    echo "Error: git is required." >&2
+    echo "Directory not found: $1" >&2
     exit 1
 }
 
@@ -32,13 +27,13 @@ is_git_repo() {
 
     [[ -e "$dir/.git" ]] && return 0
 
-    # Detect bare repositories
+    # Bare Git repository
     [[ -f "$dir/HEAD" && -f "$dir/config" ]] &&
         git -C "$dir" rev-parse --is-bare-repository 2>/dev/null |
         grep -q '^true$'
 }
 
-report_directory() {
+inspect_directory() {
     local dir="$1"
     local display_path="$2"
     local remote
@@ -46,7 +41,7 @@ report_directory() {
     local found=0
 
     if ! is_git_repo "$dir"; then
-        NOT_REPOS+=("$display_path")
+        printf "NOT_REPO\t%s\n" "$display_path"
         return
     fi
 
@@ -54,21 +49,23 @@ report_directory() {
         while IFS= read -r url; do
             [[ -n "$url" ]] || continue
 
-            if [[ "$found" -eq 0 ]]; then
-                REPOS_WITH_REMOTES+=("$display_path")
-                found=1
-            fi
+            printf "REMOTE\t%s\t%s\t%s\n" \
+                "$display_path" "$remote" "$url"
 
-            REMOTE_LINES+=("  $remote = $url")
-        done < <(git -C "$dir" remote get-url --all "$remote" 2>/dev/null)
-    done < <(git -C "$dir" remote 2>/dev/null)
+            found=1
+        done < <(
+            git -C "$dir" remote get-url --all "$remote" 2>/dev/null
+        )
+    done < <(
+        git -C "$dir" remote 2>/dev/null
+    )
 
     if [[ "$found" -eq 0 ]]; then
-        REPOS_WITHOUT_REMOTES+=("$display_path")
+        printf "NO_REMOTE\t%s\n" "$display_path"
     fi
 }
 
-scan_archive() {
+inspect_archive() {
     local archive="$1"
     local display_path="$2"
     local extract_dir
@@ -79,13 +76,13 @@ scan_archive() {
 
     case "${archive,,}" in
         *.zip)
-            command -v unzip >/dev/null 2>&1 || {
-                ARCHIVE_ERRORS+=("$display_path: unzip is not installed")
+            if ! command -v unzip >/dev/null 2>&1; then
+                printf "ARCHIVE_ERROR\t%s\tunzip not installed\n" "$display_path"
                 return
-            }
+            fi
 
             unzip -qq "$archive" -d "$extract_dir" 2>/dev/null || {
-                ARCHIVE_ERRORS+=("$display_path: could not extract")
+                printf "ARCHIVE_ERROR\t%s\tcould not extract\n" "$display_path"
                 return
             }
             ;;
@@ -93,89 +90,40 @@ scan_archive() {
         *.tar|*.tar.gz|*.tgz|*.tar.bz2|*.tbz2|*.tar.xz|*.txz)
             tar -xf "$archive" -C "$extract_dir" \
                 --no-same-owner --no-same-permissions 2>/dev/null || {
-                ARCHIVE_ERRORS+=("$display_path: could not extract")
+                printf "ARCHIVE_ERROR\t%s\tcould not extract\n" "$display_path"
                 return
             }
             ;;
     esac
 
-    # Check whether the archive root itself is a Git repository.
+    # Check the archive's top-level itself.
     if is_git_repo "$extract_dir"; then
-        report_directory "$extract_dir" "$display_path!/"
+        inspect_directory "$extract_dir" "$display_path!/"
     fi
 
-    # Only inspect directories immediately inside the archive.
+    # Check only directories immediately inside the archive.
     while IFS= read -r -d '' child; do
         child_name="$(basename "$child")"
-        report_directory "$child" "$display_path!/$child_name"
-    done < <(find "$extract_dir" -mindepth 1 -maxdepth 1 -type d -print0)
+        inspect_directory "$child" "$display_path!/$child_name"
+    done < <(
+        find "$extract_dir" -mindepth 1 -maxdepth 1 -type d -print0
+    )
 }
 
-declare -a REPOS_WITH_REMOTES=()
-declare -a REMOTE_LINES=()
-declare -a REPOS_WITHOUT_REMOTES=()
-declare -a NOT_REPOS=()
-declare -a ARCHIVE_ERRORS=()
+printf "STATUS\tPATH\tREMOTE\tURL\n"
 
-# Scan only directories immediately inside ROOT.
+# Scan only immediate directories under ROOT.
 while IFS= read -r -d '' dir; do
-    report_directory "$dir" "$dir"
-done < <(find "$ROOT" -mindepth 1 -maxdepth 1 -type d -print0)
+    inspect_directory "$dir" "$dir"
+done < <(
+    find "$ROOT" -mindepth 1 -maxdepth 1 -type d -print0
+)
 
-# Scan only archive files immediately inside ROOT.
+# Scan only immediate archive files under ROOT.
 while IFS= read -r -d '' archive; do
     if is_archive "$archive"; then
-        scan_archive "$archive" "$archive"
+        inspect_archive "$archive" "$archive"
     fi
-done < <(find "$ROOT" -mindepth 1 -maxdepth 1 -type f -print0)
-
-echo
-echo "============================================================"
-echo "GIT REPOSITORIES WITH REMOTES"
-echo "============================================================"
-
-if ((${#REPOS_WITH_REMOTES[@]} == 0)); then
-    echo "None found."
-else
-    for repo in "${REPOS_WITH_REMOTES[@]}"; do
-        echo "$repo"
-
-        # Print matching remote lines in order.
-        for remote_line in "${REMOTE_LINES[@]}"; do
-            echo "$remote_line"
-        done
-
-        echo
-    done
-fi
-
-echo
-echo "============================================================"
-echo "GIT REPOSITORIES WITHOUT A REMOTE"
-echo "============================================================"
-
-if ((${#REPOS_WITHOUT_REMOTES[@]} == 0)); then
-    echo "None found."
-else
-    printf '%s\n' "${REPOS_WITHOUT_REMOTES[@]}"
-fi
-
-echo
-echo "============================================================"
-echo "DIRECTORIES THAT ARE NOT GIT REPOSITORIES"
-echo "============================================================"
-
-if ((${#NOT_REPOS[@]} == 0)); then
-    echo "None found."
-else
-    printf '%s\n' "${NOT_REPOS[@]}"
-fi
-
-if ((${#ARCHIVE_ERRORS[@]} > 0)); then
-    echo
-    echo "============================================================"
-    echo "ARCHIVES THAT COULD NOT BE SCANNED"
-    echo "============================================================"
-
-    printf '%s\n' "${ARCHIVE_ERRORS[@]}"
-fi
+done < <(
+    find "$ROOT" -mindepth 1 -maxdepth 1 -type f -print0
+)
