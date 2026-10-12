@@ -3,5 +3,5 @@
     "shareAnonymousStatistics": "false",
     "stepsLimit": "false",
     "subagentsMode": "Auto",
-    "toolbarVisibility": "{\"workingDirectory\":true,\"gitBranch\":true,\"braveMode\":true,\"model\":true,\"effort\":true,\"activeEditor\":true,\"contextWindow\":true,\"sessionCredits\":false}"
+    "toolbarVisibility": "{\"workingDirectory\":true,\"gitBranch\":true,\"braveMode\":true,\"model\":true,\"effort\":true,\"activeEditor\":true,\"contextWindow\":true,\"sessionCredits\":false,\"notifications\":true}"
 }
