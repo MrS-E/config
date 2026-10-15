@@ -14,18 +14,54 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nextcloud-vfs.url = "path:../custom-flakes/nextcloud-vfs";
-    bettermouse.url = "path:../custom-flakes/bettermouse";
-    figma.url = "path:../custom-flakes/figma";
-    texifier.url = "path:../custom-flakes/texifier";
-    proton-drive.url = "path:../custom-flakes/proton-drive";
-    burp-suite.url = "path:../custom-flakes/burp-suite";
-    creality-print.url = "path:../custom-flakes/creality-print";
-    proton-mail-bridge.url = "path:../custom-flakes/proton-mail-bridge";
-    raspberry-pi-imager.url = "path:../custom-flakes/raspberry-pi-imager";
-    nordic-nrf-command-line-tools.url = "path:../custom-flakes/nordic-nrf-command-line-tools";
-    aflplusplus.url = "path:../custom-flakes/aflplusplus";
-    mbpoll.url = "path:../custom-flakes/mbpoll";
+    nextcloud-vfs = {
+      url = "path:../custom-flakes/nextcloud-vfs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    bettermouse = {
+      url = "path:../custom-flakes/bettermouse";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    figma = {
+      url = "path:../custom-flakes/figma";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    texifier = {
+      url = "path:../custom-flakes/texifier";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    proton-drive = {
+      url = "path:../custom-flakes/proton-drive";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    burp-suite = {
+      url = "path:../custom-flakes/burp-suite";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    creality-print = {
+      url = "path:../custom-flakes/creality-print";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    proton-mail-bridge = {
+      url = "path:../custom-flakes/proton-mail-bridge";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    raspberry-pi-imager = {
+      url = "path:../custom-flakes/raspberry-pi-imager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nordic-nrf-command-line-tools = {
+      url = "path:../custom-flakes/nordic-nrf-command-line-tools";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    aflplusplus = {
+      url = "path:../custom-flakes/aflplusplus";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    mbpoll = {
+      url = "path:../custom-flakes/mbpoll";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     adb-enhanced = {
       url = "path:../custom-flakes/adb-enhanced";
       inputs.nixpkgs.follows = "nixpkgs";
