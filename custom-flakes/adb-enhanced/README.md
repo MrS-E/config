@@ -4,8 +4,8 @@ This standalone flake packages [`adb-enhanced`](https://github.com/ashishb/adb-e
 `2.12.0` from its PyPI source distribution. It uses Python 3.12 and pins the
 source archive's SHA-256 in `flake.nix`. The package includes the Python runtime
 dependencies and adds Nixpkgs' Android platform tools to `adbe`'s `PATH`.
-The standalone flake pins Nixpkgs 26.05 to retain `x86_64-darwin` support; this
-is the last Nixpkgs release supporting Intel macOS.
+The standalone flake pins Nixpkgs 26.05; the `nix/` configuration overrides this
+with its own Nixpkgs via `inputs.nixpkgs.follows = "nixpkgs"`.
 
 Build the package from this directory with:
 

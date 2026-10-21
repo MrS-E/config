@@ -6,8 +6,9 @@ URL, SHA-256 hash, and product metadata are pinned from the cask rather than
 fetched dynamically.
 
 The cask currently lists version `1.9.33,855,ddb6e02`, requires macOS 14 or
-later, and installs `Texifier.app`. The same disk image is used on Apple Silicon
-and Intel. Build the package from this directory with:
+later, and installs `Texifier.app`. The flake builds for Apple Silicon only and
+uses the single universal disk image the cask provides. Build the package from
+this directory with:
 
 ```sh
 nix build .#texifier

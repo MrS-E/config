@@ -3,14 +3,12 @@
 This standalone flake packages the macOS app from the [Homebrew cask API
 entry](https://formulae.brew.sh/api/cask/burp-suite.json). The version, ARM64
 download URL and SHA-256, app name, description, homepage, and cask metadata
-are pinned from that JSON rather than fetched dynamically. Homebrew's
-[cask definition](https://github.com/Homebrew/homebrew-cask/blob/HEAD/Casks/b/burp-suite.rb)
-also defines the Intel download URL and checksum, which this flake uses for
-`x86_64-darwin`.
+are pinned from that JSON rather than fetched dynamically. The flake builds for
+Apple Silicon only and uses the ARM64 artifact.
 
 The cask currently packages Burp Suite Community Edition `2026.8`. Its
-Apple-Silicon and Intel DMGs contain the `Burp Suite.app` bundle on an HFS+
-disk image. The derivation uses Nixpkgs' `p7zip` to extract the image. Because
+Apple-Silicon DMG contains the `Burp Suite.app` bundle on an HFS+ disk image.
+The derivation uses Nixpkgs' `p7zip` to extract the image. Because
 `p7zip` emits HFS+ symbolic-link targets as regular text files and does not
 preserve all executable modes, the build reads the DMG's Unix mode metadata,
 recreates symlinks, and restores file permissions. It then copies the bundle
@@ -38,10 +36,9 @@ curl -fsSL https://formulae.brew.sh/api/cask/burp-suite.json | jq \
   '{version, url, sha256, name, desc, homepage, auto_updates, depends_on, artifacts}'
 ```
 
-The API response provides the Apple-Silicon artifact. Update the Intel URL and
-checksum from the matching `arch intel` entries in the linked Homebrew cask
-definition as well. The archive names are derived from the version and end in
-`.dmg`. If the download format or image filesystem changes, verify that
+The API response provides the Apple-Silicon artifact, which is the only one this
+flake pins. The archive name is derived from the version and ends in `.dmg`. If
+the download format or image filesystem changes, verify that
 Nixpkgs' `p7zip` can extract it. If the archive's symlink metadata or app
 layout changes, update the restoration logic and `cask.app`; verify the result
 with `codesign --verify --deep --strict` before updating the pin. The app is

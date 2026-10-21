@@ -6,8 +6,8 @@ specific download URLs and SHA-256 hashes, and product metadata are pinned from
 the cask rather than fetched dynamically.
 
 The cask currently lists version `126.9.11` and installs `Figma.app`. The flake
-uses the `mac-arm` archive on Apple Silicon and the `mac` archive on Intel. Build
-the package from this directory with:
+builds for Apple Silicon only and uses the `mac-arm` archive. Build the package
+from this directory with:
 
 ```sh
 nix build .#figma
@@ -32,9 +32,9 @@ curl -fsSL https://formulae.brew.sh/api/cask/figma.json | jq \
 ```
 
 Update the matching values in `custom-flakes/figma/flake.nix`, keeping the ARM
-and Intel URLs and hashes paired. Adjust the `installPhase` if the ZIP layout or
-app bundle name changes. Keep the bundle intact (`dontFixup` is set) so its
-vendor signature is not modified.
+URL and hash paired. Adjust the `installPhase` if the ZIP layout or app bundle
+name changes. Keep the bundle intact (`dontFixup` is set) so its vendor
+signature is not modified.
 
 From the repository root, validate an update with:
 

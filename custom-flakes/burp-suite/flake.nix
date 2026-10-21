@@ -5,7 +5,7 @@
 
   outputs = { nixpkgs, ... }:
     let
-      darwinSystems = [ "aarch64-darwin" "x86_64-darwin" ];
+      darwinSystems = [ "aarch64-darwin" ];
       forAllSystems = nixpkgs.lib.genAttrs darwinSystems;
 
       cask = rec {
@@ -16,8 +16,6 @@
         version = "2026.8";
         url = "https://portswigger-cdn.net/burp/releases/download?product=desktop&version=${version}&type=MacOsArm64";
         sha256 = "638ff9d9c3026838798f5659904e3e9cba00ee0b26f3d616f93b1967f275d2ce";
-        intelUrl = "https://portswigger-cdn.net/burp/releases/download?product=desktop&version=${version}&type=MacOsx";
-        intelSha256 = "6c6f0f8450179d1c3e99538fcdad7d1d764a5d7e290c8c48b9070018e08c9411";
         auto_updates = null;
         depends_on = {
           macos = { };
@@ -29,15 +27,10 @@
       };
 
       archiveVersion = builtins.replaceStrings [ "." ] [ "_" ] cask.version;
-      artifactFor = system:
-        if system == "aarch64-darwin" then {
-          name = "burpsuite_macos_arm64_v${archiveVersion}.dmg";
-          inherit (cask) url sha256;
-        } else {
-          name = "burpsuite_macos_x64_v${archiveVersion}.dmg";
-          url = cask.intelUrl;
-          sha256 = cask.intelSha256;
-        };
+      artifact = {
+        name = "burpsuite_macos_arm64_v${archiveVersion}.dmg";
+        inherit (cask) url sha256;
+      };
 
       pkgsFor = system: import nixpkgs {
         inherit system;
@@ -48,7 +41,6 @@
       packages = forAllSystems (system:
         let
           pkgs = pkgsFor system;
-          artifact = artifactFor system;
           burpSuite = pkgs.stdenvNoCC.mkDerivation {
             pname = cask.token;
             inherit (cask) version;

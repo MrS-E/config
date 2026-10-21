@@ -11,8 +11,9 @@ marks the cask discontinued as of 2026-04-01, with `nextcloud` as its
 replacement. Although the cask declares automatic updates, this flake remains
 pinned until its metadata is updated.
 
-The flake uses `nixpkgs-26.05-darwin` to retain an `x86_64-darwin` output;
-Nixpkgs identifies 26.05 as its final release supporting Intel Macs.
+The flake pins `nixpkgs-26.05-darwin` for its standalone builds; the `nix/`
+configuration overrides this with its own Nixpkgs via
+`inputs.nixpkgs.follows = "nixpkgs"`. The flake builds for Apple Silicon only.
 
 The derivation extracts the signed `Nextcloud.app` from the pinned `.pkg` using
 `xar`, `gzip`, and `cpio`; it does not run Apple's installer or the package's

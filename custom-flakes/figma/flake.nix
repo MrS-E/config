@@ -5,7 +5,7 @@
 
   outputs = { nixpkgs, ... }:
     let
-      darwinSystems = [ "aarch64-darwin" "x86_64-darwin" ];
+      darwinSystems = [ "aarch64-darwin" ];
       forAllSystems = nixpkgs.lib.genAttrs darwinSystems;
 
       cask = {
@@ -23,10 +23,6 @@
           aarch64-darwin = {
             url = "https://desktop.figma.com/mac-arm/Figma-126.9.11.zip";
             sha256 = "0c93c31c79338e0c108b139dc08e3a1256699faaa7a3248042e7aa2c5fde3043";
-          };
-          x86_64-darwin = {
-            url = "https://desktop.figma.com/mac/Figma-126.9.11.zip";
-            sha256 = "667f016dcfdacbdfb288ee52d72f0054ca695f42da63bab2bf25655551433e93";
           };
         };
       };
