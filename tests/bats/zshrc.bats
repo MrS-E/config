@@ -67,7 +67,7 @@ EOF
   assert_failure
 }
 
-@test "nix-system-update activates Home Manager without nix-darwin" {
+@test "nix-system-update updates Nixpkgs before activating Home Manager" {
   local test_home="$BATS_TEST_TMPDIR/home"
   local mock_bin="$BATS_TEST_TMPDIR/mock-bin"
   local activation_dir="$BATS_TEST_TMPDIR/home-manager"
@@ -93,7 +93,10 @@ EOF
     > "$mock_bin/sysctl"
   cat > "$mock_bin/nix" <<'EOF'
 #!/usr/bin/env sh
-printf '%s\n' "$@" > "$NIX_TEST_ARGUMENTS"
+printf '%s\n' "$*" >> "$NIX_TEST_ARGUMENTS"
+case " $* " in
+  *" flake update "*) exit 0 ;;
+esac
 printf '%s\n' "$NIX_TEST_ACTIVATION_PACKAGE"
 EOF
   cat > "$activation_dir/activate" <<'EOF'
@@ -112,10 +115,25 @@ EOF
       source "$REPO_DIR/zshrc"
       nix-system-update
       [[ -f "$NIX_TEST_ACTIVATION_MARKER" ]] || exit 1
+      command grep -Fq -- "flake update nixpkgs --flake git+file://$REPO_DIR?dir=nix" "$NIX_TEST_ARGUMENTS" || exit 1
+      expected_updates=1
+      last_custom_flake=""
+      for custom_flake in "$REPO_DIR"/custom-flakes/*/flake.nix; do
+        custom_flake_dir="${custom_flake%/flake.nix}"
+        command grep -Fq -- "flake update nixpkgs --flake $custom_flake_dir" "$NIX_TEST_ARGUMENTS" || exit 1
+        expected_updates=$((expected_updates + 1))
+        last_custom_flake="$custom_flake_dir"
+      done
+      actual_updates="$(command grep -cF "flake update nixpkgs --flake" "$NIX_TEST_ARGUMENTS")"
+      [[ "$actual_updates" -eq "$expected_updates" ]] || exit 1
+      update_line="$(command grep -nF "flake update nixpkgs --flake $last_custom_flake" "$NIX_TEST_ARGUMENTS" | command tail -n 1 | command cut -d: -f1)"
+      build_line="$(command grep -nF "build --no-link" "$NIX_TEST_ARGUMENTS" | command head -n 1 | command cut -d: -f1)"
+      [[ -n "$update_line" && -n "$build_line" && "$update_line" -lt "$build_line" ]] || exit 1
       command grep -Fq -- "git+file://$REPO_DIR?dir=nix#darwinConfigurations.aarch64-darwin.config.home-manager.users.\"$(id -un)\".home.activationPackage" "$NIX_TEST_ARGUMENTS" || exit 1
       mkdir -p "$HOME/external-flake"
       NIX_DARWIN_CONFIG_DIR="$HOME/external-flake"
       nix-system-update
+      command grep -Fq -- "flake update nixpkgs --flake path:$HOME/external-flake" "$NIX_TEST_ARGUMENTS" || exit 1
       command grep -Fq -- "path:$HOME/external-flake#darwinConfigurations.aarch64-darwin.config.home-manager.users.\"$(id -un)\".home.activationPackage" "$NIX_TEST_ARGUMENTS" || exit 1
       ! command grep -Fq -- "darwin-rebuild" "$NIX_TEST_ARGUMENTS"
     '

@@ -150,11 +150,17 @@ if [[ "$OS" = "macos" ]]; then
     local configuration="${NIX_DARWIN_HOSTNAME:-aarch64-darwin}"
     local username
     local activation_package
+    local custom_flake
 
     if [[ "${config_dir:A}" == "$CONFIG_DIR/nix" ]]; then
       flake_ref="git+file://$CONFIG_DIR?dir=nix"
+      nix --extra-experimental-features 'nix-command flakes' flake update nixpkgs --flake "$flake_ref" || return
+      for custom_flake in "$CONFIG_DIR"/custom-flakes/*/flake.nix(N); do
+        nix --extra-experimental-features 'nix-command flakes' flake update nixpkgs --flake "${custom_flake%/flake.nix}" || return
+      done
     else
       flake_ref="path:$config_dir"
+      nix --extra-experimental-features 'nix-command flakes' flake update nixpkgs --flake "$flake_ref" || return
     fi
 
     username="$(id -un)" || return
