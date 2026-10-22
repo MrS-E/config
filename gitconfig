@@ -42,3 +42,5 @@
 	helper = cache
 [init]
 	defaultBranch = main
+[url "git@github.com:zurich-uas-racing/"]
+	insteadOf = https://github.com/zurich-uas-racing/
