@@ -148,6 +148,8 @@ proton-vpn-gnome-desktop
 protonvpn-stable-release
 # Description: A tool for monitoring the progress of data through a pipeline
 pv
+# Description:
+python3-devel 
 # Description: Qt decoration plugin implementing Adwaita-like client-side decorations
 qadwaitadecorations-qt5
 # Description: QEMU user mode emulation of qemu targets static build
