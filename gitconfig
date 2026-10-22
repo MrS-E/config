@@ -39,7 +39,7 @@
 [pull]
 	rebase = false
 [credential]
-	helper = cache
+	helper = store
 [init]
 	defaultBranch = main
 [url "git@github.com:zurich-uas-racing/"]
