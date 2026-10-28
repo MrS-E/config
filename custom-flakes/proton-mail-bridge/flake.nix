@@ -8,34 +8,39 @@
       darwinSystems = [ "aarch64-darwin" ];
       forAllSystems = nixpkgs.lib.genAttrs darwinSystems;
 
-      cask = rec {
-        token = "proton-mail-bridge";
-        name = [ "Proton Mail Bridge" ];
-        desc = "Bridges Proton Mail to email clients supporting IMAP and SMTP protocols";
-        homepage = "https://proton.me/mail/bridge";
-        version = "3.27.0";
-        url = "https://github.com/ProtonMail/proton-bridge/releases/download/v${version}/Bridge-Installer.dmg";
-        sha256 = "44152e90108ae4280aafec86604b7871697bd514633c2afb911038f9ab50fe3e";
-        auto_updates = true;
-        depends_on = {
-          macos = { };
-        };
-        app = "Proton Mail Bridge.app";
-      };
-
       pkgsFor = system: import nixpkgs {
         inherit system;
         config.allowUnfreePredicate = package:
-          builtins.elem (package.pname or package.name) [ cask.token ];
+          builtins.elem (package.pname or package.name) [ "proton-mail-bridge" ];
       };
     in {
       packages = forAllSystems (system:
         let
           pkgs = pkgsFor system;
+          generatedSources = if builtins.pathExists ./_sources/generated.nix
+            then import ./_sources/generated.nix {
+              inherit (pkgs) fetchgit fetchurl fetchFromGitHub dockerTools;
+            }
+            else {};
+          generated = generatedSources.proton-mail-bridge or null;
+          cask = rec {
+            token = "proton-mail-bridge";
+            name = [ "Proton Mail Bridge" ];
+            desc = "Bridges Proton Mail to email clients supporting IMAP and SMTP protocols";
+            homepage = "https://proton.me/mail/bridge";
+            version = if generated != null then generated.version else "3.27.0";
+            url = if generated != null then generated.src.url else "https://github.com/ProtonMail/proton-bridge/releases/download/v${version}/Bridge-Installer.dmg";
+            sha256 = if generated != null then generated.src.outputHash else "44152e90108ae4280aafec86604b7871697bd514633c2afb911038f9ab50fe3e";
+            auto_updates = true;
+            depends_on = {
+              macos = { };
+            };
+            app = "Proton Mail Bridge.app";
+          };
           protonMailBridge = pkgs.stdenvNoCC.mkDerivation {
             pname = cask.token;
             inherit (cask) version;
-            src = pkgs.fetchurl {
+            src = if generated != null then generated.src else pkgs.fetchurl {
               name = builtins.baseNameOf cask.url;
               inherit (cask) url sha256;
             };

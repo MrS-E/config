@@ -7,11 +7,22 @@
     let
       systems = [ "aarch64-darwin" "aarch64-linux" "x86_64-linux" ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
-      version = "5.03c";
+      defaultVersion = "5.03c";
     in {
       packages = forAllSystems (system:
         let
           pkgs = import nixpkgs { inherit system; };
+          generatedSources = if builtins.pathExists ./_sources/generated.nix
+            then import ./_sources/generated.nix {
+              inherit (pkgs) fetchgit fetchurl fetchFromGitHub dockerTools;
+            }
+            else {};
+          generated = generatedSources.aflplusplus or null;
+          version = if generated != null then generated.version else defaultVersion;
+          src = if generated != null then generated.src else pkgs.fetchurl {
+            url = "https://github.com/AFLplusplus/AFLplusplus/archive/refs/tags/v${version}.tar.gz";
+            sha256 = "07f089e8591209862898c770a569d8e2b74b459fe967db323fc6a3924dcc82b5";
+          };
           clang = pkgs.llvmPackages.clang;
           llvm = pkgs.llvmPackages.llvm;
           lld = pkgs.llvmPackages.lld;
