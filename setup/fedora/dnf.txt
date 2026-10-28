@@ -122,6 +122,8 @@ ninja-build
 okular
 # Description: The Programmers Solid 3D CAD Modeller
 openscad
+# Description: A passphrase dialog for OpenSSH
+openssh-askpass
 # Description: Markup conversion between documentation formats
 pandoc-cli
 # Description: Utility for modifying/upgrading files
