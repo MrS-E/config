@@ -8,34 +8,39 @@
       darwinSystems = [ "aarch64-darwin" ];
       forAllSystems = nixpkgs.lib.genAttrs darwinSystems;
 
-      cask = {
-        token = "creality-print";
-        name = [ "Creality Print" ];
-        desc = "Slicer and cloud services for some Creality FDM 3D printers";
-        homepage = "https://www.creality.com/pages/download-software";
-        version = "7.2.2.5483,7.2.1";
-        url = "https://github.com/CrealityOfficial/CrealityPrint/releases/download/v7.2.1/CrealityPrint-7.2.2.5483-macx-arm64-Release.dmg";
-        sha256 = "86c611740afc797a3f55d1c7f3f1e34ce0c3bf55cf5bcc6b93febe32d5b7df63";
-        auto_updates = null;
-        depends_on = {
-          macos = { };
-        };
-        app = "Creality Print.app";
-      };
-
       pkgsFor = system: import nixpkgs {
         inherit system;
         config.allowUnfreePredicate = package:
-          builtins.elem (package.pname or package.name) [ cask.token ];
+          builtins.elem (package.pname or package.name) [ "creality-print" ];
       };
     in {
       packages = forAllSystems (system:
         let
           pkgs = pkgsFor system;
+          generatedSources = if builtins.pathExists ./_sources/generated.nix
+            then import ./_sources/generated.nix {
+              inherit (pkgs) fetchgit fetchurl fetchFromGitHub dockerTools;
+            }
+            else {};
+          generated = generatedSources.creality-print or null;
+          cask = {
+            token = "creality-print";
+            name = [ "Creality Print" ];
+            desc = "Slicer and cloud services for some Creality FDM 3D printers";
+            homepage = "https://www.creality.com/pages/download-software";
+            version = if generated != null then generated.version else "7.2.2.5483,7.2.1";
+            url = if generated != null then generated.src.url else "https://github.com/CrealityOfficial/CrealityPrint/releases/download/v7.2.1/CrealityPrint-7.2.2.5483-macx-arm64-Release.dmg";
+            sha256 = if generated != null then generated.src.outputHash else "86c611740afc797a3f55d1c7f3f1e34ce0c3bf55cf5bcc6b93febe32d5b7df63";
+            auto_updates = null;
+            depends_on = {
+              macos = { };
+            };
+            app = "Creality Print.app";
+          };
           crealityPrint = pkgs.stdenvNoCC.mkDerivation {
             pname = cask.token;
             inherit (cask) version;
-            src = pkgs.fetchurl {
+            src = if generated != null then generated.src else pkgs.fetchurl {
               name = builtins.baseNameOf cask.url;
               inherit (cask) url sha256;
             };

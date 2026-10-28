@@ -7,19 +7,25 @@
     let
       systems = [ "aarch64-darwin" "aarch64-linux" "x86_64-linux" ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
-      version = "1.5.4";
+      defaultVersion = "1.5.4";
     in {
       packages = forAllSystems (system:
         let
           pkgs = import nixpkgs { inherit system; };
+          generatedSources = if builtins.pathExists ./_sources/generated.nix
+            then import ./_sources/generated.nix {
+              inherit (pkgs) fetchgit fetchurl fetchFromGitHub dockerTools;
+            }
+            else {};
+          generated = generatedSources.mbpoll or null;
+          version = if generated != null then generated.version else defaultVersion;
+          src = if generated != null then generated.src else pkgs.fetchurl {
+            url = "https://github.com/epsilonrt/mbpoll/archive/refs/tags/v${version}.tar.gz";
+            sha256 = "a9bcc3afa3b85b3794505d07827873ead280d96a94769d236892eb8a4fb9956f";
+          };
           mbpoll = pkgs.stdenv.mkDerivation {
             pname = "mbpoll";
-            inherit version;
-
-            src = pkgs.fetchurl {
-              url = "https://github.com/epsilonrt/mbpoll/archive/refs/tags/v${version}.tar.gz";
-              sha256 = "a9bcc3afa3b85b3794505d07827873ead280d96a94769d236892eb8a4fb9956f";
-            };
+            inherit version src;
 
             patches = [ (pkgs.fetchurl {
               name = "mbpoll-include-limits.patch";

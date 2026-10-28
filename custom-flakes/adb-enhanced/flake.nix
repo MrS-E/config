@@ -8,20 +8,26 @@
       systems = [ "aarch64-darwin" "aarch64-linux" "x86_64-linux" ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
       pname = "adb-enhanced";
-      version = "2.12.0";
+      defaultVersion = "2.12.0";
     in {
       packages = forAllSystems (system:
         let
           pkgs = import nixpkgs { inherit system; };
+          generatedSources = if builtins.pathExists ./_sources/generated.nix
+            then import ./_sources/generated.nix {
+              inherit (pkgs) fetchgit fetchurl fetchFromGitHub dockerTools;
+            }
+            else {};
+          generated = generatedSources.adb-enhanced or null;
+          version = if generated != null then generated.version else defaultVersion;
+          src = if generated != null then generated.src else pkgs.fetchurl {
+            url = "https://files.pythonhosted.org/packages/15/98/64a9e67f5917396f5165861f7860690d0192dc3b392a70db00274d3d961a/adb_enhanced-2.12.0.tar.gz";
+            hash = "sha256-1HfegkbCfgMI7u6VKldopYRP9cigJ9YupA++ueV+OrQ=";
+          };
           pythonPackages = pkgs.python312Packages;
           adbEnhanced = pythonPackages.buildPythonApplication {
-            inherit pname version;
+            inherit pname version src;
             format = "pyproject";
-
-            src = pkgs.fetchurl {
-              url = "https://files.pythonhosted.org/packages/15/98/64a9e67f5917396f5165861f7860690d0192dc3b392a70db00274d3d961a/adb_enhanced-2.12.0.tar.gz";
-              hash = "sha256-1HfegkbCfgMI7u6VKldopYRP9cigJ9YupA++ueV+OrQ=";
-            };
 
             build-system = [ pythonPackages.setuptools ];
             dependencies = [

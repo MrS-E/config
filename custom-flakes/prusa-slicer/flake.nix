@@ -8,34 +8,39 @@
       darwinSystems = [ "aarch64-darwin" ];
       forAllSystems = nixpkgs.lib.genAttrs darwinSystems;
 
-      cask = {
-        token = "prusaslicer";
-        name = [ "PrusaSlicer" ];
-        desc = "G-code generator for 3D printers (RepRap, Makerbot, Ultimaker etc.)";
-        homepage = "https://www.prusa3d.com/slic3r-prusa-edition/";
-        version = "2.9.6";
-        url = "https://github.com/prusa3d/PrusaSlicer/releases/download/version_2.9.6/PrusaSlicer-2.9.6.dmg";
-        sha256 = "94fd7b8a9f87c9631e1c71739b15b184fc5f4c0ceabd69072f1c78f229a4fe40";
-        auto_updates = null;
-        depends_on = {
-          macos = { };
-        };
-        app = "PrusaSlicer.app";
-      };
-
       pkgsFor = system: import nixpkgs {
         inherit system;
         config.allowUnfreePredicate = package:
-          builtins.elem (package.pname or package.name) [ cask.token ];
+          builtins.elem (package.pname or package.name) [ "prusaslicer" ];
       };
     in {
       packages = forAllSystems (system:
         let
           pkgs = pkgsFor system;
+          generatedSources = if builtins.pathExists ./_sources/generated.nix
+            then import ./_sources/generated.nix {
+              inherit (pkgs) fetchgit fetchurl fetchFromGitHub dockerTools;
+            }
+            else {};
+          generated = generatedSources.prusa-slicer or null;
+          cask = {
+            token = "prusaslicer";
+            name = [ "PrusaSlicer" ];
+            desc = "G-code generator for 3D printers (RepRap, Makerbot, Ultimaker etc.)";
+            homepage = "https://www.prusa3d.com/slic3r-prusa-edition/";
+            version = if generated != null then generated.version else "2.9.6";
+            url = if generated != null then generated.src.url else "https://github.com/prusa3d/PrusaSlicer/releases/download/version_2.9.6/PrusaSlicer-2.9.6.dmg";
+            sha256 = if generated != null then generated.src.outputHash else "94fd7b8a9f87c9631e1c71739b15b184fc5f4c0ceabd69072f1c78f229a4fe40";
+            auto_updates = null;
+            depends_on = {
+              macos = { };
+            };
+            app = "PrusaSlicer.app";
+          };
           prusaSlicer = pkgs.stdenvNoCC.mkDerivation {
             pname = cask.token;
             inherit (cask) version;
-            src = pkgs.fetchurl {
+            src = if generated != null then generated.src else pkgs.fetchurl {
               name = builtins.baseNameOf cask.url;
               inherit (cask) url sha256;
             };
