@@ -4,6 +4,7 @@
   "apiType": "OpenAICompletion",
   "apiKey": "REDACTED",
   "temperature": 0.6,
+  "maxContextLength": 999424, 
   "fasterModel": {
     "id": "z-ai/glm-5.3-flash",
     "temperature": 0.5
