@@ -14,6 +14,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    mac-app-util = {
+      url = "github:hraban/mac-app-util";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nextcloud-vfs = {
       url = "path:../custom-flakes/nextcloud-vfs";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -79,6 +84,7 @@
   outputs = {
     nix-darwin,
     home-manager,
+    mac-app-util,
     nextcloud-vfs,
     bettermouse,
     figma,
@@ -105,6 +111,7 @@
       darwinConfigurations."aarch64-darwin" = nix-darwin.lib.darwinSystem {
         inherit system;
         modules = [
+          mac-app-util.darwinModules.default
           home-manager.darwinModules.home-manager
           {
             nixpkgs.hostPlatform = system;
@@ -138,6 +145,9 @@
               home = builtins.toPath "/Users/simeon.stix";
             };
 
+            home-manager.sharedModules = [
+              mac-app-util.homeManagerModules.default
+            ];
             home-manager.useGlobalPkgs = true;
             home-manager.extraSpecialArgs = {
               betterMouse = bettermouse.packages.${system}.bettermouse;
