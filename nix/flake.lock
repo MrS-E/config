@@ -101,6 +101,27 @@
       },
       "parent": []
     },
+    "example-tool": {
+      "inputs": {
+        "nixpkgs": [
+          "sstix-tools",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793213033,
+        "narHash": "sha256-6jOSa/jCKk1K9jCX9waigwV8CygnkQWWKw3kjW1VhhA=",
+        "owner": "sstix-tools",
+        "repo": "example-tool",
+        "rev": "888355110f273fb68b6d7ceda300a779cf28484f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sstix-tools",
+        "repo": "example-tool",
+        "type": "github"
+      }
+    },
     "figma": {
       "inputs": {
         "nixpkgs": [
@@ -364,6 +385,27 @@
       },
       "parent": []
     },
+    "project": {
+      "inputs": {
+        "nixpkgs": [
+          "sstix-tools",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793230716,
+        "narHash": "sha256-ZMAfg02qR75XxMYVBlPwdwsJLOqocxndUb38wdpUaj8=",
+        "owner": "sstix-tools",
+        "repo": "project",
+        "rev": "6656d44ec750a7d9e276d0e99f8ba1e943ee203b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sstix-tools",
+        "repo": "project",
+        "type": "github"
+      }
+    },
     "proton-drive": {
       "inputs": {
         "nixpkgs": [
@@ -447,8 +489,31 @@
         "proton-mail-bridge": "proton-mail-bridge",
         "prusa-slicer": "prusa-slicer",
         "raspberry-pi-imager": "raspberry-pi-imager",
+        "sstix-tools": "sstix-tools",
         "texifier": "texifier",
         "zotero": "zotero"
+      }
+    },
+    "sstix-tools": {
+      "inputs": {
+        "example-tool": "example-tool",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "project": "project"
+      },
+      "locked": {
+        "lastModified": 1793231384,
+        "narHash": "sha256-6bj3Ef0G+jAnGIbwTxHgo0BRQa46BgNjVsVdO0aKSMY=",
+        "owner": "sstix-tools",
+        "repo": "registry",
+        "rev": "c0298c0cbe0ec832f59acb1a287a5905e574d54e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sstix-tools",
+        "repo": "registry",
+        "type": "github"
       }
     },
     "systems": {

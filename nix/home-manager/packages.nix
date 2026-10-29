@@ -1,4 +1,4 @@
-{ config, lib, pkgs, betterMouse, figma, texifier, protonDrive, burpSuite, crealityPrint, prusaSlicer, protonMailBridge, raspberryPiImager, nordicNrfCommandLineTools, aflPlusPlus, mbpoll, adbEnhanced, zoteroPackage, ... }:
+{ config, lib, pkgs, betterMouse, figma, texifier, protonDrive, burpSuite, crealityPrint, prusaSlicer, protonMailBridge, raspberryPiImager, nordicNrfCommandLineTools, aflPlusPlus, mbpoll, adbEnhanced, zoteroPackage, sstix-tools, ... }:
 {
   home.stateVersion = "26.05";
 
@@ -22,6 +22,7 @@
       adbEnhanced
       pkgs.segger-jlink
       zoteroPackage
+      sstix-tools.project
       pkgs.rectangle
     ];
 }
