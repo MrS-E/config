@@ -16,6 +16,8 @@ bcc-tools
 bison
 # Description: Berkeley Yacc, a parser generator
 byacc
+# Description: SocketCAN user space utilities and tools
+can-utils
 # Description: C/C++ compiler cache
 ccache
 # Description: End-user tools for the Clam Antivirus scanner
@@ -90,6 +92,10 @@ imsettings
 imsettings-gsettings
 # Description: A GNU program for formatting C code
 indent
+# Description: OpenJDK 25 Development Environment
+java-25-openjdk-devel
+# Description: SEGGER J-Link tools
+jlink
 # Description: Development package for building kernel modules to match the kernel
 kernel-devel
 # Description: Cross-platform, fast, feature full, GPU based terminal emulator
@@ -120,16 +126,18 @@ nextcloud-client-nautilus
 ninja-build
 # Description: A document viewer
 okular
+# Description: Debugging, in-system programming and boundary-scan testing for embedded devices
+openocd
 # Description: The Programmers Solid 3D CAD Modeller
 openscad
-# Description: A passphrase dialog for OpenSSH
-openssh-askpass
 # Description: Markup conversion between documentation formats
 pandoc-cli
 # Description: Utility for modifying/upgrading files
 patch
 # Description: A collection of programs for manipulating patch files
 patchutils
+# Description: Portable command line archive file manager
+patool
 # Description: Performance monitoring for the Linux kernel
 perf
 # Description: Utility for reading and writing image meta info
@@ -140,8 +148,6 @@ plantuml
 podman-compose
 # Description: PostgreSQL client programs
 postgresql
-# Description: Proton Mail Bridge
-protonmail-bridge
 # Description: Proton VPN Gnome Desktop metapackage
 proton-vpn-gnome-desktop
 # Description: Stable release package
@@ -214,6 +220,8 @@ texlive-siunitx
 texlive-tocbibind
 # Description: Mozilla Thunderbird mail/newsgroup client
 thunderbird
+# Description: Simple TTY terminal I/O application
+tio
 # Description: Totem video thumbnailer
 totem-video-thumbnailer
 # Description: Dynamic analysis tools to detect memory or thread bugs and profile
