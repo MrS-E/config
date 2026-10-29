@@ -3,7 +3,7 @@
 [user]
 	signingkey = ./git_code
 	name = Simeon Stix
-	email = simeon.stix@smoca.ch
+	email = simeon.stix@protonmail.ch
 [core]
 	autocrlf = input
 	editor = codium --wait --new-window
@@ -39,6 +39,8 @@
 [pull]
 	rebase = false
 [credential]
-	helper = cache
+	helper = store
 [init]
 	defaultBranch = main
+[url "git@github.com:zurich-uas-racing/"]
+	insteadOf = https://github.com/zurich-uas-racing/

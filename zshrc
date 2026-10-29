@@ -186,6 +186,12 @@ alias fzfile='rg --no-heading --line-number "" | fzf'
 alias sshproxy='ssh -D 8080 -C -N'
 alias sshdisconnect='rm -rf /tmp/ssh*'
 
+# Prompt for SSH/PKCS11 PIN directly in interactive terminal
+if [[ -t 0 ]]; then
+  unset SSH_ASKPASS
+  export SSH_ASKPASS_REQUIRE=never
+fi
+
 # Git
 alias branch='git branch'
 alias clone='git clone'
