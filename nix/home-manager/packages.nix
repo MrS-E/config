@@ -24,6 +24,7 @@
       zoteroPackage
       sstix-tools.git-clone-remote
       sstix-tools.project
+      sstix-tools.nixvm
       pkgs.rectangle
     ];
 }

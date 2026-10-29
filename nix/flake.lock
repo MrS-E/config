@@ -221,11 +221,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790819692,
-        "narHash": "sha256-rvubAPbh3QCliic3sAK+CXTrPCGgJstY52OTs/5H1J4=",
+        "lastModified": 1793193205,
+        "narHash": "sha256-X6xa6sGA7RnJQuZGbFMC+K+KToWAlBDCCjJXfTwEPsw=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "c8ecc29e5175452bee4a2aa1ba2383856d795338",
+        "rev": "095fef2f265c3c0da4fe315efba8f8a04495ab34",
         "type": "github"
       },
       "original": {
@@ -298,11 +298,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786845137,
-        "narHash": "sha256-oQFip+v0luP8NIxJzmiW4Wu8bILsbFWom5l0zonl8hQ=",
+        "lastModified": 1792737899,
+        "narHash": "sha256-P0/GhewcEQmAbzq3QunNWY2jLJaYH9F6c/5dEM/jQ4M=",
         "owner": "LnL7",
         "repo": "nix-darwin",
-        "rev": "4cff07de74b50e64bdd68cd4e722ab5b6b35ee48",
+        "rev": "bb0b90dbd54e207100de72b5dcbe3188c98a4b69",
         "type": "github"
       },
       "original": {
@@ -387,6 +387,27 @@
         "owner": "NixOS",
         "ref": "nixpkgs-unstable",
         "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixvm": {
+      "inputs": {
+        "nixpkgs": [
+          "sstix-tools",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793237208,
+        "narHash": "sha256-zGcR/bC0jKG877QBQDlDb+6iu/nT1ezKsgSxI3brzzk=",
+        "owner": "sstix-tools",
+        "repo": "nixvm",
+        "rev": "1015ab7cba688a1d45e69f8b1c349d2057f3aeaa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sstix-tools",
+        "repo": "nixvm",
         "type": "github"
       }
     },
@@ -522,14 +543,15 @@
         "nixpkgs": [
           "nixpkgs"
         ],
+        "nixvm": "nixvm",
         "project": "project"
       },
       "locked": {
-        "lastModified": 1793234890,
-        "narHash": "sha256-TrFq7gNvNvWNcnDCMAbaGt0aPRdF11LiV8HIZbrxp1M=",
+        "lastModified": 1793237893,
+        "narHash": "sha256-onafZn0Z7CPISTKK/8LABbc7SQziWTGGYI64ByMarQg=",
         "owner": "sstix-tools",
         "repo": "registry",
-        "rev": "1215ad5194e2a908750c334b9bbc9fbc9a6d8bca",
+        "rev": "11d58b3c99ddfa1861924df159d59f50ecbd7e8b",
         "type": "github"
       },
       "original": {
