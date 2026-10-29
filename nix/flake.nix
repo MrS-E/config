@@ -4,6 +4,11 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
+    sstix-tools = {
+      url = "github:sstix-tools/registry";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nix-darwin = {
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -85,6 +90,7 @@
     nix-darwin,
     home-manager,
     mac-app-util,
+    sstix-tools,
     nextcloud-vfs,
     bettermouse,
     figma,
@@ -115,6 +121,7 @@
           home-manager.darwinModules.home-manager
           {
             nixpkgs.hostPlatform = system;
+            nixpkgs.overlays = [ sstix-tools.overlays.default ];
             nixpkgs.config.allowUnfreePredicate = package:
               builtins.elem (package.pname or package.name) [
                 "google-chrome"
