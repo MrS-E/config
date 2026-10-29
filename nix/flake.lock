@@ -193,6 +193,27 @@
         "type": "indirect"
       }
     },
+    "git-clone-remote": {
+      "inputs": {
+        "nixpkgs": [
+          "sstix-tools",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793234297,
+        "narHash": "sha256-ppkieRbvKuxOMUbxe4Rg1EyqUr4xmbbflGbdCvbz8JQ=",
+        "owner": "sstix-tools",
+        "repo": "git-clone-remote",
+        "rev": "a9bae358c01df2ee39dfc6ded5bd8940b68643cc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sstix-tools",
+        "repo": "git-clone-remote",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -497,17 +518,18 @@
     "sstix-tools": {
       "inputs": {
         "example-tool": "example-tool",
+        "git-clone-remote": "git-clone-remote",
         "nixpkgs": [
           "nixpkgs"
         ],
         "project": "project"
       },
       "locked": {
-        "lastModified": 1793231384,
-        "narHash": "sha256-6bj3Ef0G+jAnGIbwTxHgo0BRQa46BgNjVsVdO0aKSMY=",
+        "lastModified": 1793234890,
+        "narHash": "sha256-TrFq7gNvNvWNcnDCMAbaGt0aPRdF11LiV8HIZbrxp1M=",
         "owner": "sstix-tools",
         "repo": "registry",
-        "rev": "c0298c0cbe0ec832f59acb1a287a5905e574d54e",
+        "rev": "1215ad5194e2a908750c334b9bbc9fbc9a6d8bca",
         "type": "github"
       },
       "original": {

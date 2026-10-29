@@ -22,6 +22,7 @@
       adbEnhanced
       pkgs.segger-jlink
       zoteroPackage
+      sstix-tools.git-clone-remote
       sstix-tools.project
       pkgs.rectangle
     ];
