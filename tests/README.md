@@ -19,7 +19,7 @@ tests/
 │   │   └── assertions.bash            # symlink / manifest / package assertions
 │   ├── smoke.bats                     # setup.sh runs + creates symlinks
 │   ├── idempotency.bats               # second run is a safe no-op
-│   ├── git-filters.bats               # filter bootstrap, SSH providers, and Git identity
+│   ├── git-filters.bats               # filter bootstrap, SSH providers, and profile redaction
 │   ├── assertions-fedora.bats
 │   ├── fedora-packages.bats         # Fedora package manifest filtering
 │   ├── assertions-manjaro.bats

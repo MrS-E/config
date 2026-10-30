@@ -19,11 +19,33 @@ help() {
   cat <<'EOF'
 Register git clean/smudge filters for this dotfiles repo: pkcs11-provider
 (tokenizes/resolves SSH PKCS#11 provider paths), git-email (selects the email
-from gitconfig.profiles using the ignored gitconfig.vars selector), scrub-apikey
-(redacts API keys in Junie model configs), and Junie JSON filters (require
-Python 3, track selected settings, and keep MCP enabled values local).
-Idempotent: filters are only rewritten when the configured value differs.
+from gitconfig.profiles using gitconfig.vars), gitconfig-vars (redacts the
+selected profile in the staged selector), scrub-apikey (redacts API keys in
+Junie model configs), and Junie JSON filters (require Python 3, track selected
+settings, and keep MCP enabled values local). Idempotent: filters are only
+rewritten when the configured value differs.
 EOF
+}
+
+prepare_gitconfig_vars() {
+  local file="$REPO_DIR/gitconfig.vars" tmpfile
+  if [[ ! -f "$file" ]]; then
+    printf '[git]\nprofile = "PRIVATE"\n' > "$file"
+    log "Created gitconfig.vars with the default PRIVATE profile."
+    return
+  fi
+
+  tmpfile="$(mktemp "$REPO_DIR/.gitconfig-vars-filter.XXXXXX")"
+  if "$REPO_DIR/gitconfig-filter.sh" vars-smudge < "$file" > "$tmpfile"; then
+    if cmp -s "$tmpfile" "$file"; then
+      rm -f "$tmpfile"
+    else
+      mv "$tmpfile" "$file"
+    fi
+  else
+    rm -f "$tmpfile"
+    return 1
+  fi
 }
 
 refresh_gitconfig() {
@@ -54,15 +76,21 @@ refresh_gitconfig() {
 run() {
   log "Configuring git filters..."
 
-  if [[ ! -f "$REPO_DIR/gitconfig.vars" ]]; then
-    printf 'GIT_PROFILE=PRIVATE\n' > "$REPO_DIR/gitconfig.vars"
-    log "Created gitconfig.vars with the default PRIVATE profile."
-  fi
+  prepare_gitconfig_vars
   "$REPO_DIR/gitconfig-filter.sh" smudge </dev/null >/dev/null
 
   ensure_git_config filter.git-email.clean  "./gitconfig-filter.sh clean"
   ensure_git_config filter.git-email.smudge "./gitconfig-filter.sh smudge"
   ensure_git_config filter.git-email.required true
+
+  ensure_git_config filter.gitconfig-vars.clean  "./gitconfig-filter.sh vars-clean"
+  ensure_git_config filter.gitconfig-vars.smudge "./gitconfig-filter.sh vars-smudge"
+  ensure_git_config filter.gitconfig-vars.required true
+
+  if git rev-parse --is-inside-work-tree >/dev/null 2>&1 &&
+    git ls-files --error-unmatch -- gitconfig.vars >/dev/null 2>&1; then
+    git update-index --refresh -- gitconfig.vars >/dev/null 2>&1 || true
+  fi
 
   ensure_git_config filter.pkcs11-provider.clean  "ssh/pkcs11-filter.sh clean"
   ensure_git_config filter.pkcs11-provider.smudge "ssh/pkcs11-filter.sh smudge"
@@ -110,7 +138,7 @@ run() {
     done < <(git ls-files -z -- 'ssh/config.d/*')
   fi
 
-  log "Git filters configured: git-email, pkcs11-provider, scrub-apikey, junie-settings, junie-mcp"
+  log "Git filters configured: git-email, gitconfig-vars, pkcs11-provider, scrub-apikey, junie-settings, junie-mcp"
 }
 
 case "${1:-}" in

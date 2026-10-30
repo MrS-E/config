@@ -42,11 +42,20 @@ path.
 
 ## Git email profile
 
-The general Git filter setup creates an ignored `gitconfig.vars` file with
-`GIT_PROFILE=PRIVATE` as the default. Set it to `GIT_PROFILE=WORK` to use the
-work address, then rerun `./setup.sh --only general/02-git-filters.sh` to apply
-the selection to `gitconfig`. Add another `PROFILE=email` entry to
-`gitconfig.profiles` to make additional profiles available.
+`gitconfig.vars` is a TOML file with a `[git]` section, tracked as:
+
+```toml
+[git]
+profile = "REDACTED"
+```
+
+Its clean filter redacts the selected value from staged and committed content.
+Setup restores the local value, defaulting to `PRIVATE` on a fresh checkout.
+Set `profile = "WORK"` in the `[git]` section to use the work address, then rerun
+`./setup.sh --only general/02-git-filters.sh` to apply the selection to
+`gitconfig`. Staging `gitconfig.vars` alone does not refresh `gitconfig`.
+Add another `PROFILE=email` entry to `gitconfig.profiles` to make additional
+profiles available.
 
 ## Repository layout
 
