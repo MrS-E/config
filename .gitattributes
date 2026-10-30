@@ -3,3 +3,4 @@ junie/settings.json filter=junie-settings
 junie/mcp/mcp.json filter=junie-mcp
 ssh/config.d/* filter=pkcs11-provider
 gitconfig filter=git-email
+gitconfig.vars filter=gitconfig-vars

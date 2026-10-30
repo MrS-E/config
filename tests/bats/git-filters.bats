@@ -11,6 +11,7 @@ load "$REPO_DIR/tests/bats/helpers/assertions.bash"
   mkdir -p "$repo/setup/general" "$repo/ssh/config.d" "$checkout"
 
   cp "$REPO_DIR/.gitattributes" "$REPO_DIR/.gitignore" "$repo/"
+  cp "$REPO_DIR/gitconfig.vars" "$repo/"
   cp "$REPO_DIR/gitconfig-filter.sh" "$REPO_DIR/gitconfig.profiles" "$repo/"
   cp "$REPO_DIR/setup/general/common.bash" "$REPO_DIR/setup/general/02-git-filters.sh" "$repo/setup/general/"
   cp "$REPO_DIR/ssh/pkcs11-filter.sh" "$REPO_DIR/ssh/providers.mac" "$REPO_DIR/ssh/providers.fedora" "$repo/ssh/"
@@ -54,6 +55,7 @@ load "$REPO_DIR/tests/bats/helpers/assertions.bash"
   mkdir -p "$repo/setup/general" "$repo/ssh/config.d"
 
   cp "$REPO_DIR/.gitattributes" "$REPO_DIR/.gitignore" "$repo/"
+  cp "$REPO_DIR/gitconfig.vars" "$repo/"
   cp "$REPO_DIR/gitconfig-filter.sh" "$REPO_DIR/gitconfig.profiles" "$repo/"
   cp "$REPO_DIR/setup/general/common.bash" "$REPO_DIR/setup/general/02-git-filters.sh" "$repo/setup/general/"
   cp "$REPO_DIR/ssh/pkcs11-filter.sh" "$REPO_DIR/ssh/providers.mac" "$REPO_DIR/ssh/providers.fedora" "$repo/ssh/"
@@ -93,6 +95,7 @@ load "$REPO_DIR/tests/bats/helpers/assertions.bash"
   mkdir -p "$producer/setup/general" "$producer/ssh/config.d"
 
   cp "$REPO_DIR/.gitattributes" "$REPO_DIR/.gitignore" "$producer/"
+  cp "$REPO_DIR/gitconfig.vars" "$producer/"
   cp "$REPO_DIR/gitconfig-filter.sh" "$REPO_DIR/gitconfig.profiles" "$producer/"
   cp "$REPO_DIR/setup/general/common.bash" "$REPO_DIR/setup/general/02-git-filters.sh" "$producer/setup/general/"
   cp "$REPO_DIR/ssh/pkcs11-filter.sh" "$REPO_DIR/ssh/providers.mac" "$REPO_DIR/ssh/providers.fedora" "$producer/ssh/"
@@ -137,6 +140,7 @@ load "$REPO_DIR/tests/bats/helpers/assertions.bash"
   local repo="$BATS_TEST_TMPDIR/junie-filter-repo"
   mkdir -p "$repo/setup/general" "$repo/junie/mcp"
   cp "$REPO_DIR/.gitattributes" "$REPO_DIR/.gitignore" "$repo/"
+  cp "$REPO_DIR/gitconfig.vars" "$repo/"
   cp "$REPO_DIR/gitconfig-filter.sh" "$REPO_DIR/gitconfig.profiles" "$repo/"
   cp "$REPO_DIR/setup/general/common.bash" "$REPO_DIR/setup/general/02-git-filters.sh" "$repo/setup/general/"
   cp "$REPO_DIR/junie/junie-json-filter.py" "$repo/junie/"
@@ -223,7 +227,9 @@ assert mcp["mcpServers"]["example"]["enabled"] is True
   local checkout="$BATS_TEST_TMPDIR/gitconfig-email-checkout"
   mkdir -p "$repo/setup/general"
   cp "$REPO_DIR/.gitattributes" "$REPO_DIR/.gitignore" "$REPO_DIR/gitconfig" \
-    "$REPO_DIR/gitconfig-filter.sh" "$REPO_DIR/gitconfig.profiles" "$repo/"
+    "$REPO_DIR/gitconfig.vars" "$REPO_DIR/gitconfig-filter.sh" \
+    "$REPO_DIR/gitconfig.profiles" "$repo/"
+  printf '[git]\nprofile = "REDACTED"\n' > "$repo/gitconfig.vars"
   cp "$REPO_DIR/setup/general/common.bash" "$REPO_DIR/setup/general/02-git-filters.sh" \
     "$repo/setup/general/"
 
@@ -242,7 +248,12 @@ assert mcp["mcpServers"]["example"]["enabled"] is True
   assert_success
   assert_output "simeon.stix@protonmail.ch"
   run git -C "$repo" check-ignore --quiet gitconfig.vars
+  assert_failure
+  run git -C "$repo" ls-files --error-unmatch -- gitconfig.vars
   assert_success
+  run git -C "$repo" show HEAD:gitconfig.vars
+  assert_success
+  assert_output $'[git]\nprofile = "REDACTED"'
   run git -C "$repo" show HEAD:gitconfig
   assert_success
   assert_output_partial 'email = @GIT_EMAIL@'
@@ -250,7 +261,18 @@ assert mcp["mcpServers"]["example"]["enabled"] is True
   assert_success
   assert_output ""
 
-  printf 'GIT_PROFILE=WORK\n' > "$repo/gitconfig.vars"
+  printf '[git]\nprofile = "WORK"\n' > "$repo/gitconfig.vars"
+  git -C "$repo" add gitconfig.vars
+  run git -C "$repo" show :gitconfig.vars
+  assert_success
+  assert_output $'[git]\nprofile = "REDACTED"'
+  run git -C "$repo" diff --quiet
+  assert_success
+  run git -C "$repo" checkout-index --force --prefix="$checkout/work/" -- gitconfig.vars
+  assert_success
+  run sed -n '1,2p' "$checkout/work/gitconfig.vars"
+  assert_success
+  assert_output $'[git]\nprofile = "WORK"'
   run git -C "$repo" checkout-index --force --prefix="$checkout/work/" -- gitconfig
   assert_success
   run git -C "$repo" config --file "$checkout/work/gitconfig" --get user.email
@@ -268,14 +290,14 @@ assert mcp["mcpServers"]["example"]["enabled"] is True
   assert_output_partial 'email = @GIT_EMAIL@'
 
   printf '\nFUTURE=future@example.com\n' >> "$repo/gitconfig.profiles"
-  printf 'GIT_PROFILE=FUTURE\n' > "$repo/gitconfig.vars"
+  printf '[git]\nprofile = "FUTURE"\n' > "$repo/gitconfig.vars"
   run bash -c 'cd "$1" && "$1/setup/general/02-git-filters.sh" run' _ "$repo"
   assert_success
   run git -C "$repo" config --file "$repo/gitconfig" --get user.email
   assert_success
   assert_output "future@example.com"
 
-  printf 'GIT_PROFILE=UNDEFINED\n' > "$repo/gitconfig.vars"
+  printf '[git]\nprofile = "UNDEFINED"\n' > "$repo/gitconfig.vars"
   run bash -c 'cd "$1" && "$1/gitconfig-filter.sh" smudge < "$1/gitconfig"' _ "$repo"
   assert_failure
   assert_output_partial "unknown or ambiguous profile: UNDEFINED"
