@@ -40,12 +40,20 @@ path.
 - Fedora Atomic
 - Manjaro
 
+## Git email profile
+
+The general Git filter setup creates an ignored `gitconfig.vars` file with
+`GIT_PROFILE=PRIVATE` as the default. Set it to `GIT_PROFILE=WORK` to use the
+work address, then rerun `./setup.sh --only general/02-git-filters.sh` to apply
+the selection to `gitconfig`. Add another `PROFILE=email` entry to
+`gitconfig.profiles` to make additional profiles available.
+
 ## Repository layout
 
 | Area | Files |
 |---|---|
 | Shell and prompt | `zshrc`, `starship.toml` |
-| Git | `gitconfig` |
+| Git | `gitconfig`, `gitconfig.profiles`, `gitconfig-filter.sh` |
 | Editors | `vimrc`, `vim/`, `nvim/` |
 | Terminal apps | `kitty/`, `ghostty/`, `lazygit/` |
 | SSH | `ssh/` |

@@ -18,7 +18,7 @@ WORKSPACE   := /workspace
 
 SHELLCHECK  ?= shellcheck
 SHELLCHECK_FLAGS ?= -x -S warning
-SHELLCHECK_SOURCES := setup.sh \
+SHELLCHECK_SOURCES := setup.sh gitconfig-filter.sh \
 	$(shell find setup -type f -name '*.sh' -print) \
 	$(shell find setup -type f -name '*.bash' -print) \
 	$(shell find scripts -maxdepth 1 -type f -perm -111 -print) \
