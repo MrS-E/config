@@ -66,7 +66,7 @@ read_profile() {
     }
 
     END {
-      if (count != 1 || value !~ /^\"[A-Z0-9_-]+\"$/) exit 1
+      if (count != 1 || value !~ /^"[A-Z0-9_-]+"$/) exit 1
       print substr(value, 2, length(value) - 2)
     }
   ' "$1"
@@ -125,7 +125,7 @@ case "${1:-}" in
         if (section != "git" || key != "profile") next
         count++
         value = trim(substr(line, equals + 1))
-        if (value !~ /^\"[A-Z0-9_-]+\"$/) invalid = 1
+        if (value !~ /^"[A-Z0-9_-]+"$/) invalid = 1
         lines[NR] = "profile = \"REDACTED\""
       }
 
@@ -162,7 +162,7 @@ case "${1:-}" in
         if (section != "git" || key != "profile") next
         count++
         value = trim(substr(line, equals + 1))
-        if (value !~ /^\"[A-Z0-9_-]+\"$/) invalid = 1
+        if (value !~ /^"[A-Z0-9_-]+"$/) invalid = 1
         lines[NR] = "profile = \"" profile "\""
       }
 
