@@ -40,12 +40,29 @@ path.
 - Fedora Atomic
 - Manjaro
 
+## Git email profile
+
+`gitconfig.vars` is a TOML file with a `[git]` section, tracked as:
+
+```toml
+[git]
+profile = "REDACTED"
+```
+
+Its clean filter redacts the selected value from staged and committed content.
+Setup restores the local value, defaulting to `PRIVATE` on a fresh checkout.
+Set `profile = "WORK"` in the `[git]` section to use the work address, then rerun
+`./setup.sh --only general/02-git-filters.sh` to apply the selection to
+`gitconfig`. Staging `gitconfig.vars` alone does not refresh `gitconfig`.
+Add another `PROFILE=email` entry to `gitconfig.profiles` to make additional
+profiles available.
+
 ## Repository layout
 
 | Area | Files |
 |---|---|
 | Shell and prompt | `zshrc`, `starship.toml` |
-| Git | `gitconfig` |
+| Git | `gitconfig`, `gitconfig.profiles`, `gitconfig-filter.sh` |
 | Editors | `vimrc`, `vim/`, `nvim/` |
 | Terminal apps | `kitty/`, `ghostty/`, `lazygit/` |
 | SSH | `ssh/` |
