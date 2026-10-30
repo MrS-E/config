@@ -7,7 +7,6 @@ with pkgs;
   imhex
   jetbrains-toolbox
   kitty
-  lmstudio
   texliveFull
   meshlab
   mqtt-explorer
