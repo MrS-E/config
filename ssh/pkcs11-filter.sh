@@ -17,6 +17,9 @@ clean_rules() {
   {
     [ -f "$SCRIPT_DIR/providers.mac" ] && cat "$SCRIPT_DIR/providers.mac"
     [ -f "$SCRIPT_DIR/providers.fedora" ] && cat "$SCRIPT_DIR/providers.fedora"
+    printf '%s\n' \
+      'YKCS11=/opt/homebrew/lib/libykcs11.dylib' \
+      'OPENSC=/opt/homebrew/lib/opensc-pkcs11.so'
   } 2>/dev/null | grep -v '^#' | grep -v '^$' | while IFS='=' read -r var path; do
     [ -n "$var" ] && [ -n "$path" ] && printf 's|%s|@%s@|g\n' "$path" "$var"
   done
@@ -45,8 +48,8 @@ case "$cmd" in
       # Fallback if providers file not yet checked out (fresh clone race).
       case "$(uname -s)" in
         Darwin)
-          YKCS11="/opt/homebrew/lib/libykcs11.dylib"
-          OPENSC="/opt/homebrew/lib/opensc-pkcs11.so"
+          YKCS11="/Users/simeon.stix/.nix-profile/lib/libykcs11.dylib"
+          OPENSC="/Users/simeon.stix/.nix-profile/lib/opensc-pkcs11.so"
           ;;
         *)
           cat

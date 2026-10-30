@@ -1,0 +1,49 @@
+[adb-enhanced]
+src.pypi = "adb-enhanced"
+fetch.pypi = "adb_enhanced"
+
+[aflplusplus]
+src.webpage = "https://github.com/AFLplusplus/AFLplusplus/releases"
+src.regex = "releases/tag/v?([0-9.]+[a-z]?)\""
+fetch.url = "https://github.com/AFLplusplus/AFLplusplus/archive/refs/tags/v$ver.tar.gz"
+
+[bettermouse]
+src.webpage = "https://better-mouse.com/"
+src.regex = "wp-content/uploads/BetterMouse\\.([0-9.]+)\\.zip"
+fetch.url = "https://better-mouse.com/wp-content/uploads/BetterMouse.$ver.zip"
+
+[creality-print]
+src.webpage = "https://github.com/CrealityOfficial/CrealityPrint/releases"
+src.regex = "releases/download/(v[0-9.]+/CrealityPrint-[0-9.]+-macx-arm64-Release\\.dmg)"
+fetch.url = "https://github.com/CrealityOfficial/CrealityPrint/releases/download/$ver"
+
+[mbpoll]
+src.webpage = "https://github.com/epsilonrt/mbpoll/releases"
+src.regex = "releases/tag/v?([0-9.]+)\""
+fetch.url = "https://github.com/epsilonrt/mbpoll/archive/refs/tags/v$ver.tar.gz"
+
+[nextcloud-vfs]
+src.webpage = "https://github.com/nextcloud-releases/desktop/releases"
+src.regex = "releases/tag/v([0-9.]+)\""
+fetch.url = "https://github.com/nextcloud-releases/desktop/releases/download/v$ver/Nextcloud-$ver.pkg"
+
+[proton-mail-bridge]
+src.webpage = "https://github.com/ProtonMail/proton-bridge/releases"
+src.regex = "releases/tag/v([0-9.]+)\""
+fetch.url = "https://github.com/ProtonMail/proton-bridge/releases/download/v$ver/Bridge-Installer.dmg"
+
+[prusa-slicer]
+src.webpage = "https://github.com/prusa3d/PrusaSlicer/releases"
+src.regex = "releases/tag/version_([0-9.]+)\""
+fetch.url = "https://github.com/prusa3d/PrusaSlicer/releases/download/version_$ver/PrusaSlicer-$ver.dmg"
+
+[raspberry-pi-imager]
+src.webpage = "https://github.com/raspberrypi/rpi-imager/releases"
+src.regex = "releases/tag/v([0-9.]+)\""
+fetch.url = "https://github.com/raspberrypi/rpi-imager/releases/download/v$ver/rpi-imager-v$ver.dmg"
+
+[zotero]
+src.httpheader = "https://www.zotero.org/download/client/dl?channel=release&platform=mac&distro=pkg"
+src.header = "location"
+src.regex = "client/release/([^/]+)/"
+fetch.url = "https://download.zotero.org/client/release/$ver/Zotero-$ver.dmg"

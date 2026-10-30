@@ -1,15 +1,15 @@
 {
   "baseUrl": "https://openrouter.ai/api/v1/chat/completions",
-  "id": "deepseek/deepseek-v4.1-flash",
+  "id": "deepseek/deepseek-v4.1-flash-1017",
   "apiType": "OpenAICompletion",
   "apiKey": "REDACTED",
   "temperature": 0.6,
   "primaryModel": {
-    "id": "deepseek/deepseek-v4.1-flash",
+    "id": "deepseek/deepseek-v4.1-flash-1017",
     "temperature": 0.3
   },
   "fasterModel": {
-    "id": "deepseek/deepseek-v4.1-flash",
+    "id": "deepseek/deepseek-v4.1-flash-1017",
     "temperature": 0
   },
   "extraBody": {
