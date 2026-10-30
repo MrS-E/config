@@ -1,27 +1,22 @@
 #!/usr/bin/env bats
 # Git filter bootstrap checks.
 
-load "/workspace/tests/bats/helpers/common.bash"
-load "/workspace/tests/bats/helpers/assertions.bash"
-
-create_private_ssh_config_fixture() {
-  cat > "$1" <<'EOF'
-Host private-test
-  PKCS11Provider /opt/homebrew/lib/libykcs11.dylib
-EOF
-}
+REPO_DIR="${REPO_DIR:-/workspace}"
+load "$REPO_DIR/tests/bats/helpers/common.bash"
+load "$REPO_DIR/tests/bats/helpers/assertions.bash"
 
 @test "git filter commands remain valid after a repository move" {
   local repo="$BATS_TEST_TMPDIR/filter-repo"
   local checkout="$BATS_TEST_TMPDIR/checkout"
   mkdir -p "$repo/setup/general" "$repo/ssh/config.d" "$checkout"
 
-  cp "$REPO_DIR/.gitattributes" "$repo/"
+  cp "$REPO_DIR/.gitattributes" "$REPO_DIR/.gitignore" "$repo/"
+  cp "$REPO_DIR/gitconfig-filter.sh" "$REPO_DIR/gitconfig.profiles" "$repo/"
   cp "$REPO_DIR/setup/general/common.bash" "$REPO_DIR/setup/general/02-git-filters.sh" "$repo/setup/general/"
   cp "$REPO_DIR/ssh/pkcs11-filter.sh" "$REPO_DIR/ssh/providers.mac" "$REPO_DIR/ssh/providers.fedora" "$repo/ssh/"
-  create_private_ssh_config_fixture "$repo/ssh/config.d/private"
-  "$REPO_DIR/ssh/pkcs11-filter.sh" clean < "$repo/ssh/config.d/private" > "$repo/ssh/config.d/private.tmp"
-  mv "$repo/ssh/config.d/private.tmp" "$repo/ssh/config.d/private"
+  cp "$REPO_DIR/ssh/config.d/global" "$repo/ssh/config.d/"
+  "$REPO_DIR/ssh/pkcs11-filter.sh" clean < "$repo/ssh/config.d/global" > "$repo/ssh/config.d/global.tmp"
+  mv "$repo/ssh/config.d/global.tmp" "$repo/ssh/config.d/global"
 
   git -C "$repo" init --quiet
   git -C "$repo" config filter.pkcs11-provider.clean cat
@@ -30,7 +25,7 @@ EOF
   git -C "$repo" config filter.pkcs11-provider.smudge /stale/ssh/pkcs11-filter.sh
   git -C "$repo" config filter.pkcs11-provider.required true
 
-  run git -C "$repo" checkout-index --force --prefix="$checkout/stale/" -- ssh/config.d/private
+  run git -C "$repo" checkout-index --force --prefix="$checkout/stale/" -- ssh/config.d/global
   assert_failure
 
   run bash -c 'cd "$1" && "$1/setup/general/02-git-filters.sh" run' _ "$repo"
@@ -40,14 +35,54 @@ EOF
   assert_success
   assert_output "ssh/pkcs11-filter.sh smudge"
 
-  run git -C "$repo" checkout-index --force --prefix="$checkout/portable/" -- ssh/config.d/private
+  run git -C "$repo" checkout-index --force --prefix="$checkout/portable/" -- ssh/config.d/global
   assert_success
   local expected_provider
+  local provider_file
   case "$(uname -s)" in
-    Darwin) expected_provider="/opt/homebrew/lib/libykcs11.dylib" ;;
-    *) expected_provider="/usr/lib64/pkcs11/opensc-pkcs11.so" ;;
+    Darwin) provider_file="$REPO_DIR/ssh/providers.mac" ;;
+    *) provider_file="$REPO_DIR/ssh/providers.fedora" ;;
   esac
-  run grep -F "PKCS11Provider $expected_provider" "$checkout/portable/ssh/config.d/private"
+  expected_provider="$(sed -n 's/^YKCS11=//p' "$provider_file")"
+  run grep -F "PKCS11Provider $expected_provider" "$checkout/portable/ssh/config.d/global"
+  assert_success
+}
+
+@test "git filter setup replaces legacy Homebrew provider paths" {
+  local repo="$BATS_TEST_TMPDIR/legacy-filter-repo"
+  local provider_file expected_provider
+  mkdir -p "$repo/setup/general" "$repo/ssh/config.d"
+
+  cp "$REPO_DIR/.gitattributes" "$REPO_DIR/.gitignore" "$repo/"
+  cp "$REPO_DIR/gitconfig-filter.sh" "$REPO_DIR/gitconfig.profiles" "$repo/"
+  cp "$REPO_DIR/setup/general/common.bash" "$REPO_DIR/setup/general/02-git-filters.sh" "$repo/setup/general/"
+  cp "$REPO_DIR/ssh/pkcs11-filter.sh" "$REPO_DIR/ssh/providers.mac" "$REPO_DIR/ssh/providers.fedora" "$repo/ssh/"
+  printf '%s\n' 'Host github.com' '    PKCS11Provider @YKCS11@' > "$repo/ssh/config.d/global"
+
+  git -C "$repo" init --quiet
+  git -C "$repo" config user.email test@example.com
+  git -C "$repo" config user.name "Filter Test"
+  git -C "$repo" config filter.pkcs11-provider.clean "ssh/pkcs11-filter.sh clean"
+  git -C "$repo" config filter.pkcs11-provider.smudge "ssh/pkcs11-filter.sh smudge"
+  git -C "$repo" add .
+  git -C "$repo" commit --quiet -m initial
+
+  printf '%s\n' 'Host github.com' '    PKCS11Provider /opt/homebrew/lib/libykcs11.dylib' \
+    > "$repo/ssh/config.d/global"
+
+  run bash -c 'cd "$1" && "$1/setup/general/02-git-filters.sh" run' _ "$repo"
+  assert_success
+
+  case "$(uname -s)" in
+    Darwin) provider_file="$repo/ssh/providers.mac" ;;
+    *) provider_file="$repo/ssh/providers.fedora" ;;
+  esac
+  expected_provider="$(sed -n 's/^YKCS11=//p' "$provider_file")"
+  run grep -F "PKCS11Provider $expected_provider" "$repo/ssh/config.d/global"
+  assert_success
+  run grep -F '/opt/homebrew' "$repo/ssh/config.d/global"
+  assert_failure
+  run git -C "$repo" diff --quiet -- ssh/config.d/global
   assert_success
 }
 
@@ -57,12 +92,13 @@ EOF
   local repo="$BATS_TEST_TMPDIR/filter-clone"
   mkdir -p "$producer/setup/general" "$producer/ssh/config.d"
 
-  cp "$REPO_DIR/.gitattributes" "$producer/"
+  cp "$REPO_DIR/.gitattributes" "$REPO_DIR/.gitignore" "$producer/"
+  cp "$REPO_DIR/gitconfig-filter.sh" "$REPO_DIR/gitconfig.profiles" "$producer/"
   cp "$REPO_DIR/setup/general/common.bash" "$REPO_DIR/setup/general/02-git-filters.sh" "$producer/setup/general/"
-  cp "$REPO_DIR/ssh/pkcs11-filter.sh" "$REPO_DIR/ssh/providers.mac" "$producer/ssh/"
-  create_private_ssh_config_fixture "$producer/ssh/config.d/private"
-  "$REPO_DIR/ssh/pkcs11-filter.sh" clean < "$producer/ssh/config.d/private" > "$producer/ssh/config.d/private.tmp"
-  mv "$producer/ssh/config.d/private.tmp" "$producer/ssh/config.d/private"
+  cp "$REPO_DIR/ssh/pkcs11-filter.sh" "$REPO_DIR/ssh/providers.mac" "$REPO_DIR/ssh/providers.fedora" "$producer/ssh/"
+  cp "$REPO_DIR/ssh/config.d/global" "$producer/ssh/config.d/"
+  "$REPO_DIR/ssh/pkcs11-filter.sh" clean < "$producer/ssh/config.d/global" > "$producer/ssh/config.d/global.tmp"
+  mv "$producer/ssh/config.d/global.tmp" "$producer/ssh/config.d/global"
 
   git init --bare --quiet "$origin"
   git -C "$producer" init --quiet
@@ -76,8 +112,8 @@ EOF
   git -C "$producer" push --quiet -u origin HEAD
   git clone --quiet "$origin" "$repo"
 
-  printf '\n# remote update\n' >> "$producer/ssh/config.d/private"
-  git -C "$producer" add ssh/config.d/private
+  printf '\n# remote update\n' >> "$producer/ssh/config.d/global"
+  git -C "$producer" add ssh/config.d/global
   git -C "$producer" commit --quiet -m update
   git -C "$producer" push --quiet
 
@@ -93,14 +129,15 @@ EOF
 
   run git -C "$repo" pull --ff-only
   assert_success
-  run grep -F "# remote update" "$repo/ssh/config.d/private"
+  run grep -F "# remote update" "$repo/ssh/config.d/global"
   assert_success
 }
 
 @test "Junie filters track selected settings and omit MCP enabled keys" {
   local repo="$BATS_TEST_TMPDIR/junie-filter-repo"
   mkdir -p "$repo/setup/general" "$repo/junie/mcp"
-  cp "$REPO_DIR/.gitattributes" "$repo/"
+  cp "$REPO_DIR/.gitattributes" "$REPO_DIR/.gitignore" "$repo/"
+  cp "$REPO_DIR/gitconfig-filter.sh" "$REPO_DIR/gitconfig.profiles" "$repo/"
   cp "$REPO_DIR/setup/general/common.bash" "$REPO_DIR/setup/general/02-git-filters.sh" "$repo/setup/general/"
   cp "$REPO_DIR/junie/junie-json-filter.py" "$repo/junie/"
 
@@ -179,4 +216,67 @@ assert mcp["mcpServers"]["example"]["enabled"] is True
   assert_success
   run git -C "$repo" diff --quiet
   assert_success
+}
+
+@test "git email filter resolves extensible local profiles" {
+  local repo="$BATS_TEST_TMPDIR/gitconfig-email-repo"
+  local checkout="$BATS_TEST_TMPDIR/gitconfig-email-checkout"
+  mkdir -p "$repo/setup/general"
+  cp "$REPO_DIR/.gitattributes" "$REPO_DIR/.gitignore" "$REPO_DIR/gitconfig" \
+    "$REPO_DIR/gitconfig-filter.sh" "$REPO_DIR/gitconfig.profiles" "$repo/"
+  cp "$REPO_DIR/setup/general/common.bash" "$REPO_DIR/setup/general/02-git-filters.sh" \
+    "$repo/setup/general/"
+
+  export GIT_CONFIG_NOSYSTEM=1
+  export GIT_CONFIG_GLOBAL="$repo/global-gitconfig"
+  git -C "$repo" init --quiet
+  git -C "$repo" config user.email test@example.com
+  git -C "$repo" config user.name "Filter Test"
+  git -C "$repo" add .
+  git -C "$repo" commit --quiet -m initial
+
+  run bash -c 'cd "$1" && "$1/setup/general/02-git-filters.sh" run' _ "$repo"
+  assert_success
+
+  run git -C "$repo" config --file "$repo/gitconfig" --get user.email
+  assert_success
+  assert_output "simeon.stix@protonmail.ch"
+  run git -C "$repo" check-ignore --quiet gitconfig.vars
+  assert_success
+  run git -C "$repo" show HEAD:gitconfig
+  assert_success
+  assert_output_partial 'email = @GIT_EMAIL@'
+  run git -C "$repo" status --short --untracked-files=all
+  assert_success
+  assert_output ""
+
+  printf 'GIT_PROFILE=WORK\n' > "$repo/gitconfig.vars"
+  run git -C "$repo" checkout-index --force --prefix="$checkout/work/" -- gitconfig
+  assert_success
+  run git -C "$repo" config --file "$checkout/work/gitconfig" --get user.email
+  assert_success
+  assert_output "simeon.stix@smoca.ch"
+
+  run bash -c 'cd "$1" && "$1/setup/general/02-git-filters.sh" run' _ "$repo"
+  assert_success
+  run git -C "$repo" config --file "$repo/gitconfig" --get user.email
+  assert_success
+  assert_output "simeon.stix@smoca.ch"
+  git -C "$repo" add gitconfig
+  run git -C "$repo" show :gitconfig
+  assert_success
+  assert_output_partial 'email = @GIT_EMAIL@'
+
+  printf '\nFUTURE=future@example.com\n' >> "$repo/gitconfig.profiles"
+  printf 'GIT_PROFILE=FUTURE\n' > "$repo/gitconfig.vars"
+  run bash -c 'cd "$1" && "$1/setup/general/02-git-filters.sh" run' _ "$repo"
+  assert_success
+  run git -C "$repo" config --file "$repo/gitconfig" --get user.email
+  assert_success
+  assert_output "future@example.com"
+
+  printf 'GIT_PROFILE=UNDEFINED\n' > "$repo/gitconfig.vars"
+  run bash -c 'cd "$1" && "$1/gitconfig-filter.sh" smudge < "$1/gitconfig"' _ "$repo"
+  assert_failure
+  assert_output_partial "unknown or ambiguous profile: UNDEFINED"
 }
