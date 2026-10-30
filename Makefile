@@ -18,7 +18,7 @@ WORKSPACE   := /workspace
 
 SHELLCHECK  ?= shellcheck
 SHELLCHECK_FLAGS ?= -x -S warning
-SHELLCHECK_SOURCES := setup.sh \
+SHELLCHECK_SOURCES := setup.sh gitconfig-filter.sh \
 	$(shell find setup -type f -name '*.sh' -print) \
 	$(shell find setup -type f -name '*.bash' -print) \
 	$(shell find scripts -maxdepth 1 -type f -perm -111 -print) \
@@ -44,7 +44,7 @@ BATS_FEDORA  := $(BATS_COMMON) \
 		tests/work-finder.bats
 BATS_MANJARO := $(BATS_COMMON) tests/bats/assertions-manjaro.bats
 BATS_ATOMIC  := $(BATS_COMMON) tests/bats/assertions-fedora-atomic.bats
-BATS_MACOS   := $(BATS_COMMON) tests/bats/assertions-macos.bats tests/bats/nixvm.bats tests/bats/migrate-brew-to-nix.bats
+BATS_MACOS   := $(BATS_COMMON) tests/bats/assertions-macos.bats tests/bats/migrate-brew-to-nix.bats
 
 OS_LIST := fedora manjaro fedora-atomic macos
 

@@ -101,6 +101,27 @@
       },
       "parent": []
     },
+    "example-tool": {
+      "inputs": {
+        "nixpkgs": [
+          "sstix-tools",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793213033,
+        "narHash": "sha256-6jOSa/jCKk1K9jCX9waigwV8CygnkQWWKw3kjW1VhhA=",
+        "owner": "sstix-tools",
+        "repo": "example-tool",
+        "rev": "888355110f273fb68b6d7ceda300a779cf28484f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sstix-tools",
+        "repo": "example-tool",
+        "type": "github"
+      }
+    },
     "figma": {
       "inputs": {
         "nixpkgs": [
@@ -172,6 +193,27 @@
         "type": "indirect"
       }
     },
+    "git-clone-remote": {
+      "inputs": {
+        "nixpkgs": [
+          "sstix-tools",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793234297,
+        "narHash": "sha256-ppkieRbvKuxOMUbxe4Rg1EyqUr4xmbbflGbdCvbz8JQ=",
+        "owner": "sstix-tools",
+        "repo": "git-clone-remote",
+        "rev": "a9bae358c01df2ee39dfc6ded5bd8940b68643cc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sstix-tools",
+        "repo": "git-clone-remote",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -179,11 +221,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790819692,
-        "narHash": "sha256-rvubAPbh3QCliic3sAK+CXTrPCGgJstY52OTs/5H1J4=",
+        "lastModified": 1793193205,
+        "narHash": "sha256-X6xa6sGA7RnJQuZGbFMC+K+KToWAlBDCCjJXfTwEPsw=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "c8ecc29e5175452bee4a2aa1ba2383856d795338",
+        "rev": "095fef2f265c3c0da4fe315efba8f8a04495ab34",
         "type": "github"
       },
       "original": {
@@ -256,11 +298,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786845137,
-        "narHash": "sha256-oQFip+v0luP8NIxJzmiW4Wu8bILsbFWom5l0zonl8hQ=",
+        "lastModified": 1792737899,
+        "narHash": "sha256-P0/GhewcEQmAbzq3QunNWY2jLJaYH9F6c/5dEM/jQ4M=",
         "owner": "LnL7",
         "repo": "nix-darwin",
-        "rev": "4cff07de74b50e64bdd68cd4e722ab5b6b35ee48",
+        "rev": "bb0b90dbd54e207100de72b5dcbe3188c98a4b69",
         "type": "github"
       },
       "original": {
@@ -334,17 +376,38 @@
     },
     "nixpkgs_4": {
       "locked": {
-        "lastModified": 1793136825,
-        "narHash": "sha256-2pkE69JpFRInaARSczZytcfPw83IL82E2KdhbWGwdMs=",
+        "lastModified": 1793225069,
+        "narHash": "sha256-sx1f99WGrDfJ83KKuQrqGPmot0rnDgmpLJDzpU2oHQQ=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "f05535a0efcb2134c478d1e88434fadf486d42b5",
+        "rev": "e62746b0b472753ef019baceab6f1e2e52014980",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
         "ref": "nixpkgs-unstable",
         "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixvm": {
+      "inputs": {
+        "nixpkgs": [
+          "sstix-tools",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793237208,
+        "narHash": "sha256-zGcR/bC0jKG877QBQDlDb+6iu/nT1ezKsgSxI3brzzk=",
+        "owner": "sstix-tools",
+        "repo": "nixvm",
+        "rev": "1015ab7cba688a1d45e69f8b1c349d2057f3aeaa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sstix-tools",
+        "repo": "nixvm",
         "type": "github"
       }
     },
@@ -363,6 +426,27 @@
         "type": "path"
       },
       "parent": []
+    },
+    "project": {
+      "inputs": {
+        "nixpkgs": [
+          "sstix-tools",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793230716,
+        "narHash": "sha256-ZMAfg02qR75XxMYVBlPwdwsJLOqocxndUb38wdpUaj8=",
+        "owner": "sstix-tools",
+        "repo": "project",
+        "rev": "6656d44ec750a7d9e276d0e99f8ba1e943ee203b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sstix-tools",
+        "repo": "project",
+        "type": "github"
+      }
     },
     "proton-drive": {
       "inputs": {
@@ -447,8 +531,33 @@
         "proton-mail-bridge": "proton-mail-bridge",
         "prusa-slicer": "prusa-slicer",
         "raspberry-pi-imager": "raspberry-pi-imager",
+        "sstix-tools": "sstix-tools",
         "texifier": "texifier",
         "zotero": "zotero"
+      }
+    },
+    "sstix-tools": {
+      "inputs": {
+        "example-tool": "example-tool",
+        "git-clone-remote": "git-clone-remote",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "nixvm": "nixvm",
+        "project": "project"
+      },
+      "locked": {
+        "lastModified": 1793237893,
+        "narHash": "sha256-onafZn0Z7CPISTKK/8LABbc7SQziWTGGYI64ByMarQg=",
+        "owner": "sstix-tools",
+        "repo": "registry",
+        "rev": "11d58b3c99ddfa1861924df159d59f50ecbd7e8b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sstix-tools",
+        "repo": "registry",
+        "type": "github"
       }
     },
     "systems": {

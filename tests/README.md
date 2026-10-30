@@ -7,7 +7,7 @@ OS setup system for **Fedora**, **Manjaro**, **Fedora Atomic**, and **macOS**.
 
 ```
 tests/
-├── work-finder.bats                 # standalone work-finder test suite
+├── work-finder.bats                   # standalone work-finder test suite
 ├── containers/
 │   ├── Containerfile.fedora         # real Fedora image + bats
 │   ├── Containerfile.manjaro        # real Manjaro image + bats
@@ -15,11 +15,11 @@ tests/
 │   └── Containerfile.macos-mock     # Fedora + mocked macOS identity/desktop/SSH commands
 ├── bats/
 │   ├── helpers/
-│   │   ├── common.bash              # run_setup, platform_script, env
-│   │   └── assertions.bash          # symlink / manifest / package assertions
-│   ├── smoke.bats                   # setup.sh runs + creates symlinks
-│   ├── idempotency.bats             # second run is a safe no-op
-│   ├── git-filters.bats             # filter bootstrap and provider migration
+│   │   ├── common.bash                # run_setup, platform_script, env
+│   │   └── assertions.bash            # symlink / manifest / package assertions
+│   ├── smoke.bats                     # setup.sh runs + creates symlinks
+│   ├── idempotency.bats               # second run is a safe no-op
+│   ├── git-filters.bats               # filter bootstrap, SSH providers, and profile redaction
 │   ├── assertions-fedora.bats
 │   ├── fedora-packages.bats         # Fedora package manifest filtering
 │   ├── assertions-manjaro.bats
