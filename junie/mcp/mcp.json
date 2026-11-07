@@ -13,6 +13,25 @@
             ],
             "command": "npx"
         },
+        "esp-idf-eim": {
+            "args": [
+                "run",
+                "idf.py mcp-server"
+            ],
+            "command": "eim",
+            "env": {
+                "IDF_MCP_WORKSPACE_FOLDER": "${workspaceFolder}"
+            }
+        },
+        "espressif-component-registry": {
+            "url": "https://components.espressif.com/mcp"
+        },
+        "espressif-docs": {
+            "url": "https://mcp.espressif.com/docs"
+        },
+        "espressif-engineering": {
+            "url": "https://ts-mcp.espressif.com/mcp"
+        },
         "idea": {
             "url": "http://127.0.0.1:64342/stream"
         },
