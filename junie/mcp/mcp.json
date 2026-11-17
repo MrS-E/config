@@ -13,6 +13,9 @@
             ],
             "command": "npx"
         },
+        "clion": {
+            "url": "http://127.0.0.1:64362/stream"
+        },
         "esp-idf-eim": {
             "args": [
                 "run",
