@@ -36,7 +36,7 @@
             "url": "https://ts-mcp.espressif.com/mcp"
         },
         "idea": {
-            "url": "http://127.0.0.1:64342/stream"
+            "url": "http://127.0.0.1:64342/steam"
         },
         "xcode": {
             "args": [
