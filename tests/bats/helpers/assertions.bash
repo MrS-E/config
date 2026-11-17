@@ -5,7 +5,8 @@
 
 # Print a diagnostic line on bats' output channel (fd 3) and fail the test.
 _fail() {
-  echo "# $*" >&3
+  local msg="$*"
+  printf '# %s\n' "${msg//$'\n'/$'\n'# }" >&3
   return 1
 }
 
@@ -50,8 +51,9 @@ assert_output() {
     assert_output_partial "$1"
   else
     if [[ "$output" != "$1" ]]; then
-      _fail "expected output: $1"
-      _fail "actual:   $output"
+      printf '# expected output: %s\n# actual:   %s\n' \
+        "${1//$'\n'/$'\n'# }" \
+        "${output//$'\n'/$'\n'# }" >&3
       return 1
     fi
   fi
