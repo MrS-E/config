@@ -36,6 +36,7 @@ prepare_gitconfig_vars() {
   fi
 
   tmpfile="$(mktemp "$REPO_DIR/.gitconfig-vars-filter.XXXXXX")"
+  cp -p "$file" "$tmpfile"
   if "$REPO_DIR/gitconfig-filter.sh" vars-smudge < "$file" > "$tmpfile"; then
     if cmp -s "$tmpfile" "$file"; then
       rm -f "$tmpfile"

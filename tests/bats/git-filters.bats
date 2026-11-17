@@ -224,7 +224,6 @@ assert mcp["mcpServers"]["example"]["enabled"] is True
 
 @test "git email filter resolves extensible local profiles" {
   local repo="$BATS_TEST_TMPDIR/gitconfig-email-repo"
-  local checkout="$BATS_TEST_TMPDIR/gitconfig-email-checkout"
   mkdir -p "$repo/setup/general"
   cp "$REPO_DIR/.gitattributes" "$REPO_DIR/.gitignore" "$REPO_DIR/gitconfig" \
     "$REPO_DIR/gitconfig.vars" "$REPO_DIR/gitconfig-filter.sh" \
@@ -261,21 +260,30 @@ assert mcp["mcpServers"]["example"]["enabled"] is True
   assert_success
   assert_output ""
 
-  printf '[git]\nprofile = "WORK"\n' > "$repo/gitconfig.vars"
+  printf '# Local profile selector\n[git]\nprofile = "WORK"\n' > "$repo/gitconfig.vars"
   git -C "$repo" add gitconfig.vars
   run git -C "$repo" show :gitconfig.vars
   assert_success
-  assert_output $'[git]\nprofile = "REDACTED"'
-  run git -C "$repo" diff --quiet
+  assert_output $'# Local profile selector\n[git]\nprofile = "REDACTED"'
+  git -C "$repo" commit --quiet -m "document gitconfig.vars"
+  run git -C "$repo" diff --quiet HEAD^ HEAD -- gitconfig.vars
+  assert_failure
+
+  run git -C "$repo" checkout --quiet --detach HEAD^
   assert_success
-  run git -C "$repo" checkout-index --force --prefix="$checkout/work/" -- gitconfig.vars
-  assert_success
-  run sed -n '1,2p' "$checkout/work/gitconfig.vars"
+  run cat "$repo/gitconfig.vars"
   assert_success
   assert_output $'[git]\nprofile = "WORK"'
-  run git -C "$repo" checkout-index --force --prefix="$checkout/work/" -- gitconfig
+  run git -C "$repo" diff --quiet
   assert_success
-  run git -C "$repo" config --file "$checkout/work/gitconfig" --get user.email
+
+  rm -f "$repo/gitconfig.vars" "$repo/gitconfig"
+  run git -C "$repo" checkout -- gitconfig.vars gitconfig
+  assert_success
+  run cat "$repo/gitconfig.vars"
+  assert_success
+  assert_output $'[git]\nprofile = "WORK"'
+  run git -C "$repo" config --file "$repo/gitconfig" --get user.email
   assert_success
   assert_output "simeon.stix@smoca.ch"
 

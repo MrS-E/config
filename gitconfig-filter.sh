@@ -72,9 +72,44 @@ read_profile() {
   ' "$1"
 }
 
+profile_cache_file() {
+  git_dir="$(git rev-parse --absolute-git-dir 2>/dev/null || git -C "$SCRIPT_DIR" rev-parse --absolute-git-dir 2>/dev/null)" || return 1
+  printf '%s/gitconfig-vars-profile\n' "$git_dir"
+}
+
+read_cached_profile() {
+  cache_file="$(profile_cache_file)" || return 1
+  [ -f "$cache_file" ] || return 1
+  IFS= read -r cached_profile < "$cache_file" || return 1
+  case "$cached_profile" in
+    ''|REDACTED|*[!A-Z0-9_-]*) return 1 ;;
+  esac
+  printf '%s\n' "$cached_profile"
+}
+
+write_cached_profile() {
+  case "${1:-}" in
+    ''|REDACTED|*[!A-Z0-9_-]*) return 0 ;;
+  esac
+  cache_file="$(profile_cache_file)" || return 0
+  if cached_profile="$(read_cached_profile)" && [ "$cached_profile" = "$1" ]; then
+    return 0
+  fi
+  cache_tmpfile="$(mktemp "$cache_file.XXXXXX" 2>/dev/null)" || return 0
+  if printf '%s\n' "$1" > "$cache_tmpfile"; then
+    mv "$cache_tmpfile" "$cache_file"
+  else
+    rm -f "$cache_tmpfile"
+  fi
+}
+
 vars_profile() {
   if [ ! -f "$VARS_FILE" ]; then
-    printf 'PRIVATE\n'
+    if profile="$(read_cached_profile)"; then
+      printf '%s\n' "$profile"
+    else
+      printf 'PRIVATE\n'
+    fi
     return 0
   fi
 
@@ -84,14 +119,55 @@ vars_profile() {
   }
 
   case "$profile" in
-    REDACTED) profile=PRIVATE ;;
+    REDACTED)
+      if ! profile="$(read_cached_profile)"; then
+        profile=PRIVATE
+      fi
+      ;;
     ''|*[!A-Z0-9_-]*)
       printf 'gitconfig-filter: invalid profile: %s\n' "$profile" >&2
       return 1
       ;;
+    *)
+      write_cached_profile "$profile"
+      ;;
   esac
 
   printf '%s\n' "$profile"
+}
+
+rewrite_vars_profile() {
+  awk -v profile="$1" '
+    function trim(text) {
+      sub(/^[[:space:]]+/, "", text)
+      sub(/[[:space:]]+$/, "", text)
+      return text
+    }
+
+    {
+      lines[NR] = $0
+      line = $0
+      sub(/[[:space:]]*#.*/, "", line)
+      line = trim(line)
+      if (substr(line, 1, 1) == "[" && substr(line, length(line), 1) == "]") {
+        section = trim(substr(line, 2, length(line) - 2))
+        next
+      }
+      equals = index(line, "=")
+      if (equals == 0) next
+      key = trim(substr(line, 1, equals - 1))
+      if (section != "git" || key != "profile") next
+      count++
+      value = trim(substr(line, equals + 1))
+      if (value !~ /^"[A-Z0-9_-]+"$/) invalid = 1
+      lines[NR] = "profile = \"" profile "\""
+    }
+
+    END {
+      if (count != 1 || invalid) exit 1
+      for (line = 1; line <= NR; line++) print lines[line]
+    }
+  '
 }
 
 case "${1:-}" in
@@ -103,74 +179,24 @@ case "${1:-}" in
     sed "s|@GIT_EMAIL@|$email|g"
     ;;
   vars-clean)
-    awk '
-      function trim(text) {
-        sub(/^[[:space:]]+/, "", text)
-        sub(/[[:space:]]+$/, "", text)
-        return text
-      }
-
-      {
-        lines[NR] = $0
-        line = $0
-        sub(/[[:space:]]*#.*/, "", line)
-        line = trim(line)
-        if (substr(line, 1, 1) == "[" && substr(line, length(line), 1) == "]") {
-          section = trim(substr(line, 2, length(line) - 2))
-          next
-        }
-        equals = index(line, "=")
-        if (equals == 0) next
-        key = trim(substr(line, 1, equals - 1))
-        if (section != "git" || key != "profile") next
-        count++
-        value = trim(substr(line, equals + 1))
-        if (value !~ /^"[A-Z0-9_-]+"$/) invalid = 1
-        lines[NR] = "profile = \"REDACTED\""
-      }
-
-      END {
-        if (count != 1 || invalid) exit 1
-        for (line = 1; line <= NR; line++) print lines[line]
-      }
-    ' || {
+    clean_tmpfile="$(mktemp)"
+    cat > "$clean_tmpfile"
+    profile="$(read_profile "$clean_tmpfile")" || {
+      rm -f "$clean_tmpfile"
       printf 'gitconfig-filter: expected one TOML [git].profile string in %s\n' "$VARS_FILE" >&2
       exit 1
     }
+    write_cached_profile "$profile"
+    rewrite_vars_profile REDACTED < "$clean_tmpfile" || {
+      rm -f "$clean_tmpfile"
+      printf 'gitconfig-filter: expected one TOML [git].profile string in %s\n' "$VARS_FILE" >&2
+      exit 1
+    }
+    rm -f "$clean_tmpfile"
     ;;
   vars-smudge)
     profile="$(vars_profile)" || exit 1
-    awk -v profile="$profile" '
-      function trim(text) {
-        sub(/^[[:space:]]+/, "", text)
-        sub(/[[:space:]]+$/, "", text)
-        return text
-      }
-
-      {
-        lines[NR] = $0
-        line = $0
-        sub(/[[:space:]]*#.*/, "", line)
-        line = trim(line)
-        if (substr(line, 1, 1) == "[" && substr(line, length(line), 1) == "]") {
-          section = trim(substr(line, 2, length(line) - 2))
-          next
-        }
-        equals = index(line, "=")
-        if (equals == 0) next
-        key = trim(substr(line, 1, equals - 1))
-        if (section != "git" || key != "profile") next
-        count++
-        value = trim(substr(line, equals + 1))
-        if (value !~ /^"[A-Z0-9_-]+"$/) invalid = 1
-        lines[NR] = "profile = \"" profile "\""
-      }
-
-      END {
-        if (count != 1 || invalid) exit 1
-        for (line = 1; line <= NR; line++) print lines[line]
-      }
-    '
+    rewrite_vars_profile "$profile"
     ;;
   *)
     printf 'usage: %s {clean|smudge|vars-clean|vars-smudge}\n' "$(basename "$0")" >&2
