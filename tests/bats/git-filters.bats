@@ -51,7 +51,7 @@ load "$REPO_DIR/tests/bats/helpers/assertions.bash"
 
 @test "git filter setup replaces legacy Homebrew provider paths" {
   local repo="$BATS_TEST_TMPDIR/legacy-filter-repo"
-  local provider_file expected_provider
+  local provider_file stale_provider_file expected_provider stale_provider
   mkdir -p "$repo/setup/general" "$repo/ssh/config.d"
 
   cp "$REPO_DIR/.gitattributes" "$REPO_DIR/.gitignore" "$repo/"
@@ -69,20 +69,28 @@ load "$REPO_DIR/tests/bats/helpers/assertions.bash"
   git -C "$repo" add .
   git -C "$repo" commit --quiet -m initial
 
-  printf '%s\n' 'Host github.com' '    PKCS11Provider /opt/homebrew/lib/libykcs11.dylib' \
+  case "$(uname -s)" in
+    Darwin)
+      provider_file="$repo/ssh/providers.mac"
+      stale_provider_file="$repo/ssh/providers.fedora"
+      ;;
+    *)
+      provider_file="$repo/ssh/providers.fedora"
+      stale_provider_file="$repo/ssh/providers.mac"
+      ;;
+  esac
+  expected_provider="$(sed -n 's/^YKCS11=//p' "$provider_file")"
+  stale_provider="$(sed -n 's/^YKCS11=//p' "$stale_provider_file")"
+
+  printf '%s\n' 'Host github.com' "    PKCS11Provider $stale_provider" \
     > "$repo/ssh/config.d/global"
 
   run bash -c 'cd "$1" && "$1/setup/general/02-git-filters.sh" run' _ "$repo"
   assert_success
 
-  case "$(uname -s)" in
-    Darwin) provider_file="$repo/ssh/providers.mac" ;;
-    *) provider_file="$repo/ssh/providers.fedora" ;;
-  esac
-  expected_provider="$(sed -n 's/^YKCS11=//p' "$provider_file")"
   run grep -F "PKCS11Provider $expected_provider" "$repo/ssh/config.d/global"
   assert_success
-  run grep -F '/opt/homebrew' "$repo/ssh/config.d/global"
+  run grep -F "$stale_provider" "$repo/ssh/config.d/global"
   assert_failure
   run git -C "$repo" diff --quiet -- ssh/config.d/global
   assert_success
