@@ -342,55 +342,6 @@ export PATH="$PATH:/usr/local/bin"
 export PATH="$PATH:$HOME/.local/bin"
 
 ##########
-# NVM
-##########
-if [[ -s /usr/share/nvm/init-nvm.sh ]]; then
-  export NVM_DIR="$HOME/.nvm"
-  source /usr/share/nvm/init-nvm.sh
-  [[ -s /usr/share/nvm/bash_completion ]] && source /usr/share/nvm/bash_completion
-elif command -v brew >/dev/null 2>&1 && [[ -d "$(brew --prefix 2>/dev/null)/opt/nvm" ]]; then
-  export NVM_DIR="$HOME/.nvm"
-  [[ -s "$(brew --prefix)/opt/nvm/nvm.sh" ]] && source "$(brew --prefix)/opt/nvm/nvm.sh"
-  [[ -s "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm" ]] && source "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm"
-elif [[ -s "$HOME/.nvm/nvm.sh" ]]; then
-  export NVM_DIR="$HOME/.nvm"
-  source "$NVM_DIR/nvm.sh"
-  [[ -s "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"
-fi
-
-##########
-# JABBA
-##########
-if [[ -s "$HOME/.jabba/jabba.sh" ]]; then
-  export JABBA_INDEX="https://github.com/typelevel/jdk-index/raw/main/index.json"
-  export JABBA_HOME="$HOME/.jabba"
-  source "$JABBA_HOME/jabba.sh"
-fi
-
-##########
-# PYENV
-##########
-if [[ -d "$HOME/.pyenv/bin" ]]; then
-  export PATH="$HOME/.pyenv/bin:$PATH"
-fi
-
-if command -v pyenv >/dev/null 2>&1; then
-  eval "$(pyenv init -)"
-  eval "$(pyenv init --path)"
-fi
-
-##########
-# RBENV
-##########
-if [[ -d "$HOME/.rbenv/bin" ]]; then
-  export PATH="$HOME/.rbenv/bin:$PATH"
-fi
-
-if command -v rbenv >/dev/null 2>&1; then
-  eval "$(rbenv init - zsh)"
-fi
-
-##########
 # Zephyr-SDK
 ##########
 # export ZEPHYR_SDK_INSTALL_DIR="$HOME/zephyr-sdk-0.17.1"
