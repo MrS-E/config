@@ -43,6 +43,12 @@ make baseline            # record current results under tests/baselines/
 make compare-baseline    # re-run and diff against the recorded baseline
 ```
 
+Run the standalone Home Manager package-list evaluation without building packages:
+
+```bash
+nix-instantiate --eval --strict tests/nix-home-manager-packages.nix
+```
+
 The repo is bind-mounted at `/workspace` inside each container; the test user is
 `tester` with `HOME=/home/tester` and passwordless `sudo`.
 
