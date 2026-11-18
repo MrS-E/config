@@ -19,7 +19,6 @@ with pkgs;
   proxyman
   slack
   spotify
-  tailscale-gui
   thunderbird
   wireshark
   vscodium

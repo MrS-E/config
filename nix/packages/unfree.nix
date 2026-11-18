@@ -11,7 +11,6 @@
       "segger-jlink"
       "slack"
       "spotify"
-      "tailscale-gui"
     ];
   nixpkgs.config.segger-jlink.acceptLicense = true;
 }
