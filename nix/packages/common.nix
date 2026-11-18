@@ -15,9 +15,11 @@ with pkgs;
   dotnet-sdk
   fzf
   gcc
+  git-filter-repo
   git-lfs
   gnuplot
   go
+  gnupg
   pkgconf
   gradle
   gnugrep
@@ -51,6 +53,7 @@ with pkgs;
   swiftlint
   inetutils
   tree
+  typst
   uv
   wget
   yarn
