@@ -70,7 +70,6 @@
               imports = [
                 ./home-manager/packages.nix
               ];
-              programs.nextcloud-vfs.enable = true;
               targets.darwin.copyApps.enable = false;
             };
           }

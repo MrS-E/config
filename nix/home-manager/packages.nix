@@ -2,6 +2,8 @@
 {
   home.stateVersion = "26.05";
 
+  programs.nextcloud-vfs.enable = true;
+
   home.packages =
     (import ../packages/common.nix { inherit pkgs; })
     ++ (import ../packages/darwin.nix { inherit pkgs; })
