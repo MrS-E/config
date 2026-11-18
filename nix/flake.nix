@@ -113,23 +113,9 @@
         modules = [
           mac-app-util.darwinModules.default
           home-manager.darwinModules.home-manager
+          ./packages/unfree.nix
           {
             nixpkgs.hostPlatform = system;
-            nixpkgs.config.allowUnfreePredicate = package:
-              builtins.elem (package.pname or package.name) [
-                "google-chrome"
-                "jetbrains-toolbox"
-                "lmstudio"
-                "mqtt-explorer"
-                "obsidian"
-                "postman"
-                "proxyman"
-                "segger-jlink"
-                "slack"
-                "spotify"
-                "tailscale-gui"
-              ];
-            nixpkgs.config.segger-jlink.acceptLicense = true;
             nix.settings.experimental-features = "nix-command flakes";
             # Don't forward macOS-specific LC_* values to remote hosts.
             programs.ssh.extraConfig = ''

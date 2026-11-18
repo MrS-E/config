@@ -29,6 +29,7 @@ setup() {
   assert [ -f "$REPO_DIR/nix/packages/common.nix" ]
   assert [ -f "$REPO_DIR/nix/packages/darwin.nix" ]
   assert [ -f "$REPO_DIR/nix/packages/aarch64-darwin.nix" ]
+  assert [ -f "$REPO_DIR/nix/packages/unfree.nix" ]
   assert [ -f "$REPO_DIR/nix/home-manager/packages.nix" ]
 }
 
