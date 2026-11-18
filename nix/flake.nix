@@ -4,6 +4,11 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
+    sstix-tools = {
+      url = "github:sstix-tools/registry";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nix-darwin = {
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -30,6 +35,7 @@
     home-manager,
     mac-app-util,
     custom-flakes,
+    sstix-tools,
     ...
   }:
     let
@@ -47,6 +53,17 @@
           ./packages/unfree.nix
           {
             nixpkgs.hostPlatform = system;
+            nix.registry.sstix-tools = {
+              from = {
+                id = "sstix-tools";
+                type = "indirect";
+              };
+              to = {
+                owner = "sstix-tools";
+                repo = "registry";
+                type = "github";
+              };
+            };
             nix.settings.experimental-features = "nix-command flakes";
             # Don't forward macOS-specific LC_* values to remote hosts.
             programs.ssh.extraConfig = ''
@@ -66,6 +83,9 @@
               mac-app-util.homeManagerModules.default
             ];
             home-manager.useGlobalPkgs = true;
+            home-manager.extraSpecialArgs = {
+              sstix-tools = sstix-tools.packages.${system};
+            };
             home-manager.users."simeon.stix" = {
               imports = [
                 ./home-manager/packages.nix

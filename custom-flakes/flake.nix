@@ -67,6 +67,7 @@
   };
 
   outputs = {
+    self,
     nextcloud-vfs,
     bettermouse,
     figma,
@@ -87,26 +88,28 @@
     let
       system = "aarch64-darwin";
     in {
+      packages.${system} = {
+        bettermouse = bettermouse.packages.${system}.bettermouse;
+        figma = figma.packages.${system}.figma;
+        texifier = texifier.packages.${system}.texifier;
+        proton-drive = proton-drive.packages.${system}.proton-drive;
+        burp-suite = burp-suite.packages.${system}.burp-suite;
+        creality-print = creality-print.packages.${system}.creality-print;
+        proton-mail-bridge = proton-mail-bridge.packages.${system}.proton-mail-bridge;
+        raspberry-pi-imager = raspberry-pi-imager.packages.${system}.raspberry-pi-imager;
+        nordic-nrf-command-line-tools = nordic-nrf-command-line-tools.packages.${system}.nordic-nrf-command-line-tools;
+        aflplusplus = aflplusplus.packages.${system}.aflplusplus;
+        mbpoll = mbpoll.packages.${system}.mbpoll;
+        adb-enhanced = adb-enhanced.packages.${system}.adb-enhanced;
+        zotero = zotero.packages.${system}.zotero;
+        prusa-slicer = prusa-slicer.packages.${system}.prusa-slicer;
+      };
+
       darwinModules.default = {
         home-manager.sharedModules = [
           nextcloud-vfs.homeManagerModules.default
         ];
-        home-manager.extraSpecialArgs = {
-          betterMouse = bettermouse.packages.${system}.bettermouse;
-          figma = figma.packages.${system}.figma;
-          texifier = texifier.packages.${system}.texifier;
-          protonDrive = proton-drive.packages.${system}.proton-drive;
-          burpSuite = burp-suite.packages.${system}.burp-suite;
-          crealityPrint = creality-print.packages.${system}.creality-print;
-          protonMailBridge = proton-mail-bridge.packages.${system}.proton-mail-bridge;
-          raspberryPiImager = raspberry-pi-imager.packages.${system}.raspberry-pi-imager;
-          nordicNrfCommandLineTools = nordic-nrf-command-line-tools.packages.${system}.nordic-nrf-command-line-tools;
-          aflPlusPlus = aflplusplus.packages.${system}.aflplusplus;
-          mbpoll = mbpoll.packages.${system}.mbpoll;
-          adbEnhanced = adb-enhanced.packages.${system}.adb-enhanced;
-          zoteroPackage = zotero.packages.${system}.zotero;
-          prusaSlicer = prusa-slicer.packages.${system}.prusa-slicer;
-        };
+        home-manager.extraSpecialArgs.custom-flakes = self;
       };
     };
 }

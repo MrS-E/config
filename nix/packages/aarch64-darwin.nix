@@ -1,4 +1,7 @@
-{ pkgs }:
+{ pkgs, custom-flakes, sstix-tools }:
+let
+  customPackages = custom-flakes.packages.${pkgs.stdenv.hostPlatform.system};
+in
 with pkgs;
 [
   android-tools
@@ -19,8 +22,26 @@ with pkgs;
   proxyman
   slack
   spotify
-  tailscale-gui
   thunderbird
   wireshark
   vscodium
+  customPackages.bettermouse
+  customPackages.figma
+  customPackages.texifier
+  customPackages.proton-drive
+  customPackages.burp-suite
+  customPackages.creality-print
+  customPackages.prusa-slicer
+  customPackages.proton-mail-bridge
+  customPackages.raspberry-pi-imager
+  customPackages.nordic-nrf-command-line-tools
+  customPackages.aflplusplus
+  customPackages.mbpoll
+  customPackages.adb-enhanced
+  segger-jlink
+  customPackages.zotero
+  sstix-tools.git-clone-remote
+  sstix-tools.project
+  sstix-tools.nixvm
+  rectangle
 ]
