@@ -50,7 +50,7 @@ For all Tier 3 packages, maintainers follow the concrete runbooks below using th
 
 ## 3. Automated Updates Workflow (Tier 1 & Tier 2)
 
-Tier 1 and Tier 2 flakes are configured in `custom-flakes/nvfetcher.toml`. Running the updater queries upstream release endpoints, calculates SRI cryptographic hashes, and updates `_sources/generated.nix` across all target flakes.
+Tier 1 and Tier 2 flakes are configured in `custom-flakes/nvfetcher.toml`. Running the updater queries upstream release endpoints and calculates SRI cryptographic hashes in the shared `custom-flakes/_sources/` directory, then distributes only each package's own entry to its standalone flake. The updater requires `nix` and `python3`.
 
 ### Running Automated Updates
 
@@ -60,11 +60,13 @@ To update all Tier 1 and Tier 2 packages in a single command, run the update scr
 ./custom-flakes/update.sh
 ```
 
-Or execute `nvfetcher` directly:
+You can execute `nvfetcher` directly to refresh only the shared generated metadata:
 
 ```sh
 nix run nixpkgs#nvfetcher -- -c custom-flakes/nvfetcher.toml -o custom-flakes/_sources
 ```
+
+Running `nvfetcher` directly does not synchronize the per-flake copies; use `./custom-flakes/update.sh` to distribute the matching entry to each flake. When nvfetcher is run with a package filter, packages absent from its output retain their previous per-flake metadata.
 
 ### Derivation Integration & Pure Evaluation
 

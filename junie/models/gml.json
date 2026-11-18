@@ -3,7 +3,7 @@
   "id": "z-ai/glm-5.3",
   "apiType": "OpenAICompletion",
   "apiKey": "REDACTED",
-  "temperature": 0.6,
+  "temperature": 0.7,
   "maxContextLength": 999424, 
   "fasterModel": {
     "id": "z-ai/glm-5.3-flash",

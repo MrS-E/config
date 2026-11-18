@@ -20,13 +20,7 @@ AUTOMATED_FLAKES=(
   "zotero"
 )
 
-echo "==> Synchronizing generated sources to individual flake directories..."
-for flake in "${AUTOMATED_FLAKES[@]}"; do
-  if [ -d "$flake" ]; then
-    mkdir -p "$flake/_sources"
-    cp -f _sources/generated.nix "$flake/_sources/generated.nix"
-    cp -f _sources/generated.json "$flake/_sources/generated.json"
-  fi
-done
+echo "==> Distributing package-specific generated sources to individual flakes..."
+python3 "$SCRIPT_DIR/distribute-sources.py" "${AUTOMATED_FLAKES[@]}"
 
 echo "==> Custom flakes update completed successfully."

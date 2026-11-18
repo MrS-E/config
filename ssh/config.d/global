@@ -4,6 +4,6 @@ Host github.com
     IdentitiesOnly yes
 
 Host *.smoca.ch
-    PKCS11Provider @OPENSC@
+    PKCS11Provider @YKCS11@
     IdentityFile ~/.ssh/yubikey-9a.pub
     IdentitiesOnly yes
