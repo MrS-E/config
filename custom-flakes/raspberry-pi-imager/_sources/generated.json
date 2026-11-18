@@ -1,0 +1,17 @@
+{
+    "raspberry-pi-imager": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "raspberry-pi-imager",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-FbGpTHEsADJ1CFVlPCvxKdzrQBMp+84Kg9fPBdxYpCE=",
+            "type": "url",
+            "url": "https://github.com/raspberrypi/rpi-imager/releases/download/v2.0.12/rpi-imager-v2.0.12.dmg"
+        },
+        "version": "2.0.12"
+    }
+}

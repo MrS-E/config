@@ -42,7 +42,7 @@ presteps() {
 help() {
   cat <<'EOF'
 Download and install Digilent WaveForms from the official .dmg release. Not
-installed via the Brewfile because the cask is not kept up to date on Homebrew.
+managed by the Nix package profile; this remains an independent vendor installer.
 Idempotent: skips when WaveForms.app is already in /Applications.
 
 files.digilent.com is behind Cloudflare, which blocks plain curl with HTTP 403

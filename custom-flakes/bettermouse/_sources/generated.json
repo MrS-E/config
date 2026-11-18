@@ -1,0 +1,17 @@
+{
+    "bettermouse": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "bettermouse",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-E/o3LZ04KSomarztWyNEdO4fgR/FrsuoeDthCL4HA14=",
+            "type": "url",
+            "url": "https://better-mouse.com/wp-content/uploads/BetterMouse.1.7.9010.zip"
+        },
+        "version": "1.7.9010"
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "creality-print": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "creality-print",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-21TdbUiUDlaeZpBaSuTs1XOOYA4AAHejDxkZW5ziF7c=",
+            "type": "url",
+            "url": "https://github.com/CrealityOfficial/CrealityPrint/releases/download/v7.3.0/CrealityPrint-7.3.0.6157-macx-arm64-Release.dmg"
+        },
+        "version": "v7.3.0/CrealityPrint-7.3.0.6157-macx-arm64-Release.dmg"
+    }
+}

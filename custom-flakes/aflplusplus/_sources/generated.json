@@ -1,0 +1,17 @@
+{
+    "aflplusplus": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "aflplusplus",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-B/CJ6FkSCYYomMdwpWnY4rdLRZ/pZ9syP8ajkk3MgrU=",
+            "type": "url",
+            "url": "https://github.com/AFLplusplus/AFLplusplus/archive/refs/tags/v5.03c.tar.gz"
+        },
+        "version": "5.03c"
+    }
+}

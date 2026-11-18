@@ -1,0 +1,17 @@
+{
+    "adb-enhanced": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "adb-enhanced",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-1HfegkbCfgMI7u6VKldopYRP9cigJ9YupA++ueV+OrQ=",
+            "type": "url",
+            "url": "https://pypi.org/packages/source/a/adb_enhanced/adb_enhanced-2.12.0.tar.gz"
+        },
+        "version": "2.12.0"
+    }
+}
