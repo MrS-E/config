@@ -19,64 +19,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nextcloud-vfs = {
-      url = "path:../custom-flakes/nextcloud-vfs";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    bettermouse = {
-      url = "path:../custom-flakes/bettermouse";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    figma = {
-      url = "path:../custom-flakes/figma";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    texifier = {
-      url = "path:../custom-flakes/texifier";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    proton-drive = {
-      url = "path:../custom-flakes/proton-drive";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    burp-suite = {
-      url = "path:../custom-flakes/burp-suite";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    creality-print = {
-      url = "path:../custom-flakes/creality-print";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    proton-mail-bridge = {
-      url = "path:../custom-flakes/proton-mail-bridge";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    raspberry-pi-imager = {
-      url = "path:../custom-flakes/raspberry-pi-imager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    nordic-nrf-command-line-tools = {
-      url = "path:../custom-flakes/nordic-nrf-command-line-tools";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    aflplusplus = {
-      url = "path:../custom-flakes/aflplusplus";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    mbpoll = {
-      url = "path:../custom-flakes/mbpoll";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    adb-enhanced = {
-      url = "path:../custom-flakes/adb-enhanced";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    zotero = {
-      url = "path:../custom-flakes/zotero";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    prusa-slicer = {
-      url = "path:../custom-flakes/prusa-slicer";
+    custom-flakes = {
+      url = "path:../custom-flakes";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -85,21 +29,7 @@
     nix-darwin,
     home-manager,
     mac-app-util,
-    nextcloud-vfs,
-    bettermouse,
-    figma,
-    texifier,
-    proton-drive,
-    burp-suite,
-    creality-print,
-    proton-mail-bridge,
-    raspberry-pi-imager,
-    nordic-nrf-command-line-tools,
-    aflplusplus,
-    mbpoll,
-    adb-enhanced,
-    zotero,
-    prusa-slicer,
+    custom-flakes,
     ...
   }:
     let
@@ -113,6 +43,7 @@
         modules = [
           mac-app-util.darwinModules.default
           home-manager.darwinModules.home-manager
+          custom-flakes.darwinModules.default
           ./packages/unfree.nix
           {
             nixpkgs.hostPlatform = system;
@@ -135,26 +66,9 @@
               mac-app-util.homeManagerModules.default
             ];
             home-manager.useGlobalPkgs = true;
-            home-manager.extraSpecialArgs = {
-              betterMouse = bettermouse.packages.${system}.bettermouse;
-              figma = figma.packages.${system}.figma;
-              texifier = texifier.packages.${system}.texifier;
-              protonDrive = proton-drive.packages.${system}.proton-drive;
-              burpSuite = burp-suite.packages.${system}.burp-suite;
-              crealityPrint = creality-print.packages.${system}.creality-print;
-              protonMailBridge = proton-mail-bridge.packages.${system}.proton-mail-bridge;
-              raspberryPiImager = raspberry-pi-imager.packages.${system}.raspberry-pi-imager;
-              nordicNrfCommandLineTools = nordic-nrf-command-line-tools.packages.${system}.nordic-nrf-command-line-tools;
-              aflPlusPlus = aflplusplus.packages.${system}.aflplusplus;
-              mbpoll = mbpoll.packages.${system}.mbpoll;
-              adbEnhanced = adb-enhanced.packages.${system}.adb-enhanced;
-              zoteroPackage = zotero.packages.${system}.zotero;
-              prusaSlicer = prusa-slicer.packages.${system}.prusa-slicer;
-            };
             home-manager.users."simeon.stix" = {
               imports = [
                 ./home-manager/packages.nix
-                nextcloud-vfs.homeManagerModules.default
               ];
               programs.nextcloud-vfs.enable = true;
               targets.darwin.copyApps.enable = false;

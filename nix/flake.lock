@@ -3,66 +3,78 @@
     "adb-enhanced": {
       "inputs": {
         "nixpkgs": [
+          "custom-flakes",
           "nixpkgs"
         ]
       },
       "locked": {
-        "path": "../custom-flakes/adb-enhanced",
+        "path": "./adb-enhanced",
         "type": "path"
       },
       "original": {
-        "path": "../custom-flakes/adb-enhanced",
+        "path": "./adb-enhanced",
         "type": "path"
       },
-      "parent": []
+      "parent": [
+        "custom-flakes"
+      ]
     },
     "aflplusplus": {
       "inputs": {
         "nixpkgs": [
+          "custom-flakes",
           "nixpkgs"
         ]
       },
       "locked": {
-        "path": "../custom-flakes/aflplusplus",
+        "path": "./aflplusplus",
         "type": "path"
       },
       "original": {
-        "path": "../custom-flakes/aflplusplus",
+        "path": "./aflplusplus",
         "type": "path"
       },
-      "parent": []
+      "parent": [
+        "custom-flakes"
+      ]
     },
     "bettermouse": {
       "inputs": {
         "nixpkgs": [
+          "custom-flakes",
           "nixpkgs"
         ]
       },
       "locked": {
-        "path": "../custom-flakes/bettermouse",
+        "path": "./bettermouse",
         "type": "path"
       },
       "original": {
-        "path": "../custom-flakes/bettermouse",
+        "path": "./bettermouse",
         "type": "path"
       },
-      "parent": []
+      "parent": [
+        "custom-flakes"
+      ]
     },
     "burp-suite": {
       "inputs": {
         "nixpkgs": [
+          "custom-flakes",
           "nixpkgs"
         ]
       },
       "locked": {
-        "path": "../custom-flakes/burp-suite",
+        "path": "./burp-suite",
         "type": "path"
       },
       "original": {
-        "path": "../custom-flakes/burp-suite",
+        "path": "./burp-suite",
         "type": "path"
       },
-      "parent": []
+      "parent": [
+        "custom-flakes"
+      ]
     },
     "cl-nix-lite": {
       "inputs": {
@@ -88,15 +100,49 @@
     "creality-print": {
       "inputs": {
         "nixpkgs": [
+          "custom-flakes",
           "nixpkgs"
         ]
       },
       "locked": {
-        "path": "../custom-flakes/creality-print",
+        "path": "./creality-print",
         "type": "path"
       },
       "original": {
-        "path": "../custom-flakes/creality-print",
+        "path": "./creality-print",
+        "type": "path"
+      },
+      "parent": [
+        "custom-flakes"
+      ]
+    },
+    "custom-flakes": {
+      "inputs": {
+        "adb-enhanced": "adb-enhanced",
+        "aflplusplus": "aflplusplus",
+        "bettermouse": "bettermouse",
+        "burp-suite": "burp-suite",
+        "creality-print": "creality-print",
+        "figma": "figma",
+        "mbpoll": "mbpoll",
+        "nextcloud-vfs": "nextcloud-vfs",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "nordic-nrf-command-line-tools": "nordic-nrf-command-line-tools",
+        "proton-drive": "proton-drive",
+        "proton-mail-bridge": "proton-mail-bridge",
+        "prusa-slicer": "prusa-slicer",
+        "raspberry-pi-imager": "raspberry-pi-imager",
+        "texifier": "texifier",
+        "zotero": "zotero"
+      },
+      "locked": {
+        "path": "../custom-flakes",
+        "type": "path"
+      },
+      "original": {
+        "path": "../custom-flakes",
         "type": "path"
       },
       "parent": []
@@ -104,18 +150,21 @@
     "figma": {
       "inputs": {
         "nixpkgs": [
+          "custom-flakes",
           "nixpkgs"
         ]
       },
       "locked": {
-        "path": "../custom-flakes/figma",
+        "path": "./figma",
         "type": "path"
       },
       "original": {
-        "path": "../custom-flakes/figma",
+        "path": "./figma",
         "type": "path"
       },
-      "parent": []
+      "parent": [
+        "custom-flakes"
+      ]
     },
     "flake-compat": {
       "flake": false,
@@ -220,34 +269,40 @@
     "mbpoll": {
       "inputs": {
         "nixpkgs": [
+          "custom-flakes",
           "nixpkgs"
         ]
       },
       "locked": {
-        "path": "../custom-flakes/mbpoll",
+        "path": "./mbpoll",
         "type": "path"
       },
       "original": {
-        "path": "../custom-flakes/mbpoll",
+        "path": "./mbpoll",
         "type": "path"
       },
-      "parent": []
+      "parent": [
+        "custom-flakes"
+      ]
     },
     "nextcloud-vfs": {
       "inputs": {
         "nixpkgs": [
+          "custom-flakes",
           "nixpkgs"
         ]
       },
       "locked": {
-        "path": "../custom-flakes/nextcloud-vfs",
+        "path": "./nextcloud-vfs",
         "type": "path"
       },
       "original": {
-        "path": "../custom-flakes/nextcloud-vfs",
+        "path": "./nextcloud-vfs",
         "type": "path"
       },
-      "parent": []
+      "parent": [
+        "custom-flakes"
+      ]
     },
     "nix-darwin": {
       "inputs": {
@@ -351,104 +406,105 @@
     "nordic-nrf-command-line-tools": {
       "inputs": {
         "nixpkgs": [
+          "custom-flakes",
           "nixpkgs"
         ]
       },
       "locked": {
-        "path": "../custom-flakes/nordic-nrf-command-line-tools",
+        "path": "./nordic-nrf-command-line-tools",
         "type": "path"
       },
       "original": {
-        "path": "../custom-flakes/nordic-nrf-command-line-tools",
+        "path": "./nordic-nrf-command-line-tools",
         "type": "path"
       },
-      "parent": []
+      "parent": [
+        "custom-flakes"
+      ]
     },
     "proton-drive": {
       "inputs": {
         "nixpkgs": [
+          "custom-flakes",
           "nixpkgs"
         ]
       },
       "locked": {
-        "path": "../custom-flakes/proton-drive",
+        "path": "./proton-drive",
         "type": "path"
       },
       "original": {
-        "path": "../custom-flakes/proton-drive",
+        "path": "./proton-drive",
         "type": "path"
       },
-      "parent": []
+      "parent": [
+        "custom-flakes"
+      ]
     },
     "proton-mail-bridge": {
       "inputs": {
         "nixpkgs": [
+          "custom-flakes",
           "nixpkgs"
         ]
       },
       "locked": {
-        "path": "../custom-flakes/proton-mail-bridge",
+        "path": "./proton-mail-bridge",
         "type": "path"
       },
       "original": {
-        "path": "../custom-flakes/proton-mail-bridge",
+        "path": "./proton-mail-bridge",
         "type": "path"
       },
-      "parent": []
+      "parent": [
+        "custom-flakes"
+      ]
     },
     "prusa-slicer": {
       "inputs": {
         "nixpkgs": [
+          "custom-flakes",
           "nixpkgs"
         ]
       },
       "locked": {
-        "path": "../custom-flakes/prusa-slicer",
+        "path": "./prusa-slicer",
         "type": "path"
       },
       "original": {
-        "path": "../custom-flakes/prusa-slicer",
+        "path": "./prusa-slicer",
         "type": "path"
       },
-      "parent": []
+      "parent": [
+        "custom-flakes"
+      ]
     },
     "raspberry-pi-imager": {
       "inputs": {
         "nixpkgs": [
+          "custom-flakes",
           "nixpkgs"
         ]
       },
       "locked": {
-        "path": "../custom-flakes/raspberry-pi-imager",
+        "path": "./raspberry-pi-imager",
         "type": "path"
       },
       "original": {
-        "path": "../custom-flakes/raspberry-pi-imager",
+        "path": "./raspberry-pi-imager",
         "type": "path"
       },
-      "parent": []
+      "parent": [
+        "custom-flakes"
+      ]
     },
     "root": {
       "inputs": {
-        "adb-enhanced": "adb-enhanced",
-        "aflplusplus": "aflplusplus",
-        "bettermouse": "bettermouse",
-        "burp-suite": "burp-suite",
-        "creality-print": "creality-print",
-        "figma": "figma",
+        "custom-flakes": "custom-flakes",
         "home-manager": "home-manager",
         "mac-app-util": "mac-app-util",
-        "mbpoll": "mbpoll",
-        "nextcloud-vfs": "nextcloud-vfs",
         "nix-darwin": "nix-darwin",
-        "nixpkgs": "nixpkgs_4",
-        "nordic-nrf-command-line-tools": "nordic-nrf-command-line-tools",
-        "proton-drive": "proton-drive",
-        "proton-mail-bridge": "proton-mail-bridge",
-        "prusa-slicer": "prusa-slicer",
-        "raspberry-pi-imager": "raspberry-pi-imager",
-        "texifier": "texifier",
-        "zotero": "zotero"
+        "nixpkgs": "nixpkgs_4"
       }
     },
     "systems": {
@@ -484,18 +540,21 @@
     "texifier": {
       "inputs": {
         "nixpkgs": [
+          "custom-flakes",
           "nixpkgs"
         ]
       },
       "locked": {
-        "path": "../custom-flakes/texifier",
+        "path": "./texifier",
         "type": "path"
       },
       "original": {
-        "path": "../custom-flakes/texifier",
+        "path": "./texifier",
         "type": "path"
       },
-      "parent": []
+      "parent": [
+        "custom-flakes"
+      ]
     },
     "treefmt-nix": {
       "inputs": {
@@ -536,18 +595,21 @@
     "zotero": {
       "inputs": {
         "nixpkgs": [
+          "custom-flakes",
           "nixpkgs"
         ]
       },
       "locked": {
-        "path": "../custom-flakes/zotero",
+        "path": "./zotero",
         "type": "path"
       },
       "original": {
-        "path": "../custom-flakes/zotero",
+        "path": "./zotero",
         "type": "path"
       },
-      "parent": []
+      "parent": [
+        "custom-flakes"
+      ]
     }
   },
   "root": "root",
