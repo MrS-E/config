@@ -16,8 +16,8 @@
     "provider": {
       "sort": "throughput",
       "max_price": {
-        "prompt": 0.5,
-        "completion": 0.8
+        "prompt": 1.5,
+        "completion": 1.5
       },
       "allow_fallbacks": true
     }
