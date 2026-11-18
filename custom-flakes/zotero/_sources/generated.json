@@ -1,0 +1,17 @@
+{
+    "zotero": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "zotero",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-uOQ/ShPMa70al5OAvt7dfrROdhHqJQH40fApP7yUcxw=",
+            "type": "url",
+            "url": "https://download.zotero.org/client/release/10.0.6/Zotero-10.0.6.dmg"
+        },
+        "version": "10.0.6"
+    }
+}

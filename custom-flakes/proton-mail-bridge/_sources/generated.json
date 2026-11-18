@@ -1,0 +1,17 @@
+{
+    "proton-mail-bridge": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "proton-mail-bridge",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-ke8TqtfG3awAUn6FA1BYP/iBOLB/5G5yu/AxiiF7rUs=",
+            "type": "url",
+            "url": "https://github.com/ProtonMail/proton-bridge/releases/download/v3.27.1/Bridge-Installer.dmg"
+        },
+        "version": "3.27.1"
+    }
+}

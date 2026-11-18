@@ -1,0 +1,17 @@
+{
+    "mbpoll": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "mbpoll",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-qbzDr6O4WzeUUF0Hgnhz6tKA2WqUdp0jaJLrik+5lW8=",
+            "type": "url",
+            "url": "https://github.com/epsilonrt/mbpoll/archive/refs/tags/v1.5.4.tar.gz"
+        },
+        "version": "1.5.4"
+    }
+}

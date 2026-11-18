@@ -1,0 +1,152 @@
+{
+    "adb-enhanced": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "adb-enhanced",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-1HfegkbCfgMI7u6VKldopYRP9cigJ9YupA++ueV+OrQ=",
+            "type": "url",
+            "url": "https://pypi.org/packages/source/a/adb_enhanced/adb_enhanced-2.12.0.tar.gz"
+        },
+        "version": "2.12.0"
+    },
+    "aflplusplus": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "aflplusplus",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-B/CJ6FkSCYYomMdwpWnY4rdLRZ/pZ9syP8ajkk3MgrU=",
+            "type": "url",
+            "url": "https://github.com/AFLplusplus/AFLplusplus/archive/refs/tags/v5.03c.tar.gz"
+        },
+        "version": "5.03c"
+    },
+    "bettermouse": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "bettermouse",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-E/o3LZ04KSomarztWyNEdO4fgR/FrsuoeDthCL4HA14=",
+            "type": "url",
+            "url": "https://better-mouse.com/wp-content/uploads/BetterMouse.1.7.9010.zip"
+        },
+        "version": "1.7.9010"
+    },
+    "creality-print": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "creality-print",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-21TdbUiUDlaeZpBaSuTs1XOOYA4AAHejDxkZW5ziF7c=",
+            "type": "url",
+            "url": "https://github.com/CrealityOfficial/CrealityPrint/releases/download/v7.3.0/CrealityPrint-7.3.0.6157-macx-arm64-Release.dmg"
+        },
+        "version": "v7.3.0/CrealityPrint-7.3.0.6157-macx-arm64-Release.dmg"
+    },
+    "mbpoll": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "mbpoll",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-qbzDr6O4WzeUUF0Hgnhz6tKA2WqUdp0jaJLrik+5lW8=",
+            "type": "url",
+            "url": "https://github.com/epsilonrt/mbpoll/archive/refs/tags/v1.5.4.tar.gz"
+        },
+        "version": "1.5.4"
+    },
+    "nextcloud-vfs": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "nextcloud-vfs",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-99+bYq2KYvrQLdb5B+aLQpuk2Mtkte1DCwDjHhLcZEs=",
+            "type": "url",
+            "url": "https://github.com/nextcloud-releases/desktop/releases/download/v35.0.0/Nextcloud-35.0.0.pkg"
+        },
+        "version": "35.0.0"
+    },
+    "proton-mail-bridge": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "proton-mail-bridge",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-ke8TqtfG3awAUn6FA1BYP/iBOLB/5G5yu/AxiiF7rUs=",
+            "type": "url",
+            "url": "https://github.com/ProtonMail/proton-bridge/releases/download/v3.27.1/Bridge-Installer.dmg"
+        },
+        "version": "3.27.1"
+    },
+    "prusa-slicer": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "prusa-slicer",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-lP17ip+HyWMeHHFzmxWxhPxfTAzqvWkHLxx48imk/kA=",
+            "type": "url",
+            "url": "https://github.com/prusa3d/PrusaSlicer/releases/download/version_2.9.6/PrusaSlicer-2.9.6.dmg"
+        },
+        "version": "2.9.6"
+    },
+    "raspberry-pi-imager": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "raspberry-pi-imager",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-FbGpTHEsADJ1CFVlPCvxKdzrQBMp+84Kg9fPBdxYpCE=",
+            "type": "url",
+            "url": "https://github.com/raspberrypi/rpi-imager/releases/download/v2.0.12/rpi-imager-v2.0.12.dmg"
+        },
+        "version": "2.0.12"
+    },
+    "zotero": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "zotero",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-uOQ/ShPMa70al5OAvt7dfrROdhHqJQH40fApP7yUcxw=",
+            "type": "url",
+            "url": "https://download.zotero.org/client/release/10.0.6/Zotero-10.0.6.dmg"
+        },
+        "version": "10.0.6"
+    }
+}
