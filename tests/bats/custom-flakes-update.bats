@@ -1,0 +1,154 @@
+#!/usr/bin/env bats
+
+setup() {
+  REPO_DIR="$(cd "$BATS_TEST_DIRNAME/../.." && pwd)"
+  TEST_ROOT="$(mktemp -d)"
+  AUTOMATED_FLAKES=(
+    adb-enhanced
+    aflplusplus
+    bettermouse
+    creality-print
+    mbpoll
+    nextcloud-vfs
+    proton-mail-bridge
+    prusa-slicer
+    raspberry-pi-imager
+    zotero
+  )
+}
+
+teardown() {
+  rm -rf "$TEST_ROOT"
+}
+
+prepare_distribution_fixture() {
+  local custom_flakes="$TEST_ROOT/custom-flakes"
+  mkdir -p "$custom_flakes"
+  cp -R "$REPO_DIR/custom-flakes/_sources" "$custom_flakes/"
+  cp "$REPO_DIR/custom-flakes/distribute-sources.py" "$custom_flakes/"
+  for flake in "${AUTOMATED_FLAKES[@]}"; do
+    mkdir -p "$custom_flakes/$flake/_sources"
+  done
+}
+
+@test "distribution gives every automated flake only its own metadata" {
+  prepare_distribution_fixture
+  local custom_flakes="$TEST_ROOT/custom-flakes"
+
+  run python3 "$custom_flakes/distribute-sources.py" "${AUTOMATED_FLAKES[@]}"
+  [ "$status" -eq 0 ]
+
+  for flake in "${AUTOMATED_FLAKES[@]}"; do
+    local nix_file="$custom_flakes/$flake/_sources/generated.nix"
+    local json_file="$custom_flakes/$flake/_sources/generated.json"
+    run grep -cE '^  [[:alnum:]][[:alnum:].+-]* = \{' "$nix_file"
+    [ "$status" -eq 0 ]
+    [ "$output" = "1" ]
+    run grep -F "  $flake = {" "$nix_file"
+    [ "$status" -eq 0 ]
+    run python3 -c 'import importlib.util, pathlib, sys; spec = importlib.util.spec_from_file_location("distribute_sources", sys.argv[3]); module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module); shared = module.split_nix_sources(pathlib.Path(sys.argv[2]).read_text()); local = module.split_nix_sources(pathlib.Path(sys.argv[1]).read_text()); name = sys.argv[4]; assert local == {name: shared[name]}' \
+      "$nix_file" "$custom_flakes/_sources/generated.nix" "$custom_flakes/distribute-sources.py" "$flake"
+    [ "$status" -eq 0 ]
+    run python3 -c 'import json, sys; local = json.load(open(sys.argv[1])); shared = json.load(open(sys.argv[2])); name = sys.argv[3]; assert list(local) == [name]; assert local[name] == shared[name]' \
+      "$json_file" "$custom_flakes/_sources/generated.json" "$flake"
+    [ "$status" -eq 0 ]
+  done
+
+  local before
+  before="$(sha256sum "$custom_flakes"/*/_sources/generated.*)"
+  run python3 "$custom_flakes/distribute-sources.py" "${AUTOMATED_FLAKES[@]}"
+  [ "$status" -eq 0 ]
+  [ "$(sha256sum "$custom_flakes"/*/_sources/generated.*)" = "$before" ]
+}
+
+@test "metadata absent from nvfetcher output does not overwrite existing files" {
+  prepare_distribution_fixture
+  local custom_flakes="$TEST_ROOT/custom-flakes"
+  mkdir -p "$custom_flakes/not-in-output/_sources"
+  printf 'preserve this Nix metadata\n' > "$custom_flakes/not-in-output/_sources/generated.nix"
+  printf '{"preserved": true}\n' > "$custom_flakes/not-in-output/_sources/generated.json"
+
+  run python3 "$custom_flakes/distribute-sources.py" not-in-output
+  [ "$status" -eq 0 ]
+  [ "$(<"$custom_flakes/not-in-output/_sources/generated.nix")" = "preserve this Nix metadata" ]
+  [ "$(<"$custom_flakes/not-in-output/_sources/generated.json")" = '{"preserved": true}' ]
+}
+
+@test "mismatched generated metadata fails before changing per-flake files" {
+  prepare_distribution_fixture
+  local custom_flakes="$TEST_ROOT/custom-flakes"
+  local nix_file="$custom_flakes/adb-enhanced/_sources/generated.nix"
+  local json_file="$custom_flakes/adb-enhanced/_sources/generated.json"
+  printf 'old Nix metadata\n' > "$nix_file"
+  printf 'old JSON metadata\n' > "$json_file"
+  printf '{"not-a-matching-package": {}}\n' > "$custom_flakes/_sources/generated.json"
+
+  run python3 "$custom_flakes/distribute-sources.py" adb-enhanced
+  [ "$status" -ne 0 ]
+  [ "$(<"$nix_file")" = "old Nix metadata" ]
+  [ "$(<"$json_file")" = "old JSON metadata" ]
+}
+
+@test "malformed generated Nix fails before changing per-flake files" {
+  prepare_distribution_fixture
+  local custom_flakes="$TEST_ROOT/custom-flakes"
+  local nix_file="$custom_flakes/adb-enhanced/_sources/generated.nix"
+  local json_file="$custom_flakes/adb-enhanced/_sources/generated.json"
+  printf 'old Nix metadata\n' > "$nix_file"
+  printf 'old JSON metadata\n' > "$json_file"
+  printf 'not valid generated Nix\n' > "$custom_flakes/_sources/generated.nix"
+
+  run python3 "$custom_flakes/distribute-sources.py" adb-enhanced
+  [ "$status" -ne 0 ]
+  [ "$(<"$nix_file")" = "old Nix metadata" ]
+  [ "$(<"$json_file")" = "old JSON metadata" ]
+}
+
+@test "updater forwards nvfetcher options and distributes its package output" {
+  local custom_flakes="$TEST_ROOT/custom-flakes"
+  mkdir -p "$custom_flakes/adb-enhanced" "$TEST_ROOT/bin"
+  cp "$REPO_DIR/custom-flakes/update.sh" "$custom_flakes/"
+  cp "$REPO_DIR/custom-flakes/distribute-sources.py" "$custom_flakes/"
+  printf '# nvfetcher test configuration\n' > "$custom_flakes/nvfetcher.toml"
+  cat > "$TEST_ROOT/bin/nix" <<'NIX'
+#!/usr/bin/env bash
+printf '%s\n' "$@" > "$NIX_ARGS_FILE"
+mkdir -p _sources
+cat > _sources/generated.nix <<'GENERATED_NIX'
+# generated by nvfetcher
+{
+  fetchgit,
+  fetchurl,
+  fetchFromGitHub,
+  dockerTools,
+}:
+{
+  adb-enhanced = {
+    pname = "adb-enhanced";
+    version = "1.0";
+    src = fetchurl {
+      url = "https://example.invalid/adb.tar.gz";
+      sha256 = "sha256-test";
+    };
+  };
+}
+GENERATED_NIX
+cat > _sources/generated.json <<'GENERATED_JSON'
+{
+    "adb-enhanced": {
+        "version": "1.0"
+    }
+}
+GENERATED_JSON
+NIX
+  chmod +x "$TEST_ROOT/bin/nix"
+  export NIX_ARGS_FILE="$TEST_ROOT/nix-args"
+
+  run env PATH="$TEST_ROOT/bin:$PATH" "$custom_flakes/update.sh" --package adb-enhanced
+  [ "$status" -eq 0 ]
+  [ "$(<"$NIX_ARGS_FILE")" = $'run\nnixpkgs#nvfetcher\n--\n-c\nnvfetcher.toml\n-o\n_sources\n--package\nadb-enhanced' ]
+  [ -f "$custom_flakes/adb-enhanced/_sources/generated.json" ]
+  run grep -cE '^  [[:alnum:]][[:alnum:].+-]* = \{' "$custom_flakes/adb-enhanced/_sources/generated.nix"
+  [ "$status" -eq 0 ]
+  [ "$output" = "1" ]
+}
